@@ -1,10 +1,10 @@
-## Makefile for js
+## Makefile for somatic
 
-VERSION := 0.0.20090822
+VERSION := 0.0.20090823
 PROJECT := somatic
 
-#SHAREDLIBS := js
-#BINFILES := jsstart jsd jscat
+#SHAREDLIBS :=
+#BINFILES :=
 
 GENHEADERS := include/somatic/motor_msg.h
 
@@ -19,9 +19,6 @@ include/somatic/motor_msg.h: msg/motor-msg.lisp
 	cd include && \
 	  sbcl --noinform --noprint --eval "(require 'genmsg)"\
 	  --load ../$< --eval "(quit)"
-
-
-
 clean:
 	rm -rf .deps $(GENHEADERS) debian *.deb *.lzma
 
