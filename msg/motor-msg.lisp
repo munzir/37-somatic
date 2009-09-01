@@ -39,7 +39,8 @@
 (defmsgenum somatic-motor-code
   position
   velocity
-  current)
+  current
+  blank)
 
 (defmsgstruct somatic-motor-msg
   (values :double :dimension *)
