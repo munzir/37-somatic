@@ -1,10 +1,28 @@
 package somatic;
 
 // Basic somatic messages
+
+// Need a better name for this
+enum special_command {
+    NONE = 0;
+    RESET = 1;
+    EMERGENCY_STOP = 2;
+    APPLY_BRAKE = 3;
+    RELEASE_BRAKE = 4;
+}
+
 message command_msg {
     optional double current = 1;
     optional double velocity = 2;
     optional double position = 3;
+
+    optional special_command special = 4 [default=0];
+
+    required int32 motor_id = 100 [default=0];
+}
+
+message motor_commands_msg {
+    repeated command_msg commands = 1;
 }
 
 enum error_type {
@@ -30,7 +48,7 @@ message status_report_msg {
 
 // for informational logging
 // data logging will take something else...
-message somatic_log_msg {
+message log_msg {
     required string message = 1;
 
     enum log_level {
@@ -45,63 +63,63 @@ message somatic_log_msg {
     optional string sender = 3;
 }
 
-message somatic_vector3_msg {
+message vector3_msg {
     required double x = 1;
     required double y = 2;
     optional double z = 3;
 }
 
-message somatic_quaternion_msg {
+message quaternion_msg {
         required double x = 1
         required double y = 2
         required double z = 3
         required double w = 4
 }
 
-message somatic_transform_msg {
+message transform_msg {
         required somatic_vector3_msg translation = 1;
         required somatic_quaternion_msg rotation = 2;
 }
 
-message somatic_waypoint_msg {
+message waypoint_msg {
     required somatic_state_msg point = 1;
     optional double time = 2 [default=0];
     optional double velocity = 3;
 }
 
 
-message somatic_joint_config_msg {
+message joint_config_msg {
     repeated double position = 1;
     repeated double velocity = 2;
 }
 
 
-enum somatic_config_space {
- SOMATIC_JOINT_SPACE = 0;
- SOMATIC_WORK_SPACE = 1;
+enum config_space {
+ JOINT_SPACE = 0;
+ WORK_SPACE = 1;
 }
 
-enum somatic_ik_method {
-  SOMATIC_IK_ANALYTICAL = 0;
-  SOMATIC_IK_J_INV = 1;
-  SOMATIC_IK_J_T = 2;
+enum ik_method {
+  IK_ANALYTICAL = 0;
+  IK_J_INV = 1;
+  IK_J_T = 2;
 }
 
-enum somatic_interpol_method {
-  SOMATIC_INTERPOL_LINEAR = 0;
-  SOMATIC_INTERPOL_CUBIC = 2;
-  SOMATIC_INTERPOL_PARABOLICBLEND = 5;
-  SOMATIC_INTERPOL_TRAPEZOIDAL_V = 10;
-  SOMATIC_INTERPOL_JERK_LIMITED= 11;
+enum interpol_method {
+  INTERPOL_LINEAR = 0;
+  INTERPOL_CUBIC = 2;
+  INTERPOL_PARABOLICBLEND = 5;
+  INTERPOL_TRAPEZOIDAL_V = 10;
+  INTERPOL_JERK_LIMITED= 11;
 }
 
-enum somatic_control_method {
-  SOMATIC_CONTROL_POSITION = 0;
-  SOMATIC_CONTROL_VELOCITY = 1;
-  SOMATIC_CONTROL_CURRENT = 2;
+enum control_method {
+  CONTROL_POSITION = 0;
+  CONTROL_VELOCITY = 1;
+  CONTROL_CURRENT = 2;
 }
 
-message somatic_trajectory_msg {
+message trajectory_msg {
     // the via points.  Only one array should have data
     repeated somatic_transform_msg ws_points = 1;
     repeated somatic_joint_config_msg js_points = 2;
@@ -115,7 +133,7 @@ message somatic_trajectory_msg {
 
 
 // Maybe we'll use this someday....
-message somatic_can_msg {
+message can_msg {
     required int32 id = 1;
     required int32 data_size = 2;
     required fixed64 data = 3;
@@ -123,3 +141,5 @@ message somatic_can_msg {
     optional bool extended = 4;
     optional int32 bus = 5;
 }
+
+
