@@ -45,15 +45,22 @@ message somatic_log_msg {
     optional string sender = 3;
 }
 
-message somatic_state_msg {
+message somatic_vector3_msg {
     required double x = 1;
     required double y = 2;
-    required double z = 3;
+    optional double z = 3;
+}
 
-    required double qx = 10;
-    required double qy = 20;
-    required double qz = 30;
-    required double qw = 40;
+message somatic_quaternion_msg {
+        required double x = 1
+        required double y = 2
+        required double z = 3
+        required double w = 4
+}
+
+message somatic_transform_msg {
+        required somatic_vector3_msg translation = 1;
+        required somatic_quaternion_msg rotation = 2;
 }
 
 message somatic_waypoint_msg {
@@ -62,10 +69,12 @@ message somatic_waypoint_msg {
     optional double velocity = 3;
 }
 
-message somatic_config_msg {
-    required somatic_state_msg location = 1;
-    required somatic_state_msg velocity = 2;
+
+message somatic_joint_config_msg {
+    repeated double position = 1;
+    repeated double velocity = 2;
 }
+
 
 enum somatic_config_space {
  SOMATIC_JOINT_SPACE = 0;
@@ -94,7 +103,8 @@ enum somatic_control_method {
 
 message somatic_trajectory_msg {
     // the via points.  Only one array should have data
-    repeated somatic_waypoint_msg ws_points = 1;
+    repeated somatic_transform_msg ws_points = 1;
+    repeated somatic_joint_config_msg js_points = 2;
 
     // trajectory options
     optional somatic_config_space interpol_space = 3;
@@ -113,4 +123,3 @@ message somatic_can_msg {
     optional bool extended = 4;
     optional int32 bus = 5;
 }
-
