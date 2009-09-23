@@ -1,0 +1,75 @@
+
+// for informational logging
+// data logging will take something else...
+message somatic_log_msg {
+    required string message = 1;
+
+    enum log_level {
+      LOG_LEVEL_FATAL = 0;
+      LOG_LEVEL_ERROR = 1;
+      LOG_LEVEL_WARN = 2;
+      LOG_LEVEL_INFO = 3;
+      LOG_LEVEL_DEBUG = 4;
+    };
+
+    optional log_level level = 2;
+    optional string sender = 3;
+}
+
+
+message somatic_transform_msg {
+    repeated double vec = 1;
+    repeated double quat = 2;
+}
+
+message somatic_config_msg {
+    repeated double states = 1;
+}
+
+enum somatic_config_space {
+ SOMATIC_JOINT_SPACE = 0;
+ SOMATIC_WORK_SPACE = 1;
+}
+
+enum somatic_ik_method {
+  SOMATIC_IK_ANALYTICAL = 0;
+  SOMATIC_IK_J_INV = 1;
+  SOMATIC_IK_J_T = 2;
+}
+
+enum somatic_interpol_method {
+  SOMATIC_INTERPOL_LINEAR = 0;
+  SOMATIC_INTERPOL_CUBIC = 2;
+  SOMATIC_INTERPOL_PARABOLICBLEND = 5;
+  SOMATIC_INTERPOL_TRAPEZOIDAL_V = 10;
+  SOMATIC_INTERPOL_JERK_LIMITED= 11;
+}
+
+enum somatic_control_method {
+  SOMATIC_CONTROL_POSITION = 0;
+  SOMATIC_CONTROL_VELOCITY = 1;
+  SOMATIC_CONTROL_CURRENT = 2;
+}
+
+message somatic_trajectory_msg {
+    // the via points.  Only one array should have data
+    repeated somatic_transform_msg ws_points = 1;
+    repeated somatic_config_msg js_points = 2;
+
+    // trajectory options
+    optional somatic_config_space interpol_space = 3;
+    optional somatic_ik_method ik_method = 4;
+    optional somatic_interpol_method interpol_method = 5;
+    optional somatic_control_method control_method = 6;
+}
+
+
+// Maybe we'll use this someday....
+message somatic_can_msg {
+    required int32 id = 1;
+    required int32 data_size = 2;
+    required fixed64 data = 3;
+
+    optional bool extended = 4;
+    optional int32 bus = 5;
+}

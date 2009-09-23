@@ -46,12 +46,26 @@
  */
 
 
+/*
+static inline int somatic_msg_send_buf_stack( ach_channel_t *chan,
+                                              size_t buf_size,
+                                              void *msg_struct,
+                                              int (*encoder)(char *, size_t, void*)) {
+    char buf[ buf_size ];
+    int r = encoder( buf, buf_size, msg_struct );
+    assert( buf_size == r );
+    return ach_put( chan, buf, r );
+}
+*/
+
+
+
 /** Sends p_message of type msg_type on channel chan, holding buffer on stack.
  */
 #define SOMATIC_MSG_SEND_BUF_STACK( chan, p_msg_struct, msg_type )      \
     ({                                                                  \
         msg_type ## _t *_somatic_private_msg = p_msg_struct;            \
-        size_t _somatic_private_n =                                     \
+        int _somatic_private_n =                                        \
             msg_type ## _size( _somatic_private_msg );                  \
         char _somatic_private_buf[_somatic_private_n];                  \
         int _somatic_private_r =                                        \
