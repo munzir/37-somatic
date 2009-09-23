@@ -1,3 +1,32 @@
+package somatic;
+
+// Basic somatic messages
+message command_msg {
+    optional double current = 1;
+    optional double velocity = 2;
+    optional double position = 3;
+}
+
+enum error_type {
+    NONE = 0;
+    OVER_CURRENT = 1;
+    OVER_SPEED = 2;
+    UNDER_VOLTAGE = 3;
+    OVER_VOLTAGE = 4;
+    VENDOR = 1000;
+};
+
+message status_report_msg {
+    optional double current = 1;
+    optional double velocity = 2;
+    optional double position = 3;
+
+
+    optional error_type error = 4 [default = NONE];
+    optional string vendor_error = 5;
+}
+
+// Somatic messages for dealing with workspace coordinates (for arms, etc).
 
 // for informational logging
 // data logging will take something else...
@@ -16,14 +45,26 @@ message somatic_log_msg {
     optional string sender = 3;
 }
 
+message somatic_state_msg {
+    required double x = 1;
+    required double y = 2;
+    required double z = 3;
 
-message somatic_transform_msg {
-    repeated double vec = 1;
-    repeated double quat = 2;
+    required double qx = 10;
+    required double qy = 20;
+    required double qz = 30;
+    required double qw = 40;
+}
+
+message somatic_waypoint_msg {
+    required somatic_state_msg point = 1;
+    optional double time = 2 [default=0];
+    optional double velocity = 3;
 }
 
 message somatic_config_msg {
-    repeated double states = 1;
+    required somatic_state_msg location = 1;
+    required somatic_state_msg velocity = 2;
 }
 
 enum somatic_config_space {
@@ -53,8 +94,7 @@ enum somatic_control_method {
 
 message somatic_trajectory_msg {
     // the via points.  Only one array should have data
-    repeated somatic_transform_msg ws_points = 1;
-    repeated somatic_config_msg js_points = 2;
+    repeated somatic_waypoint_msg ws_points = 1;
 
     // trajectory options
     optional somatic_config_space interpol_space = 3;
@@ -73,3 +113,4 @@ message somatic_can_msg {
     optional bool extended = 4;
     optional int32 bus = 5;
 }
+
