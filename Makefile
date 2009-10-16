@@ -3,17 +3,22 @@
 VERSION := 0.0.20090921
 PROJECT := somatic
 
-#SHAREDLIBS :=
+SHAREDLIBS := somatic
 #BINFILES :=
 
-GENHEADERS := include/somatic/motor_msg.h include/somatic/somatic.pb-c.h
+#GENHEADERS := include/somatic/motor_msg.h include/somatic/somatic.pb-c.h
+GENHEADERS := include/somatic/motor_msg.h
 
-default: $(GENHEADERS)
+default: $(GENHEADERS) all
 
 include /usr/share/make-common/common.1.mk
 
 # apparently ach requires this, or at least c99
 CFLAGS += --std=gnu99
+
+all: $(LIBFILES)
+
+$(call LINKLIB, somatic, somatic_motor.o)
 
 proto/somatic.protobin: proto/somatic.proto
 	protoc -o$@ $<
