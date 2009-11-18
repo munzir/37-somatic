@@ -143,3 +143,24 @@ message can_msg {
 }
 
 
+// You can view this as either a one-dimensional array of data or
+// a real-valued vector.
+message somatic_vector {
+    repeated double data = 1;
+}
+
+// Stores a column-major matrix. Packs the
+// matrix data into a single array of doubles,
+// and then provides either the row or the column count.
+message somatic_matrix {
+    repeated double data = 1; //COLUMN-MAJOR ORDER!
+
+    optional varint rows = 2;
+    optional varint cols = 3;
+}
+
+// A message containing a number of somatic_matrix
+// messages.
+message somatic_matrices {
+    repeated somatic_matrix data = 1;
+}

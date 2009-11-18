@@ -1,4 +1,5 @@
 README FOR SOMATIC
 
 somatic is a package that integrates ach (byte-oriented IPC) and
-genmsg (marshalling) with specific application to robotics.
+genmsg or protocol buffers (marshalling) with specific application
+to robotics.
