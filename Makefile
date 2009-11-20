@@ -3,7 +3,7 @@
 VERSION := 0.0.20091021
 PROJECT := somatic
 
-SHAREDLIBS := somatic
+SHAREDLIBS := somatic somatic_pb-c
 #BINFILES :=
 
 #GENHEADERS := include/somatic/motor_msg.h include/somatic/somatic.pb-c.h
@@ -19,24 +19,23 @@ CFLAGS += --std=gnu99
 all: $(LIBFILES)
 
 $(call LINKLIB, somatic, somatic_motor.o)
-
-proto/somatic.protobin: proto/somatic.proto
-	protoc -o$@ $<
+$(call LINKLIB, somatic_pb-c, somatic.pb-c.o)
 
 include/somatic/motor_msg.h: msg/motor-msg.lisp
 	cd include && \
 	  sbcl --noinform --noprint --eval "(require 'genmsg)"\
 	  --load ../$< --eval "(quit)"
 
-include/somatic/somatic.pb-c.h: proto/somatic.proto
+somatic.pb-c.c: proto/somatic.proto
 	cd proto && \
 	  protoc-c --c_out=. somatic.proto
-	sed -e 's/#include .*//' -i proto/somatic.pb-c.c
-	cat proto/somatic.pb-c.h proto/somatic.pb-c.c >include/somatic/somatic.pb-c.h
-	rm -f proto/somatic.pb-c.*
+	mv proto/somatic.pb-c.c $(SRCDIR)
+	mv proto/somatic.pb-c.h $(INCLUDEDIR)
+
+somatic.pb-c.o: $(INCLUDEDIR)/somatic.pb-c.h
 
 clean:
-	rm -rf .deps $(GENHEADERS) debian *.deb *.lzma
+	rm -rf .deps $(GENHEADERS) debian *.deb *.lzma *.so $(INCLUDEDIR)/somatic.pb-c* $(SRCDIR)/somatic.pb-c* $(SRCDIR)/*.o
 
 doc:
 	doxygen

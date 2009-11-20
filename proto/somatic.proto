@@ -155,8 +155,8 @@ message somatic_vector {
 message somatic_matrix {
     repeated double data = 1; //COLUMN-MAJOR ORDER!
 
-    optional varint rows = 2;
-    optional varint cols = 3;
+    optional int32 rows = 2;
+    optional int32 cols = 3;
 }
 
 // A message containing a number of somatic_matrix
