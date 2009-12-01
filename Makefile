@@ -1,6 +1,6 @@
 ## Makefile for somatic
 
-VERSION := 0.0.20091021
+VERSION := 0.0.20091130
 PROJECT := somatic
 
 SHAREDLIBS := somatic somatic_pb-c
@@ -16,7 +16,7 @@ include /usr/share/make-common/common.1.mk
 # apparently ach requires this, or at least c99
 CFLAGS += --std=gnu99
 
-all: $(LIBFILES)
+all: $(LIBFILES) verbatim/share/somatic/somatic.protobin
 
 $(call LINKLIB, somatic, somatic_motor.o)
 $(call LINKLIB, somatic_pb-c, somatic.pb-c.o)
@@ -33,6 +33,9 @@ somatic.pb-c.c: proto/somatic.proto
 	mv proto/somatic.pb-c.h $(INCLUDEDIR)
 
 somatic.pb-c.o: $(INCLUDEDIR)/somatic.pb-c.h
+
+verbatim/share/somatic/somatic.protobin: proto/somatic.proto
+	protoc -o$@ $<
 
 clean:
 	rm -rf .deps $(GENHEADERS) debian *.deb *.lzma *.so $(INCLUDEDIR)/somatic.pb-c* $(SRCDIR)/somatic.pb-c* $(SRCDIR)/*.o
