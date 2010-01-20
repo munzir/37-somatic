@@ -40,4 +40,3 @@
 (cl:declaim (cl:optimize (cl:debug 3) (cl:speed 0)))
 
 (protoc:load-proto-set "/usr/share/somatic/somatic.protobin")
-

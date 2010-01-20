@@ -1,6 +1,6 @@
 ## Makefile for somatic
 
-VERSION := 0.0.20091130
+VERSION := 0.0.20091204
 PROJECT := somatic
 
 SHAREDLIBS := somatic somatic_pb-c
@@ -14,7 +14,7 @@ default: $(GENHEADERS) all
 include /usr/share/make-common/common.1.mk
 
 # apparently ach requires this, or at least c99
-CFLAGS += --std=gnu99
+CFLAGS += --std=gnu99 -Os
 
 all: $(LIBFILES) verbatim/share/somatic/somatic.protobin
 

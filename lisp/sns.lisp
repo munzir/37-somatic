@@ -65,5 +65,20 @@
     m))
 
 
-(defun ply-point-cloud-msg-points (point-cloud-msg)
-  (ply-matrix-msg (slot-value point-cloud-msg 'somatic:points)))
+(defun ply-point-cloud-msg-points (point-cloud-msg &key discard-zeros)
+  (let ((matrix-msg  (slot-value point-cloud-msg 'somatic:points)))
+    (assert (= 3 (matrix-msg-rows matrix-msg)))
+    (apply #'vector
+           (loop
+              with data = (slot-value matrix-msg 'somatic:data)
+              for i = 0 then (+ i 3)
+              while (< i (length data))
+              for j = (1+ i)
+              for k = (1+ j)
+              for x = (aref data i)
+              for y = (aref data j)
+              for z = (aref data k)
+              when (or (null discard-zeros)
+                       (not (and (zerop x) (zerop y) (zerop z))))
+              collect (double-vector x y z)))))
+
