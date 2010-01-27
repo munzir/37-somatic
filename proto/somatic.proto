@@ -175,8 +175,15 @@ message point_cloud {
     optional timespec time = 5;
 }
 
+
 // A message containing a number of somatic_matrix
 // messages.
 message matrices {
     repeated matrix data = 1;
+}
+
+message force_moment {
+    required vector force = 1;
+    required vector moment = 2;
+    optional timespec time = 3;
 }
