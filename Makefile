@@ -14,11 +14,11 @@ default: $(GENHEADERS) all
 include /usr/share/make-common/common.1.mk
 
 # apparently ach requires this, or at least c99
-CFLAGS += --std=gnu99 -Os
+CFLAGS += --std=gnu99 -O0
 
 all: $(LIBFILES) verbatim/share/somatic/somatic.protobin
 
-$(call LINKLIB, somatic, somatic_motor.o)
+$(call LINKLIB, somatic, somatic_motor.o somatic_util.o)
 $(call LINKLIB, somatic_pb-c, somatic.pb-c.o)
 
 include/somatic/motor_msg.h: msg/motor-msg.lisp
