@@ -148,12 +148,24 @@ void somatic_fail( const char fmt[], ... );
 void somatic_hard_assert( int test, const char fmt[], ... );
 
 
+/*------------*/
+/* ALLOCATION */
+/*------------*/
+
+#define SOMATIC_NEW_AR( type, n ) ( malloc( sizeof(type) * (n) ) )
+#define SOMATIC_NEW( type ) ( SOMATIC_NEW_AR( type, 1 ) )
+
+
 /*--------*/
 /* Arrays */
 /*--------*/
 
+#define SOMATIC_ZERO_AR( a, n ) ( memset( (a), 0, (n) * sizeof((a)[0]) ) )
+
+
+
 static double *somatic_malloc_real( size_t n ) {
-    return malloc( sizeof(double) * n );
+    return (double*) malloc( sizeof(double) * n );
 }
 
 static void somatic_realcpy( double *dst, double *src, size_t n ) {
