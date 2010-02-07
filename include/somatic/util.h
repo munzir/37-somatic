@@ -152,7 +152,13 @@ void somatic_hard_assert( int test, const char fmt[], ... );
 /* ALLOCATION */
 /*------------*/
 
-#define SOMATIC_NEW_AR( type, n ) ( malloc( sizeof(type) * (n) ) )
+static inline void *somatic_xmalloc( size_t n ) {
+    void *p = malloc(n);
+    somatic_hard_assert( NULL != p, "Failed to allocate %d bytes.\n", n );
+    return memset(p, 0, n );
+}
+
+#define SOMATIC_NEW_AR( type, n ) ( somatic_xmalloc( sizeof(type) * (n) ) )
 #define SOMATIC_NEW( type ) ( SOMATIC_NEW_AR( type, 1 ) )
 
 
@@ -163,6 +169,16 @@ void somatic_hard_assert( int test, const char fmt[], ... );
 #define SOMATIC_ZERO_AR( a, n ) ( memset( (a), 0, (n) * sizeof((a)[0]) ) )
 
 
+static void somatic_d2s( float *dst, double *src, size_t cnt ) {
+    for( size_t i = 0; i < cnt; i++ )
+        dst[i] = src[i];
+}
+
+
+static void somatic_s2d( double *dst, float *src, size_t cnt ) {
+    for( size_t i = 0; i < cnt; i++ )
+        dst[i] = src[i];
+}
 
 static double *somatic_malloc_real( size_t n ) {
     return (double*) malloc( sizeof(double) * n );
