@@ -36,8 +36,13 @@
 #ifndef SOMATIC_UTIL_H
 #define SOMATIC_UTIL_H
 
+#include <cblas.h>
+
 extern int somatic_opt_verbosity;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define SOMATIC_UNUSED_ARG(expr) do { (void)(expr); } while (0)
 
@@ -181,7 +186,7 @@ static void somatic_s2d( double *dst, float *src, size_t cnt ) {
 }
 
 static double *somatic_malloc_real( size_t n ) {
-    return (double*) malloc( sizeof(double) * n );
+    return (double*) SOMATIC_NEW_AR( double, n );
 }
 
 static void somatic_realcpy( double *dst, double *src, size_t n ) {
@@ -195,6 +200,50 @@ static void somatic_realset( double *dst, double val, size_t n ) {
 }
 
 
+/*----------------*/
+/* LINEAR ALGEBRA */
+/*----------------*/
+
+static size_t somatic_la_colmajor_k( size_t rows, size_t cols, size_t i, size_t j ) {
+    assert( i < rows );
+    assert( j < cols );
+    size_t k = (j * rows) + i;
+    assert( k < rows*cols );
+    return k;
+}
+
+
+static double somatic_la_gset( double *m, size_t rows, size_t cols,
+                               size_t i, size_t j ) {
+    return m[ somatic_la_colmajor_k( rows, cols, i, j ) ];
+}
+
+static double somatic_la_mset( double *m, size_t rows, size_t cols,
+                             size_t i, size_t j, double v ) {
+    return m[ somatic_la_colmajor_k( rows, cols, i, j ) ] = v;
+}
+
+/** r = a - b */
+static inline void somatic_la_vec_sub( double *r, double *a, double *b,
+                                       size_t n ) {
+    somatic_realcpy( r, a, n ); // r := a
+    cblas_daxpy( n, -1, b, 1, r, 1 ); // r := -1*b + r
+}
+/** y = alpha A x.
+ A is column major. */
+static inline void somatic_la_gemv1( double *y, double alpha, double *A, double *x,
+                             size_t n_y, size_t n_x ) {
+    cblas_dgemv( CblasColMajor, CblasNoTrans, n_y, n_x,
+                 alpha, A, n_y,
+                 x, 1,
+                 0, y, 1  );
+}
+
+
+
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // SOMATIC_UTIL_H
-
-
