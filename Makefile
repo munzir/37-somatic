@@ -1,6 +1,6 @@
 ## Makefile for somatic
 
-VERSION := 0.0.200100127
+VERSION := 0.0.200100213
 PROJECT := somatic
 
 SHAREDLIBS := somatic somatic_pb-c

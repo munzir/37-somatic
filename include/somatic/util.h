@@ -38,12 +38,12 @@
 
 #include <cblas.h>
 
-extern int somatic_opt_verbosity;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+extern int somatic_opt_verbosity;
 #define SOMATIC_UNUSED_ARG(expr) do { (void)(expr); } while (0)
 
 /*------*/
@@ -101,6 +101,12 @@ static struct timespec somatic_timespec_add( struct timespec t1,
                                        t1.tv_nsec + t0.tv_nsec );
 }
 
+static struct timespec somatic_timespec_sub( struct timespec a,
+                                             struct timespec b ) {
+    return somatic_make_timespec_norm( a.tv_sec - b.tv_sec,
+                                       a.tv_nsec - b.tv_nsec );
+}
+
 
 static struct timespec somatic_timespec_now() {
     struct timespec t;
@@ -127,6 +133,11 @@ static int somatic_timespec_after( struct timespec abstime ) {
 static int64_t somatic_timespec2us( struct timespec t ) {
     return t.tv_sec*1000000 + t.tv_nsec/1000;
 }
+
+static double somatic_timespec2s( struct timespec t ) {
+    return t.tv_sec+ t.tv_nsec/1e9;
+}
+
 
 static struct timespec somatic_s2timespec( double t ) {
     int sec = t;
@@ -163,7 +174,7 @@ static inline void *somatic_xmalloc( size_t n ) {
     return memset(p, 0, n );
 }
 
-#define SOMATIC_NEW_AR( type, n ) ( somatic_xmalloc( sizeof(type) * (n) ) )
+#define SOMATIC_NEW_AR( type, n ) ((type*) somatic_xmalloc( sizeof(type) * (n) ) )
 #define SOMATIC_NEW( type ) ( SOMATIC_NEW_AR( type, 1 ) )
 
 
@@ -212,8 +223,16 @@ static size_t somatic_la_colmajor_k( size_t rows, size_t cols, size_t i, size_t 
     return k;
 }
 
+static double somatic_la_ssd( double *a, double *b, size_t n ) {
+    double r = 0;
+    for( size_t i = 0; i < n; i ++ ) {
+        double t = a[i] - b[i];
+        r += t*t;
+    }
+    return r;
+}
 
-static double somatic_la_gset( double *m, size_t rows, size_t cols,
+static double somatic_la_mget( double *m, size_t rows, size_t cols,
                                size_t i, size_t j ) {
     return m[ somatic_la_colmajor_k( rows, cols, i, j ) ];
 }
