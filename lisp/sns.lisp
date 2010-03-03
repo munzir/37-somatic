@@ -36,6 +36,10 @@
 
 (in-package :sns)
 
+;;; Message Translation Generic Functions ;;;
+(defgeneric ply (msg))
+(defgeneric opine (value))
+
 (defun matrix-msg-rows (matrix-msg)
   (declare (somatic:matrix matrix-msg))
   (if (slot-boundp matrix-msg 'somatic:rows)
@@ -55,6 +59,25 @@
         (assert rows)
         (assert (= 0 (mod length rows)))
         (/ length rows))))
+
+
+;;; Basic Numeric Types ;;;
+
+;;(defmethod opine ((v (simple-vector double-float (*))))
+  ;;(let ((msg (make-instance 'somatic::vector)))
+    ;;(setf (slot-value msg 'somatic::data) v)
+    ;;msg))
+
+(defmethod opine ((v double-matrix))
+  (let ((msg (make-instance 'somatic::matrix)))
+    (setf (slot-value msg 'somatic::data)
+          (numeri::double-matrix-data v))
+    (setf (slot-value msg 'somatic::rows )
+          (matrix-rows v))
+    (setf (slot-value msg 'somatic::cols )
+          (matrix-cols v))
+    msg))
+
 
 (defun ply-matrix-msg (matrix-msg)
   (declare (somatic:matrix matrix-msg))
@@ -82,3 +105,64 @@
                        (not (and (zerop x) (zerop y) (zerop z))))
               collect (double-vector x y z)))))
 
+
+(defgeneric opine-timespec (time))
+
+
+(defmethod opine-timespec ((time number))
+  (let ((msg (make-instance 'somatic::timespec)))
+    (multiple-value-bind (sec nsec) (truncate time)
+      (setf (slot-value msg 'somatic::sec)
+            sec)
+      (setf (slot-value msg 'somatic::nsec)
+            (truncate (* 1e9 nsec))))
+    msg))
+
+(defun opine-vector (v)
+  (make-instance 'somatic::vector
+                 :data (make-array (length v)
+                                   :element-type 'double-float
+                                   :initial-contents v)))
+
+(defun opine-transform (&key translation basis rotation)
+  (let ((msg (make-instance 'somatic::transform)))
+    (setf (slot-value msg 'somatic::translation)
+          (opine-vector
+           (cond
+             (translation translation)
+             (t (make-array 3 :element-type 'double-float
+                            :initial-contents '(0d0 0d0 0d0))))))
+
+    (setf (slot-value msg 'somatic::rotation)
+          (opine-vector
+           (cond
+             (rotation rotation)
+             (basis (numeri::quat<-rotmat basis))
+             (t (make-array 4 :element-type 'double-float
+                            :initial-contents '(0d0 0d0 0d0 1d0))))))
+    msg))
+
+(defun opine-setpoint( &key jointspace translation rotation time)
+  (let ((msg (make-instance 'somatic::setpoint)))
+    (when (or translation rotation)
+      (setf (slot-value msg 'somatic::workspace)
+            (opine-transform :translation translation
+                             :rotation rotation)))
+    (when jointspace
+      (setf (slot-value msg 'somatic::jointspace)
+            (opine-vector jointspace)))
+    (when time
+      (setf (slot-value msg 'somatic::time)
+            (opine-timespec time)))
+    msg))
+
+(defun opine-label-vector (v &key label time)
+  (let ((msg (make-instance 'somatic::label-vector
+                            :x (opine-vector v))))
+    (when label
+      (setf (slot-value msg 'somatic::label)
+            label))
+    (when time
+      (setf (slot-value msg 'somatic::time)
+            (opine-timespec time)))
+    msg))

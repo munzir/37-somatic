@@ -11,15 +11,20 @@ GENHEADERS := include/somatic/motor_msg.h
 
 default: $(GENHEADERS) all
 
+CC := g++
 include /usr/share/make-common/common.1.mk
 
 # apparently ach requires this, or at least c99
-CFLAGS += --std=gnu99 -O0
+CFLAGS += --std=gnu99
+
+# don't spit out warnings for all the static functions in headers
+CFLAGS += -Wno-unused-function
+CPPFLAGS += -Wno-unused-function
 
 all: $(LIBFILES) verbatim/share/somatic/somatic.protobin
 
 $(call LINKLIB, somatic, somatic_motor.o somatic_util.o)
-$(call LINKLIB, somatic_pb-c, somatic.pb-c.o)
+$(call LINKLIB, somatic_pb-c, somatic.pb-c.o msgply.o)
 
 include/somatic/motor_msg.h: msg/motor-msg.lisp
 	cd include && \

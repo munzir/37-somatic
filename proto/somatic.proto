@@ -63,24 +63,6 @@ message log_msg {
     optional string sender = 3;
 }
 
-message vector3 {
-    required double x = 1;
-    required double y = 2;
-    optional double z = 3;
-}
-
-message quaternion {
-        required double x = 1;
-        required double y = 2;
-        required double z = 3;
-        required double w = 4;
-}
-
-message transform {
-        required vector3 translation = 1;
-        required quaternion rotation = 2;
-}
-
 /*
 
 message waypoint_msg {
@@ -165,6 +147,23 @@ message matrix {
 message timespec {
    required int64 sec = 1;
    optional int32 nsec = 2;
+}
+
+message label_vector {
+        required vector x = 1;
+        optional string label = 2;
+        optional timespec time = 3;
+}
+
+message transform {
+        required vector translation = 1; // vector 3
+        required vector rotation = 2;    // xyzw quaternion
+}
+
+message setpoint {
+    optional vector jointspace = 1;
+    optional transform workspace = 2;
+    optional timespec time = 3;
 }
 
 message point_cloud {

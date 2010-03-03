@@ -38,6 +38,7 @@
 
 #include <cblas.h>
 
+#include "includes.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -80,7 +81,7 @@ static struct timespec somatic_make_timespec_norm( time_t sec, long nsec ) {
         nsec %= billion;
     }else if (nsec < -billion) {
         sec += (nsec/billion - 1);
-        nsec = somatic_modulo( nsec, billion );
+        nsec = (long) somatic_modulo( nsec, billion );
     }
 
 
@@ -95,14 +96,14 @@ static struct timespec somatic_timespec_delta( struct timespec t1,
 }
 */
 
-static struct timespec somatic_timespec_add( struct timespec t1,
-                                               struct timespec t0 ) {
+    static struct timespec somatic_timespec_add( struct timespec t1,
+                                             struct timespec t0 ) {
     return somatic_make_timespec_norm( t1.tv_sec + t0.tv_sec,
                                        t1.tv_nsec + t0.tv_nsec );
 }
 
-static struct timespec somatic_timespec_sub( struct timespec a,
-                                             struct timespec b ) {
+static struct timespec somatic_timespec_sub( const struct timespec a,
+                                             const struct timespec b ) {
     return somatic_make_timespec_norm( a.tv_sec - b.tv_sec,
                                        a.tv_nsec - b.tv_nsec );
 }
@@ -110,42 +111,41 @@ static struct timespec somatic_timespec_sub( struct timespec a,
 
 static struct timespec somatic_timespec_now() {
     struct timespec t;
-    int r = clock_gettime( CLOCK_MONOTONIC, &t );
+    clock_gettime( CLOCK_MONOTONIC, &t );
     return t;
 }
 
 /** returns reltime + now */
-static struct timespec somatic_timespec_future( struct timespec reltime ) {
+static struct timespec somatic_timespec_future( const struct timespec reltime ) {
     return somatic_timespec_add( reltime, somatic_timespec_now() );
 }
 
 /** t1 < t2: negative; t1 == t2: 0; t1 > t2: positive */
-static int somatic_timespec_cmp( struct timespec t1, struct timespec t2 ) {
+static int somatic_timespec_cmp( const struct timespec t1, const struct timespec t2 ) {
     return ( t1.tv_sec != t2.tv_sec ) ?
         (t1.tv_sec - t2.tv_sec) :
         (t1.tv_nsec - t2.tv_nsec);
 }
 
-static int somatic_timespec_after( struct timespec abstime ) {
+static int somatic_timespec_after( const struct timespec abstime ) {
     return somatic_timespec_cmp(somatic_timespec_now(), abstime) > 0;
 }
 
-static int64_t somatic_timespec2us( struct timespec t ) {
+static int64_t somatic_timespec2us( const struct timespec t ) {
     return t.tv_sec*1000000 + t.tv_nsec/1000;
 }
 
-static double somatic_timespec2s( struct timespec t ) {
+static double somatic_timespec2s( const struct timespec t ) {
     return t.tv_sec+ t.tv_nsec/1e9;
 }
 
-
 static struct timespec somatic_s2timespec( double t ) {
-    int sec = t;
-    int nsec = (t-sec)*1e9;
-    return somatic_make_timespec_norm( t, nsec );
+    time_t sec = (time_t) t;
+    long nsec = (long) ((t-sec)*1e9);
+    return somatic_make_timespec_norm( sec, nsec );
 }
 
-static void somatic_timespec_dump( struct timespec t ) {
+static void somatic_timespec_dump( const struct timespec t ) {
     fprintf( stderr, "{.tv_sec = %ld, .tv_nsec = %ld}\n",
              t.tv_sec, t.tv_nsec );
 }
@@ -185,22 +185,22 @@ static inline void *somatic_xmalloc( size_t n ) {
 #define SOMATIC_ZERO_AR( a, n ) ( memset( (a), 0, (n) * sizeof((a)[0]) ) )
 
 
-static void somatic_d2s( float *dst, double *src, size_t cnt ) {
+static void somatic_d2s( float *dst, const double *src, size_t cnt ) {
     for( size_t i = 0; i < cnt; i++ )
-        dst[i] = src[i];
+        dst[i] = (float) src[i];
 }
 
 
-static void somatic_s2d( double *dst, float *src, size_t cnt ) {
+static void somatic_s2d( double *dst, const float *src, size_t cnt ) {
     for( size_t i = 0; i < cnt; i++ )
-        dst[i] = src[i];
+        dst[i] = (double) src[i];
 }
 
 static double *somatic_malloc_real( size_t n ) {
     return (double*) SOMATIC_NEW_AR( double, n );
 }
 
-static void somatic_realcpy( double *dst, double *src, size_t n ) {
+static void somatic_realcpy( double *dst, const double *src, size_t n ) {
     memcpy( dst, src, sizeof( dst[0] ) * n );
 }
 
@@ -223,7 +223,7 @@ static size_t somatic_la_colmajor_k( size_t rows, size_t cols, size_t i, size_t 
     return k;
 }
 
-static double somatic_la_ssd( double *a, double *b, size_t n ) {
+static double somatic_la_ssd( const double *a, const double *b, size_t n ) {
     double r = 0;
     for( size_t i = 0; i < n; i ++ ) {
         double t = a[i] - b[i];
@@ -232,7 +232,7 @@ static double somatic_la_ssd( double *a, double *b, size_t n ) {
     return r;
 }
 
-static double somatic_la_mget( double *m, size_t rows, size_t cols,
+static double somatic_la_mget( const double *m, size_t rows, size_t cols,
                                size_t i, size_t j ) {
     return m[ somatic_la_colmajor_k( rows, cols, i, j ) ];
 }
@@ -243,17 +243,18 @@ static double somatic_la_mset( double *m, size_t rows, size_t cols,
 }
 
 /** r = a - b */
-static inline void somatic_la_vec_sub( double *r, double *a, double *b,
+static inline void somatic_la_vec_sub( double *r, const double *a, const double *b,
                                        size_t n ) {
     somatic_realcpy( r, a, n ); // r := a
-    cblas_daxpy( n, -1, b, 1, r, 1 ); // r := -1*b + r
+    cblas_daxpy( (int)n, -1, b, 1, r, 1 ); // r := -1*b + r
 }
 /** y = alpha A x.
  A is column major. */
-static inline void somatic_la_gemv1( double *y, double alpha, double *A, double *x,
-                             size_t n_y, size_t n_x ) {
-    cblas_dgemv( CblasColMajor, CblasNoTrans, n_y, n_x,
-                 alpha, A, n_y,
+static inline void somatic_la_gemv1( double *y, double alpha,
+                                     const double *A, const double *x,
+                                     size_t n_y, size_t n_x ) {
+    cblas_dgemv( CblasColMajor, CblasNoTrans, (int)n_y, (int)n_x,
+                 alpha, A, (int)n_y,
                  x, 1,
                  0, y, 1  );
 }
