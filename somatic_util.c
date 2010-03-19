@@ -32,11 +32,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
+#include <signal.h>
 #include "somatic/includes.h"
 #include "somatic/util.h"
 
 int somatic_opt_verbosity = 0;
+int somatic_sig_received = 0;
 
 void somatic_verbprintf( int level, const char fmt[], ... ) {
     va_list argp;
@@ -69,4 +70,36 @@ void somatic_hard_assert( int test, const char fmt[], ... ) {
         abort();
         exit(EXIT_FAILURE);
     }
+}
+
+
+static void somatic_sighandler_simple (int sig, siginfo_t *siginfo, void *context)
+{
+    (void) context;
+    somatic_verbprintf (1,
+                        "Received Signal: %d, Sending PID: %ld, UID: %ld\n",
+                        sig, (long)siginfo->si_pid, (long)siginfo->si_uid);
+    somatic_sig_received = 1;
+}
+
+void somatic_sighandler_simple_install() {
+    struct sigaction act;
+    memset(&act, 0, sizeof(act));
+
+    act.sa_sigaction = &somatic_sighandler_simple;
+
+    /* The SA_SIGINFO flag tells sigaction() to use the sa_sigaction field,
+       not sa_handler. */
+    act.sa_flags = SA_SIGINFO;
+
+    if (sigaction(SIGTERM, &act, NULL) < 0) {
+        perror ("sigaction");
+        somatic_fail( "Couldn't install handler\n");
+    }
+
+    if (sigaction(SIGINT, &act, NULL) < 0) {
+        perror ("sigaction");
+        somatic_fail( "Couldn't install handler\n");
+    }
+
 }

@@ -108,6 +108,8 @@
 
 (defgeneric opine-timespec (time))
 
+(defmethod opine-timespec ((time somatic::timespec))
+  time)
 
 (defmethod opine-timespec ((time number))
   (let ((msg (make-instance 'somatic::timespec)))
@@ -117,6 +119,8 @@
       (setf (slot-value msg 'somatic::nsec)
             (truncate (* 1e9 nsec))))
     msg))
+
+
 
 (defun opine-vector (v)
   (make-instance 'somatic::vector

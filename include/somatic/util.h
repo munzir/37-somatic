@@ -45,6 +45,8 @@ extern "C" {
 #endif
 
 extern int somatic_opt_verbosity;
+extern int somatic_sig_received;
+
 #define SOMATIC_UNUSED_ARG(expr) do { (void)(expr); } while (0)
 
 /*------*/
@@ -260,6 +262,12 @@ static inline void somatic_la_gemv1( double *y, double alpha,
 }
 
 
+/*---------*/
+/* Signals */
+/*---------*/
+
+/// installs handler for sigint and sigterm that sets somatic_sig_received to 1
+void somatic_sighandler_simple_install();
 
 
 #ifdef __cplusplus
