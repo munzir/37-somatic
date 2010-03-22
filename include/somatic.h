@@ -73,7 +73,7 @@ static inline int somatic_msg_send_buf_stack( ach_channel_t *chan,
                                  _somatic_private_n,                    \
                                  _somatic_private_msg );                \
         assert( _somatic_private_n == _somatic_private_r );             \
-        ach_put( chan, _somatic_private_buf, _somatic_private_r );      \
+        ach_put( chan, _somatic_private_buf, (size_t)_somatic_private_r ); \
     })
 
 
