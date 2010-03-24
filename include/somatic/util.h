@@ -257,6 +257,7 @@ static void somatic_la_ident( double *A, size_t n ) {
     somatic_la_ident_v( A, n, 1 );
 }
 
+int somatic_la_invert( size_t m, size_t n, double *A );
 
 /** r = a - b */
 static inline void somatic_la_vec_sub( double *r, const double *a, const double *b,

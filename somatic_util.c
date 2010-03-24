@@ -35,6 +35,7 @@
 #include <signal.h>
 #include "somatic/includes.h"
 #include "somatic/util.h"
+#include "somatic/lapack.h"
 
 int somatic_opt_verbosity = 0;
 int somatic_sig_received = 0;
@@ -102,4 +103,32 @@ void somatic_sighandler_simple_install() {
         somatic_fail( "Couldn't install handler\n");
     }
 
+}
+
+
+int somatic_la_invert( size_t m, size_t n, double *A ) {
+    int ipiv[m];
+    int mi = (int) m;
+    int ni = (int) n;
+    int info;
+
+    // LU-factor
+    dgetrf_( &mi, &ni, A, &mi, ipiv, &info );
+
+    // find optimal size
+    double swork[1];
+    int lwork_query = -1;
+    dgetri_( &ni, A, &mi, ipiv, swork, &lwork_query, &info );
+    int lwork = (int) swork[0];
+
+    // invert
+    double work[lwork];
+    dgetri_( &ni, A, &mi, ipiv, work, &lwork, &info );
+
+    return info;
+}
+
+// for fortran
+int somatic_la_invert_( const int *m, const int *n, double *A ) {
+    return somatic_la_invert( (size_t)*m, (size_t)*n, A );
 }
