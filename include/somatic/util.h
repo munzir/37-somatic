@@ -113,7 +113,7 @@ static struct timespec somatic_timespec_sub( const struct timespec a,
 
 static struct timespec somatic_timespec_now() {
     struct timespec t;
-    clock_gettime( CLOCK_MONOTONIC, &t );
+    clock_gettime( CLOCK_REALTIME, &t );
     return t;
 }
 
@@ -243,6 +243,20 @@ static double somatic_la_mset( double *m, size_t rows, size_t cols,
                              size_t i, size_t j, double v ) {
     return m[ somatic_la_colmajor_k( rows, cols, i, j ) ] = v;
 }
+
+/// Make A an identity matrix. A is size n*n
+static void somatic_la_ident_v( double *A, size_t n, double v ) {
+    somatic_realset( A, 0, n*n );
+    for( size_t i = 0; i < n; i ++ ) {
+        somatic_la_mset(A, n, n, i, i, v);
+    }
+}
+
+/// Make A an identity matrix. A is size n*n
+static void somatic_la_ident( double *A, size_t n ) {
+    somatic_la_ident_v( A, n, 1 );
+}
+
 
 /** r = a - b */
 static inline void somatic_la_vec_sub( double *r, const double *a, const double *b,
