@@ -4,7 +4,7 @@ VERSION := 0.0.200100213
 PROJECT := somatic
 
 SHAREDLIBS := somatic somatic_pb-c
-#BINFILES :=
+BINFILES :=
 
 #GENHEADERS := include/somatic/motor_msg.h include/somatic/somatic.pb-c.h
 GENHEADERS := include/somatic/motor_msg.h
@@ -21,9 +21,9 @@ CFLAGS += --std=gnu99
 CFLAGS += -Wno-unused-function
 CPPFLAGS += -Wno-unused-function
 
-all: $(LIBFILES) verbatim/share/somatic/somatic.protobin
+all: $(LIBFILES) verbatim/share/somatic/somatic.protobin $(BINFILES)
 
-$(call LINKLIB, somatic, somatic_motor.o somatic_util.o)
+$(call LINKLIB, somatic, somatic_motor.o somatic_util.o ez.o)
 $(call LINKLIB, somatic_pb-c, somatic.pb-c.o msgply.o)
 
 include/somatic/motor_msg.h: msg/motor-msg.lisp
@@ -43,7 +43,9 @@ verbatim/share/somatic/somatic.protobin: proto/somatic.proto
 	protoc -o$@ $<
 
 clean:
-	rm -rf .deps $(GENHEADERS) debian *.deb *.lzma *.so $(INCLUDEDIR)/somatic.pb-c* $(SRCDIR)/somatic.pb-c* $(SRCDIR)/*.o
+	rm -rf .deps $(GENHEADERS) debian *.deb *.lzma *.so $(INCLUDEDIR)/somatic.pb-c* $(SRCDIR)/somatic.pb-c* $(SRCDIR)/*.o doc
+
+.PHONY: doc
 
 doc:
 	doxygen

@@ -37,28 +37,32 @@
 #define SOMATIC_UTIL_H
 
 #include <cblas.h>
-
+/** \file somatic/util.h
+ *  \author Neil T. Dantam
+ */
 #include "includes.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/// verbosity level for function somatic_verbprintf
 extern int somatic_opt_verbosity;
-extern int somatic_sig_received;
 
+
+/// macro to squash compiler warning about unused argument to function
 #define SOMATIC_UNUSED_ARG(expr) do { (void)(expr); } while (0)
 
 /*------*/
 /* MISC */
 /*------*/
 
-// Fortran modulo, Ada mod
+/// Fortran modulo, Ada mod
 static inline int64_t somatic_modulo( int a, int b ) {
     return ((a % b) + b) % b;
 }
 
-// Fortran mod, Ada rem
+/// Fortran mod, Ada rem
 static inline int64_t somatic_remainder( int a, int b ) {
     return a % b;
 }
@@ -67,6 +71,7 @@ static inline int64_t somatic_remainder( int a, int b ) {
 /* Time Functions */
 /*----------------*/
 
+/// create a struct timespec with given elements
 static struct timespec somatic_make_timespec( time_t sec, long nsec ) {
     struct timespec t;
     t.tv_sec = sec;
@@ -75,6 +80,8 @@ static struct timespec somatic_make_timespec( time_t sec, long nsec ) {
 }
 
 
+/// create a struct timespec with given elements, fixing things up of
+/// nsec is negative of more than a billion
 static struct timespec somatic_make_timespec_norm( time_t sec, long nsec ) {
     // FIXME: this is crap
     int32_t billion = 1e9;
@@ -98,12 +105,14 @@ static struct timespec somatic_timespec_delta( struct timespec t1,
 }
 */
 
-    static struct timespec somatic_timespec_add( struct timespec t1,
+/// add two times: a + b
+static struct timespec somatic_timespec_add( struct timespec t1,
                                              struct timespec t0 ) {
     return somatic_make_timespec_norm( t1.tv_sec + t0.tv_sec,
                                        t1.tv_nsec + t0.tv_nsec );
 }
 
+/// subtract two times: a - b
 static struct timespec somatic_timespec_sub( const struct timespec a,
                                              const struct timespec b ) {
     return somatic_make_timespec_norm( a.tv_sec - b.tv_sec,
@@ -111,6 +120,7 @@ static struct timespec somatic_timespec_sub( const struct timespec a,
 }
 
 
+/// gets current time via CLOCK_REALTIME
 static struct timespec somatic_timespec_now() {
     struct timespec t;
     clock_gettime( CLOCK_REALTIME, &t );
@@ -129,24 +139,27 @@ static int somatic_timespec_cmp( const struct timespec t1, const struct timespec
         (t1.tv_nsec - t2.tv_nsec);
 }
 
+/// is the current time later than abstime?
 static int somatic_timespec_after( const struct timespec abstime ) {
     return somatic_timespec_cmp(somatic_timespec_now(), abstime) > 0;
 }
 
+/// convert timespec t to microseconds
 static int64_t somatic_timespec2us( const struct timespec t ) {
     return t.tv_sec*1000000 + t.tv_nsec/1000;
 }
 
+/// convert timespec t to seconds
 static double somatic_timespec2s( const struct timespec t ) {
     return t.tv_sec+ t.tv_nsec/1e9;
 }
-
+/// convert seconds t to timespec
 static struct timespec somatic_s2timespec( double t ) {
     time_t sec = (time_t) t;
     long nsec = (long) ((t-sec)*1e9);
     return somatic_make_timespec_norm( sec, nsec );
 }
-
+/// print a timespec on stderr
 static void somatic_timespec_dump( const struct timespec t ) {
     fprintf( stderr, "{.tv_sec = %ld, .tv_nsec = %ld}\n",
              t.tv_sec, t.tv_nsec );
@@ -170,13 +183,17 @@ void somatic_hard_assert( int test, const char fmt[], ... );
 /* ALLOCATION */
 /*------------*/
 
+/// malloc n bytes and zero initialize.  Terminates on error.
 static inline void *somatic_xmalloc( size_t n ) {
     void *p = malloc(n);
     somatic_hard_assert( NULL != p, "Failed to allocate %d bytes.\n", n );
     return memset(p, 0, n );
 }
 
+/// allocate and zero initialize a new array of type with n elements
 #define SOMATIC_NEW_AR( type, n ) ((type*) somatic_xmalloc( sizeof(type) * (n) ) )
+
+/// allocate and zero initialize an object of type
 #define SOMATIC_NEW( type ) ( SOMATIC_NEW_AR( type, 1 ) )
 
 
@@ -184,29 +201,34 @@ static inline void *somatic_xmalloc( size_t n ) {
 /* Arrays */
 /*--------*/
 
+/// set array a of n elements to zero
 #define SOMATIC_ZERO_AR( a, n ) ( memset( (a), 0, (n) * sizeof((a)[0]) ) )
 
-
+/// convert double floats to single floats
 static void somatic_d2s( float *dst, const double *src, size_t cnt ) {
     for( size_t i = 0; i < cnt; i++ )
         dst[i] = (float) src[i];
 }
 
 
+/// convert single floats to double floats
 static void somatic_s2d( double *dst, const float *src, size_t cnt ) {
     for( size_t i = 0; i < cnt; i++ )
         dst[i] = (double) src[i];
 }
 
+/// allocate and zero initialize n doubles
 static double *somatic_malloc_real( size_t n ) {
     return (double*) SOMATIC_NEW_AR( double, n );
 }
 
+/// copy n double floats from src to dst
 static void somatic_realcpy( double *dst, const double *src, size_t n ) {
     memcpy( dst, src, sizeof( dst[0] ) * n );
 }
 
 
+/// set n double floats to val
 static void somatic_realset( double *dst, double val, size_t n ) {
     for( size_t i = 0; i < n; i ++ )
         dst[i] = val;
@@ -217,6 +239,7 @@ static void somatic_realset( double *dst, double val, size_t n ) {
 /* LINEAR ALGEBRA */
 /*----------------*/
 
+/// calculate a column major matrix offset
 static size_t somatic_la_colmajor_k( size_t rows, size_t cols, size_t i, size_t j ) {
     assert( i < rows );
     assert( j < cols );
@@ -225,6 +248,7 @@ static size_t somatic_la_colmajor_k( size_t rows, size_t cols, size_t i, size_t 
     return k;
 }
 
+/// sum of squared differences
 static double somatic_la_ssd( const double *a, const double *b, size_t n ) {
     double r = 0;
     for( size_t i = 0; i < n; i ++ ) {
@@ -233,18 +257,19 @@ static double somatic_la_ssd( const double *a, const double *b, size_t n ) {
     }
     return r;
 }
-
+/// get a column major matrix entry
 static double somatic_la_mget( const double *m, size_t rows, size_t cols,
                                size_t i, size_t j ) {
     return m[ somatic_la_colmajor_k( rows, cols, i, j ) ];
 }
 
+/// set a column major matrix entry
 static double somatic_la_mset( double *m, size_t rows, size_t cols,
                              size_t i, size_t j, double v ) {
     return m[ somatic_la_colmajor_k( rows, cols, i, j ) ] = v;
 }
 
-/// Make A an identity matrix. A is size n*n
+/// Set n*n matrix A to diagonal matrix with all diagonal entries equal to v.
 static void somatic_la_ident_v( double *A, size_t n, double v ) {
     somatic_realset( A, 0, n*n );
     for( size_t i = 0; i < n; i ++ ) {
@@ -252,11 +277,12 @@ static void somatic_la_ident_v( double *A, size_t n, double v ) {
     }
 }
 
-/// Make A an identity matrix. A is size n*n
+/// Set n*n matrix A to identity matrix.
 static void somatic_la_ident( double *A, size_t n ) {
     somatic_la_ident_v( A, n, 1 );
 }
 
+/// invert column major m*n matrix A in place.
 int somatic_la_invert( size_t m, size_t n, double *A );
 
 /** r = a - b */
@@ -281,7 +307,16 @@ static inline void somatic_la_gemv1( double *y, double alpha,
 /* Signals */
 /*---------*/
 
-/// installs handler for sigint and sigterm that sets somatic_sig_received to 1
+/// variable set when signal INT or TERM recieved by somatic's simple sighandler
+extern int somatic_sig_received;
+
+/** installs handler for sigint and sigterm that sets
+ * somatic_sig_received to 1.
+ *
+ * You should use this so that the main loop of your program can be a
+ * `while(!somatic_sig_received) {}' and thus terminate cleanly on a
+ * signal.
+ */
 void somatic_sighandler_simple_install();
 
 

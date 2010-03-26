@@ -34,11 +34,11 @@
  */
 
 
-/* \file lapack.h
+/** \file lapack.h
  * \brief C prototypes to various fortran lapack routines.
  *
- * Since there is no official c binding to lapack is there is with
- * blas, the only reasonable way to interface with lapack from C is to
+ * Since there is no official c binding to lapack is there as with
+ * BLAS, the only reasonable way to interface with lapack from C is to
  * call the fortran methods directly.
  *
  * Authors:
@@ -81,7 +81,7 @@ void dgetri_( const int *n, double *A, const int *lda,
     \param n number of columns of matrix A
     \param A matrix in column-major order, on exit the L and U factors
     \param lda leading dimesion of A, probably just rows in A
-    \param array of length min(m,n), on exit the pivot indices
+    \param ipiv of length min(m,n), on exit the pivot indices
     \param info on success: info==0
  */
 void sgetrf_( const int *m, const int *n, float *A, const int *lda,
