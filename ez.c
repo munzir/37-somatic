@@ -41,20 +41,26 @@
 
 /// initialize somatic
 void somatic_ez_init() {
-
+    somatic_sighandler_simple_install();
 }
 
 static Somatic__EzMsg *
 somatic_ez_slow_last_unpack( somatic_channel_id chan ) {
     size_t n;
-    int r = ach_copy_last( chan, NULL, 0, &n );
+    int r;
+    if( 0 == chan->seq_num ) {
+        r = ach_wait_last( chan, NULL, 0, &n, NULL );
+    } else {
+        r = ach_copy_last( chan, NULL, 0, &n );
+    }
+
     somatic_hard_assert( ACH_OVERFLOW == r, "Unknown error: %s\n",
                          ach_result_to_string( r ) );
     uint8_t buf[n];
     size_t nread;
     r = ach_copy_last( chan, &buf[0], n, &nread );
     somatic_hard_assert( n == nread &&
-                         (ACH_OK == r || ACH_MISSED_FRAME == r),
+                         (ACH_OK == r || ACH_MISSED_FRAME == r || ACH_STALE_FRAMES == r),
                          "EZ fail: %s\n", ach_result_to_string( r ) );
     return somatic__ez_msg__unpack( &protobuf_c_system_allocator, n, buf );
 
