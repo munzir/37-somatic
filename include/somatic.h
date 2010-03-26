@@ -86,7 +86,7 @@ static inline int somatic_msg_send_buf_stack( ach_channel_t *chan,
                  _somatic_private_n );                          \
     })
 
-#define SOMATIC_GET_LAST_UNPACK( type, alloc, size, chan, ret )         \
+#define SOMATIC_GET_LAST_UNPACK( ret, type, alloc, size, chan )         \
     ({                                                                  \
         uint8_t _somatic_private_buf[size];                             \
         size_t _somatic_private_nread;                                  \
