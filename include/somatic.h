@@ -76,6 +76,26 @@ static inline int somatic_msg_send_buf_stack( ach_channel_t *chan,
         ach_put( chan, _somatic_private_buf, (size_t)_somatic_private_r ); \
     })
 
+#define SOMATIC_PACK_SEND( chan, type, msg )                    \
+    ({                                                          \
+        size_t _somatic_private_n =                             \
+            type ## __get_packed_size(msg);                     \
+        uint8_t _somatic_private_buf[_somatic_private_n];       \
+        type ## __pack( msg, &_somatic_private_buf[0] );        \
+        ach_put( chan, _somatic_private_buf,                    \
+                 _somatic_private_n );                          \
+    })
 
+#define SOMATIC_GET_LAST_UNPACK( type, alloc, size, chan, ret )         \
+    ({                                                                  \
+        uint8_t _somatic_private_buf[size];                             \
+        size_t _somatic_private_nread;                                  \
+        ret = ach_get_last( chan, _somatic_private_buf, size,           \
+                            &_somatic_private_nread );                  \
+        ( ACH_STALE_FRAMES != ret ) ?                                   \
+            type ## __unpack( alloc, _somatic_private_nread,            \
+                              _somatic_private_buf ) :                  \
+            NULL;                                                       \
+    })
 
 #endif
