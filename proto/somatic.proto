@@ -2,118 +2,6 @@ package somatic;
 
 // Basic somatic messages
 
-// Need a better name for this
-enum special_command {
-    COMMAND_NONE = 0;
-    COMMAND_RESET = 1;
-    COMMAND_EMERGENCY_STOP = 2;
-    COMMAND_APPLY_BRAKE = 3;
-    COMMAND_RELEASE_BRAKE = 4;
-}
-
-message command_msg {
-    optional double current = 1;
-    optional double velocity = 2;
-    optional double position = 3;
-
-    optional somatic.special_command special = 4 [default=COMMAND_NONE];
-
-    required int32 motor_id = 100 [default=0];
-}
-
-message motor_commands_msg {
-    repeated command_msg commands = 1;
-}
-
-enum error_type {
-    ERROR_NONE = 0;
-    ERROR_OVER_CURRENT = 1;
-    ERROR_OVER_SPEED = 2;
-    ERROR_UNDER_VOLTAGE = 3;
-    ERROR_OVER_VOLTAGE = 4;
-    ERROR_VENDOR = 1000;
-};
-
-message status_report_msg {
-    optional double current = 1;
-    optional double velocity = 2;
-    optional double position = 3;
-
-
-    optional error_type error = 4 [default=ERROR_NONE];
-    optional string vendor_error = 5;
-}
-
-// Somatic messages for dealing with workspace coordinates (for arms, etc).
-
-// for informational logging
-// data logging will take something else...
-message log_msg {
-    required string message = 1;
-
-    enum log_level {
-      LOG_LEVEL_FATAL = 0;
-      LOG_LEVEL_ERROR = 1;
-      LOG_LEVEL_WARN = 2;
-      LOG_LEVEL_INFO = 3;
-      LOG_LEVEL_DEBUG = 4;
-    };
-
-    optional log_level level = 2;
-    optional string sender = 3;
-}
-
-/*
-
-message waypoint_msg {
-    required transform_msg point = 1;
-    optional double time = 2 [default=0];
-    optional double velocity = 3;
-}
-
-
-message joint_config_msg {
-    repeated double position = 1;
-    repeated double velocity = 2;
-}
-
-
-enum config_space {
- JOINT_SPACE = 0;
- WORK_SPACE = 1;
-}
-
-enum ik_method {
-  IK_ANALYTICAL = 0;
-  IK_J_INV = 1;
-  IK_J_T = 2;
-}
-
-enum interpol_method {
-  INTERPOL_LINEAR = 0;
-  INTERPOL_CUBIC = 2;
-  INTERPOL_PARABOLICBLEND = 5;
-  INTERPOL_TRAPEZOIDAL_V = 10;
-  INTERPOL_JERK_LIMITED= 11;
-}
-
-enum control_method {
-  CONTROL_POSITION = 0;
-  CONTROL_VELOCITY = 1;
-  CONTROL_CURRENT = 2;
-}
-
-message trajectory_msg {
-    // the via points.  Only one array should have data
-    repeated transform_msg ws_points = 1;
-    repeated joint_config_msg js_points = 2;
-
-    // trajectory options
-    optional config_space interpol_space = 3;
-    optional somatic.ik_method ik_method = 4;
-    optional somatic.interpol_method interpol_method = 5;
-    optional somatic.control_method control_method = 6;
-}
 
 
 // Maybe we'll use this someday....
@@ -125,7 +13,7 @@ message can_msg {
     optional bool extended = 4;
     optional int32 bus = 5;
 }
-*/
+
 
 
 // You can view this as either a one-dimensional array of data or
@@ -195,4 +83,26 @@ message force_moment {
     required vector force = 1;
     required vector moment = 2;
     optional timespec time = 3;
+}
+
+enum motor_param {
+    MOTOR_CURRENT = 0;
+    MOTOR_VELOCITY = 1;
+    MOTOR_POSITION = 2;
+};
+
+message motor_cmd {
+    optional motor_param param = 1;
+    optional vector values = 2;
+}
+
+enum motor_status {
+    MOTOR_OK = 0;
+    MOTOR_FAIL = 1;
+};
+
+message motor_state {
+    optional motor_status status = 1;
+    optional vector position = 2;
+    optional vector velocity = 3;
 }

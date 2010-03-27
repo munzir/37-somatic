@@ -45,37 +45,11 @@
  *  \author Neil T. Dantam
  */
 
-
-/*
-static inline int somatic_msg_send_buf_stack( ach_channel_t *chan,
-                                              size_t buf_size,
-                                              void *msg_struct,
-                                              int (*encoder)(char *, size_t, void*)) {
-    char buf[ buf_size ];
-    int r = encoder( buf, buf_size, msg_struct );
-    assert( buf_size == r );
-    return ach_put( chan, buf, r );
-}
-*/
-
-
-
-/** Sends p_message of type msg_type on channel chan, holding buffer on stack.
+/**
+ * \param chan: ach channel to send over
+ * \param type: protobuf message type (ie, somatic__vector)
+ * \param msg: pointer to the protobuf message
  */
-#define SOMATIC_MSG_SEND_BUF_STACK( chan, p_msg_struct, msg_type )      \
-    ({                                                                  \
-        msg_type ## _t *_somatic_private_msg = p_msg_struct;            \
-        int _somatic_private_n =                                        \
-            msg_type ## _size( _somatic_private_msg );                  \
-        char _somatic_private_buf[_somatic_private_n];                  \
-        int _somatic_private_r =                                        \
-            msg_type ## _encode( _somatic_private_buf,                  \
-                                 _somatic_private_n,                    \
-                                 _somatic_private_msg );                \
-        assert( _somatic_private_n == _somatic_private_r );             \
-        ach_put( chan, _somatic_private_buf, (size_t)_somatic_private_r ); \
-    })
-
 #define SOMATIC_PACK_SEND( chan, type, msg )                    \
     ({                                                          \
         size_t _somatic_private_n =                             \
@@ -86,6 +60,13 @@ static inline int somatic_msg_send_buf_stack( ach_channel_t *chan,
                  _somatic_private_n );                          \
     })
 
+/**
+ * \param ret: ach return code
+ * \param type: protobuf message type (ie, somatic__vector)
+ * \param alloc: protobuf allocator (ie, &protobuf_c_system_allocator)
+ * \param size: size of buffer to give ach
+ * \param chan: ach channel pointer
+ */
 #define SOMATIC_GET_LAST_UNPACK( ret, type, alloc, size, chan )         \
     ({                                                                  \
         uint8_t _somatic_private_buf[size];                             \

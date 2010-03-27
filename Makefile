@@ -18,8 +18,8 @@ include /usr/share/make-common/common.1.mk
 CFLAGS += --std=gnu99
 
 # don't spit out warnings for all the static functions in headers
-CFLAGS += -Wno-unused-function
-CPPFLAGS += -Wno-unused-function
+CFLAGS += -Wno-unused-function -Wno-conversion
+CPPFLAGS += -Wno-unused-function -Wno-conversion
 
 all: $(LIBFILES) verbatim/share/somatic/somatic.protobin $(BINFILES)
 
@@ -31,6 +31,8 @@ include/somatic/motor_msg.h: msg/motor-msg.lisp
 	  sbcl --noinform --noprint --eval "(require 'genmsg)"\
 	  --load ../$< --eval "(quit)"
 
+ez.o: somatic.pb-c.c
+
 somatic.pb-c.c: proto/somatic.proto
 	cd proto && \
 	  protoc-c --c_out=. somatic.proto
@@ -38,6 +40,7 @@ somatic.pb-c.c: proto/somatic.proto
 	mv proto/somatic.pb-c.h $(INCLUDEDIR)
 
 somatic.pb-c.o: $(INCLUDEDIR)/somatic.pb-c.h
+
 
 verbatim/share/somatic/somatic.protobin: proto/somatic.proto
 	protoc -o$@ $<
