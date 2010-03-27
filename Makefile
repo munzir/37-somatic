@@ -23,13 +23,13 @@ CPPFLAGS += -Wno-unused-function -Wno-conversion
 
 all: $(LIBFILES) verbatim/share/somatic/somatic.protobin $(BINFILES)
 
-$(call LINKLIB, somatic, somatic_motor.o somatic_util.o ez.o)
+$(call LINKLIB, somatic, somatic_util.o ez.o)
 $(call LINKLIB, somatic_pb-c, somatic.pb-c.o msgply.o)
 
-include/somatic/motor_msg.h: msg/motor-msg.lisp
-	cd include && \
-	  sbcl --noinform --noprint --eval "(require 'genmsg)"\
-	  --load ../$< --eval "(quit)"
+#include/somatic/motor_msg.h: msg/motor-msg.lisp
+#cd include && \
+#sbcl --noinform --noprint --eval "(require 'genmsg)"\
+#--load ../$< --eval "(quit)"
 
 ez.o: somatic.pb-c.c
 
