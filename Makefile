@@ -6,9 +6,8 @@ PROJECT := somatic
 SHAREDLIBS := somatic somatic_pb-c
 BINFILES :=
 
-GENHEADERS := include/somatic/somatic.pb-c.h
 
-default: $(GENHEADERS) all
+default: all
 
 CC := g++
 include /usr/share/make-common/common.1.mk
