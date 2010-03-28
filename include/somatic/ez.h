@@ -47,6 +47,11 @@
 #include "somatic.pb-c.h"
 #include "util.h"
 
+/** \file ez.h
+ * \author Neil T. Dantam
+ * \brief Super-Simplified ach + protocol buffers
+ */
+
 /// handle to a channel
 typedef ach_channel_t *somatic_channel_id;
 

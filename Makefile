@@ -1,13 +1,12 @@
 ## Makefile for somatic
 
-VERSION := 0.0.200100213
+VERSION := 0.0.200100326
 PROJECT := somatic
 
 SHAREDLIBS := somatic somatic_pb-c
 BINFILES :=
 
-#GENHEADERS := include/somatic/motor_msg.h include/somatic/somatic.pb-c.h
-GENHEADERS := include/somatic/motor_msg.h
+GENHEADERS := include/somatic/somatic.pb-c.h
 
 default: $(GENHEADERS) all
 
@@ -25,11 +24,6 @@ all: $(LIBFILES) verbatim/share/somatic/somatic.protobin $(BINFILES)
 
 $(call LINKLIB, somatic, somatic_util.o ez.o)
 $(call LINKLIB, somatic_pb-c, somatic.pb-c.o msgply.o)
-
-#include/somatic/motor_msg.h: msg/motor-msg.lisp
-#cd include && \
-#sbcl --noinform --noprint --eval "(require 'genmsg)"\
-#--load ../$< --eval "(quit)"
 
 ez.o: somatic.pb-c.c
 
