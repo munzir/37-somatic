@@ -47,7 +47,8 @@
 
 /**
  * \param chan: ach channel to send over
- * \param type: protobuf message type (ie, somatic__vector)
+ * \param type: protobuf message type string (i.e. somatic__vector,
+ *  			NOT actual Somatic__Vector type)
  * \param msg: pointer to the protobuf message
  */
 #define SOMATIC_PACK_SEND( chan, type, msg )                    \
@@ -62,7 +63,8 @@
 
 /**
  * \param ret: ach return code
- * \param type: protobuf message type (ie, somatic__vector)
+ * \param type: protobuf message type string (i.e. somatic__vector,
+ *  			NOT actual Somatic__Vector type)
  * \param alloc: protobuf allocator (ie, &protobuf_c_system_allocator)
  * \param size: size of buffer to give ach
  * \param chan: ach channel pointer
