@@ -132,3 +132,56 @@ int somatic_la_invert( size_t m, size_t n, double *A ) {
 int somatic_la_invert_( const int *m, const int *n, double *A ) {
     return somatic_la_invert( (size_t)*m, (size_t)*n, A );
 }
+
+/*****************************************************************
+ * For managing ach channels, so we don't have to use achtool
+ *
+ * These are just functions pulled from ez.c and achtool.c, so
+ * anyone developing a daemon can use them
+ */
+
+/*
+ * Creates an ach channel
+ */
+int sutil_create_channel(const char *name, size_t frame_cnt, size_t frame_size) {
+
+    int i;
+    {
+        ach_create_attr_t attr;
+        ach_create_attr_init(&attr);
+        i = ach_create( (char*)name, frame_cnt, frame_size, &attr );
+    }
+    somatic_hard_assert( ACH_OK == i, "Error creating channel: %s\n",
+                             ach_result_to_string( i ) );
+
+    return i;
+}
+
+/*
+ * Opens named ach channel
+ */
+ach_channel_t* sutil_open_channel(const char *name)
+{
+	ach_channel_t *chan = SOMATIC_NEW( ach_channel_t );
+    int r = ach_open( chan, name, NULL );
+    somatic_hard_assert( ACH_OK == r, "Error opening channel: %s\n",
+                         ach_result_to_string( r ) );
+
+    r = ach_flush( chan );
+    somatic_hard_assert( ACH_OK == r, "Error flushing channel: %s\n",
+                         ach_result_to_string( r ) );
+
+	return(chan);
+}
+
+/*
+ * Closes a channel
+ */
+int sutil_close_channel(ach_channel_t *chan)
+{
+	int r = ach_close( chan );
+	somatic_hard_assert( ACH_OK == r, "Error closing channel: %s\n",
+	                         ach_result_to_string( r ) );
+
+	return(r);
+}

@@ -302,6 +302,19 @@ static inline void somatic_la_gemv1( double *y, double alpha,
                  0, y, 1  );
 }
 
+/*-------------*/
+/* ACH helpers */
+/*-------------*/
+
+// Open an ach channel or die trying
+ach_channel_t* sutil_open_channel(const char *name);
+
+// Create an ach channel or die trying
+int sutil_create_channel(const char *name, size_t frame_cnt, size_t frame_size);
+
+// Close an ach channel or die trying
+int sutil_close_channel(ach_channel_t *chan);
+
 
 /*---------*/
 /* Signals */
