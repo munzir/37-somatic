@@ -43,6 +43,13 @@
 #include <bullet/LinearMath/btTransform.h>
 #include "util.h"
 
+
+// naming convention
+// somatic_MSGNAME_ply
+// somatic_MSGNAME_opine
+// somatic_MSGNAME_create
+// somatic_MSGNAME_destroy
+
 btTransform somatic_ply_transform( Somatic__Transform * );
 btTransform somatic_ply_transform( double *x, size_t n );
 

@@ -88,6 +88,18 @@
     m))
 
 
+
+(defmethod ply ((msg somatic::vector))
+  (let ((lisp-vec (slot-value msg 'somatic::data)))
+    (make-array (length lisp-vec)
+                :element-type 'double-float
+                :initial-contents lisp-vec)))
+
+(defmethod ply ((msg somatic::force-moment))
+  (vector-seq-cat (list (ply (slot-value msg 'somatic::force))
+                        (ply (slot-value msg 'somatic::moment)))))
+
+
 (defun ply-point-cloud-msg-points (point-cloud-msg &key discard-zeros)
   (let ((matrix-msg  (slot-value point-cloud-msg 'somatic:points)))
     (assert (= 3 (matrix-msg-rows matrix-msg)))
@@ -170,3 +182,12 @@
       (setf (slot-value msg 'somatic::time)
             (opine-timespec time)))
     msg))
+
+(defmethod ply ((msg somatic::label-vector))
+  (let ((lisp-vec (slot-value (slot-value msg 'somatic::x)
+                              'somatic::data)))
+    (values (slot-value msg 'somatic::label)
+            (make-array (length lisp-vec)
+                        :element-type 'double-float
+                        :initial-contents lisp-vec))))
+
