@@ -143,7 +143,7 @@ int somatic_la_invert_( const int *m, const int *n, double *A ) {
 /*
  * Creates an ach channel
  */
-int sutil_create_channel(const char *name, size_t frame_cnt, size_t frame_size) {
+int somatic_create_channel(const char *name, size_t frame_cnt, size_t frame_size) {
 
     int i;
     {
@@ -160,7 +160,7 @@ int sutil_create_channel(const char *name, size_t frame_cnt, size_t frame_size) 
 /*
  * Opens named ach channel
  */
-ach_channel_t* sutil_open_channel(const char *name)
+ach_channel_t* somatic_open_channel(const char *name)
 {
 	ach_channel_t *chan = SOMATIC_NEW( ach_channel_t );
     int r = ach_open( chan, name, NULL );
@@ -177,7 +177,7 @@ ach_channel_t* sutil_open_channel(const char *name)
 /*
  * Closes a channel
  */
-int sutil_close_channel(ach_channel_t *chan)
+int somatic_close_channel(ach_channel_t *chan)
 {
 	int r = ach_close( chan );
 	somatic_hard_assert( ACH_OK == r, "Error closing channel: %s\n",
