@@ -75,7 +75,7 @@
         size_t _somatic_private_nread;                                  \
         ret = ach_get_last( chan, _somatic_private_buf, size,           \
                             &_somatic_private_nread );                  \
-        ( ACH_OK == ret || ACH_MISSED_FRAME == r ) ?                    \
+        ( ACH_OK == ret || ACH_MISSED_FRAME == ret ) ?                  \
             type ## __unpack( alloc, _somatic_private_nread,            \
                               _somatic_private_buf ) :                  \
             NULL;                                                       \
