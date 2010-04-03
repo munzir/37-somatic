@@ -3,14 +3,18 @@
 VERSION := 0.0.200100326
 PROJECT := somatic
 
-SHAREDLIBS := somatic somatic_pb-c
+SHAREDLIBS := somatic
 BINFILES :=
 
 
 default: all
 
+
 CC := g++
 include /usr/share/make-common/common.1.mk
+
+MSG_SRC := $(wildcard $(SRCDIR)/msg/*.c)
+MSG_OBJS := $(addsuffix .o, $(basename $(MSG_SRC)))
 
 # apparently ach requires this, or at least c99
 CFLAGS += --std=gnu99
@@ -21,8 +25,7 @@ CPPFLAGS += -Wno-unused-function -Wno-conversion
 
 all: $(LIBFILES) verbatim/share/somatic/somatic.protobin $(BINFILES)
 
-$(call LINKLIB, somatic, somatic_util.o ez.o)
-$(call LINKLIB, somatic_pb-c, somatic.pb-c.o msgply.o)
+$(call LINKLIB, somatic, somatic_util.o ez.o somatic.pb-c.o msgply.o $(MSG_OBJS))
 
 ez.o: somatic.pb-c.c
 
