@@ -75,10 +75,17 @@
         size_t _somatic_private_nread;                                  \
         ret = ach_get_last( chan, _somatic_private_buf, size,           \
                             &_somatic_private_nread );                  \
-        ( ACH_STALE_FRAMES != ret ) ?                                   \
+        ( ACH_OK == ret || ACH_MISSED_FRAME == r ) ?                    \
             type ## __unpack( alloc, _somatic_private_nread,            \
                               _somatic_private_buf ) :                  \
             NULL;                                                       \
     })
+
+
+#define SOMATIC_DEF_GET_LAST_UNPACK( name, ftype, rtype, size ) \
+    rtype *name( ach_channel_t *chan, int *ach_result, \
+                 ProtobufCAllocator *alloc) {                           \
+        return SOMATIC_GET_LAST_UNPACK( ach_result, ftype, alloc, size, chan ); \
+    }
 
 #endif
