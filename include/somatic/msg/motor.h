@@ -41,9 +41,9 @@
 #include "somatic/util.h"
 #include "somatic.pb-c.h"
 
-/** \file pciod_smm.h
+/** \file motor.h
  *
- *  Library to interact with pciod using motor command and state messages
+ *  Library to manage motor command and state messages
  *
  *  \author Jon Scholz
  */

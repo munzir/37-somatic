@@ -1,9 +1,9 @@
 /** \file pciod_ssm.c
- *
- *  Library to interact with pciod using motor command and state messages
- *
- *  \author Jon Scholz
- */
+*
+*  Library to manage motor command and state messages
+*
+*  \author Jon Scholz
+*/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -82,7 +82,7 @@ int somatic_generate_motorcmd(ach_channel_t *chan, double *values, size_t n_modu
 	somatic__vector__init(msg.values);
 	msg.values->data = values;
 	msg.values->n_data = n_modules;
-
+	//					size_t size = somatic__motorcmd__get_packed_size(js_msg);
 	return somatic_motorcmd_publish(&msg, chan);
 }
 
