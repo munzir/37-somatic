@@ -11,6 +11,10 @@
 #ifndef JS_SMM_H_
 #define JS_SMM_H_
 
+#include "somatic.h"
+#include "somatic/util.h"
+#include "somatic.pb-c.h"
+
 //TODO put these #defines in daemons (put in headers so we can include them?)
 #define JOYSTICK_CHANNEL_NAME "joystick-data"
 #define JACH_NBUTTONS 10
@@ -23,7 +27,7 @@
 
 
 // Allocate a Somatic__Joystick message for spacenav data
-int somatic_joystick_alloc(Somatic__Joystick *msg, size_t n_axes, size_t n_buttons);
+Somatic__Joystick *somatic_joystick_alloc(size_t n_axes, size_t n_buttons);
 
 // Free memory allocated by somatic_joystick_alloc
 int somatic_joystick_free(Somatic__Joystick *msg);
@@ -39,9 +43,6 @@ SOMATIC_DEC_WAIT_LAST_UNPACK(somatic_joystick_receive,
 							somatic__joystick,
 							Somatic__Joystick);
 
-// Receive a message from specified Ach channel
-//TODO replace this with new somatic macro
-//Somatic__Joystick* somatic_joystick_receive(ach_channel_t *chan);
 
 // Print the contents of a Somatic__Joystick message
 void somatic_joystick_print(Somatic__Joystick *msg);

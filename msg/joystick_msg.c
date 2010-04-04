@@ -11,48 +11,42 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-#include <somatic.h>
 #include <ach.h>
 
-#include <somatic/util.h>
-#include <somatic.pb-c.h>
-
-#include "../include/somatic/msg/joystick.h"
+#include "somatic/msg/base.h"
+#include "somatic/msg/joystick.h"
 
 
-/*
+/**
  * Allocate a Somatic__Joystick message
  */
-int somatic_joystick_alloc(Somatic__Joystick *msg, size_t n_axes, size_t n_buttons)
+// TODO: replace with version that takes only size params and returns pointer to entire malloced message?
+Somatic__Joystick *somatic_joystick_alloc(size_t n_axes, size_t n_buttons)
 {
+	Somatic__Joystick *msg = SOMATIC_NEW(Somatic__Joystick);
 	somatic__joystick__init(msg);
 
-	msg->axes = SOMATIC_NEW(Somatic__Vector);
-	somatic__vector__init(msg->axes);
-	msg->axes->data = SOMATIC_NEW_AR(double, n_axes);
-	msg->axes->n_data = (size_t)n_axes;
+	msg->axes = somatic_vector_alloc(n_axes);
+	msg->buttons = somatic_ivector_alloc(n_buttons);
 
-	msg->buttons = SOMATIC_NEW(Somatic__Ivector);
-	somatic__ivector__init(msg->buttons);
-	msg->buttons->data = SOMATIC_NEW_AR(int64_t, n_buttons);
-	msg->buttons->n_data = (size_t) n_buttons;
-
-	//TODO: add return code
-	return (0);
+	return (msg);
 }
 
+/**
+ * Free memory allocated to Somatic__Joystick msg
+ */
 int somatic_joystick_free(Somatic__Joystick *msg)
 {
-	free(msg->axes->data);
-	free(msg->buttons->data);
-	free(msg->axes);
-	free(msg->buttons);
-	//free(msg);
+	somatic_vector_free(msg->axes);
+	somatic_ivector_free(msg->buttons);
+	free(msg);
 
 	return(0);
 }
 
-
+/**
+ * Publish a Somatic__Joystick message on specified channel
+ */
 int somatic_joystick_publish(Somatic__Joystick *msg, ach_channel_t *chan)
 {
 	int r = SOMATIC_PACK_SEND( chan, somatic__joystick, msg );
@@ -68,30 +62,7 @@ SOMATIC_DEF_WAIT_LAST_UNPACK(somatic_joystick_receive,
 							somatic__joystick,
 							Somatic__Joystick);
 
-//TODO replace this with new somatic macro
-//Somatic__Joystick* somatic_joystick_receive(ach_channel_t *chan)
-//{
-//    size_t n;
-//    int r;
-////    if( 0 == chan->seq_num ) {
-//        r = ach_wait_last( chan, NULL, 0, &n, NULL );
-////    } else {
-////        r = ach_copy_last( chan, NULL, 0, &n );
-////    }
-//
-//    somatic_hard_assert( ACH_OVERFLOW == r, "Unknown error: %s\n",
-//                         ach_result_to_string( r ) );
-//    uint8_t buf[n];
-//    size_t nread;
-//    r = ach_copy_last( chan, &buf[0], n, &nread );
-//    somatic_hard_assert( n == nread &&
-//                         (ACH_OK == r || ACH_MISSED_FRAME == r || ACH_STALE_FRAMES == r),
-//                         "EZ fail: %s\n", ach_result_to_string( r ) );
-//
-//    return somatic__joystick__unpack( &protobuf_c_system_allocator, n, buf );
-//}
-
-/*
+/**
  * Print the contents of a Somatic__Joystick message
  */
 void somatic_joystick_print(Somatic__Joystick *msg){

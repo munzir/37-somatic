@@ -34,59 +34,114 @@
  */
 
 /*
- * base.h
+ * base.c
  *
- *  Created on: Apr 2, 2010
+ *  Created on: Apr 3, 2010
  *      Author: jscholz
  */
 
-#ifndef BASE_H_
-#define BASE_H_
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
+#include <stdint.h>
 
-#include "somatic.h"
-#include "somatic/util.h"
-#include "somatic.pb-c.h"
+#include <ach.h>
+
+#include "somatic/msg/base.h"
 
 /**
  * Somatic__Vector message utils
  */
 // Allocate a Somatic__Vector
-Somatic__Vector *somatic_vector_alloc(size_t size);
+Somatic__Vector *somatic_vector_alloc(size_t size)
+{
+	Somatic__Vector *msg = SOMATIC_NEW(Somatic__Vector);
+	somatic__vector__init(msg);
+	msg->data = SOMATIC_NEW_AR(double, size);
+	msg->n_data = size;
+	return (msg);
+}
 
 // Free allocated memory
-int somatic_vector_free(Somatic__Vector *msg);
+int somatic_vector_free(Somatic__Vector *msg)
+{
+	free(msg->data);
+	free(msg);
+	return(0);
+}
 
 // Publish message on Ach channel
-int somatic_vector_publish(Somatic__Vector *msg, ach_channel_t *chan);
+int somatic_vector_publish(Somatic__Vector *msg, ach_channel_t *chan)
+{
+	int r = SOMATIC_PACK_SEND( chan, somatic__vector, msg );
+	somatic_hard_assert( ACH_OK == r, "Failed to send message: %s\n", ach_result_to_string( r ) );
+
+	return(r);
+}
 
 
-// Declares a receive function
-SOMATIC_DEC_WAIT_LAST_UNPACK(somatic_vector_receive,
+// Defines a receive function
+SOMATIC_DEF_WAIT_LAST_UNPACK(somatic_vector_receive,
 							somatic__vector,
 							Somatic__Vector);
 
 // Print the contents of a Somatic__Vector message
-void somatic_vector_print(Somatic__Vector *msg);
+void somatic_vector_print(Somatic__Vector *msg)
+{
+	size_t i;
+	for (i=0; i<msg->n_data; ++i) {
+		if (i < msg->n_data - 1)
+			fprintf(stdout, "% 1.2lf::", msg->data[i]);
+		else
+			fprintf(stdout, "% 1.2lf", msg->data[i]);
+	}
+}
 
 /**
  * Somatic__Ivector message utils
  */
 // Allocate a Somatic__Ivector
-Somatic__Ivector *somatic_ivector_alloc(size_t size);
+Somatic__Ivector *somatic_ivector_alloc(size_t size)
+{
+	Somatic__Ivector *msg = SOMATIC_NEW(Somatic__Ivector);
+	somatic__ivector__init(msg);
+	msg->data = SOMATIC_NEW_AR(int64_t, size);
+	msg->n_data = size;
+	return (msg);
+}
 
 // Free allocated memory
-int somatic_ivector_free(Somatic__Ivector *msg);
+int somatic_ivector_free(Somatic__Ivector *msg)
+{
+	free(msg->data);
+	free(msg);
+	return(0);
+}
 
 // Publish message on Ach channel
-int somatic_ivector_publish(Somatic__Ivector *msg, ach_channel_t *chan);
+int somatic_ivector_publish(Somatic__Ivector *msg, ach_channel_t *chan)
+{
+	int r = SOMATIC_PACK_SEND( chan, somatic__ivector, msg );
+	somatic_hard_assert( ACH_OK == r, "Failed to send message: %s\n", ach_result_to_string( r ) );
+
+	return(r);
+}
 
 
-// Declares a receive function
-SOMATIC_DEC_WAIT_LAST_UNPACK(somatic_ivector_receive,
+// Defines a receive function
+SOMATIC_DEF_WAIT_LAST_UNPACK(somatic_ivector_receive,
 							somatic__ivector,
 							Somatic__Ivector);
 
 // Print the contents of a Somatic__Ivector message
-void somatic_ivector_print(Somatic__Ivector *msg);
-
-#endif /* BASE_H_ */
+void somatic_ivector_print(Somatic__Ivector *msg)
+{
+	size_t i;
+	for (i=0; i<msg->n_data; ++i) {
+		if (i < msg->n_data - 1)
+			fprintf(stdout, "% 1.2lld::", msg->data[i]);
+		else
+			fprintf(stdout, "% 1.2lld", msg->data[i]);
+	}
+}
