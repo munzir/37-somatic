@@ -8,15 +8,19 @@
 #ifndef HOKUYO_SMM_H_
 #define HOKUYO_SMM_H_
 
+/* calling C functions in CPP */
+extern "C" {
 #include "somatic.h"
 #include "somatic/util.h"
 #include "somatic.pb-c.h"
+}
 
 // <#define any macros describing your channel>
 #define HOKUYO_CHANNEL_NAME "hokuyo-data"
 #define HOKUYO_CHANNEL_FRAMES (1128*2)
 
 // Include headers for your device, if necessary
+
 
 // Allocate a message
 Somatic__Hokuyo* somatic_hokuyo_allocate_msg(int nranges);

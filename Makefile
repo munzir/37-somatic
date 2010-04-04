@@ -13,8 +13,9 @@ default: all
 CC := g++
 include /usr/share/make-common/common.1.mk
 
-MSG_SRC := $(wildcard $(SRCDIR)/msg/*.c)
-MSG_OBJS := $(addsuffix .o, $(basename $(MSG_SRC)))
+MSG_SRC_C := $(wildcard $(SRCDIR)/msg/*.c)
+MSG_SRC_CPP := $(wildcard $(SRCDIR)/msg/*.cpp)
+MSG_OBJS := $(addsuffix .o, $(basename $(MSG_SRC_C))) $(addsuffix .o, $(basename $(MSG_SRC_CPP)))
 
 # apparently ach requires this, or at least c99
 CFLAGS += --std=gnu99
