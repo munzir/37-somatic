@@ -111,3 +111,11 @@ message joystick {
     optional ivector buttons = 1;
     optional vector axes = 2;
 }
+
+message dsa {
+	optional ivector output = 1;
+}
+
+message hokuyo {
+	optional vector ranges = 1;
+}
