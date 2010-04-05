@@ -9,11 +9,15 @@
 #define HOKUYO_SMM_H_
 
 /* calling C functions in CPP */
+#ifdef __cplusplus
 extern "C" {
+#endif
+
 #include "somatic.h"
 #include "somatic/util.h"
 #include "somatic.pb-c.h"
-}
+
+
 
 // <#define any macros describing your channel>
 #define HOKUYO_CHANNEL_NAME "hokuyo-data"
@@ -40,5 +44,9 @@ SOMATIC_DEC_WAIT_LAST_UNPACK(somatic_hokuyo_receive,
 
 // Print the contents of your message type
 void somatic_hokuyo_print(Somatic__Hokuyo *msg);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _SMM_H_ */
