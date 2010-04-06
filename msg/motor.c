@@ -82,8 +82,15 @@ int somatic_generate_motorcmd(ach_channel_t *chan, double *values, size_t n_modu
 	somatic__vector__init(msg.values);
 	msg.values->data = values;
 	msg.values->n_data = n_modules;
-	//					size_t size = somatic__motorcmd__get_packed_size(js_msg);
-	return somatic_motorcmd_publish(&msg, chan);
+	// size_t size = somatic__motorcmd__get_packed_size(js_msg);
+
+	// publish
+	int r = somatic_motorcmd_publish(&msg, chan);
+
+	// Cleanup
+	somatic_motorcmd_free(&msg);
+
+	return r;
 }
 
 // Issues a motor state query request
