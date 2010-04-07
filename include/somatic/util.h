@@ -234,6 +234,14 @@ static void somatic_realset( double *dst, double val, size_t n ) {
         dst[i] = val;
 }
 
+/// set n double floats to val
+static void somatic_realprint( double *arr, size_t n ) {
+    for( size_t i = 0; i < n; i ++ )
+    	if (i < n - 1)
+    		printf("%lf::", arr[i]);
+    	else
+    		printf("%lf\n", arr[i]);
+}
 
 /*----------------*/
 /* LINEAR ALGEBRA */

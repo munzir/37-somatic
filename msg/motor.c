@@ -49,23 +49,29 @@ Somatic__MotorState *somatic_motorstate_alloc(size_t n_modules)
 
 /*
  * Free dynamically allocated memory from MotorCmd message
+ * DON'T call this if you're aliasing stack-allocated memory!
  */
 int somatic_motorcmd_free(Somatic__MotorCmd *msg)
 {
-	somatic_vector_free(msg->values);
-	free(msg);
+	if (msg != NULL) {
+		somatic_vector_free(msg->values);
+		free(msg);
+	}
 
 	return(0);
 }
 
 /*
  * Free dynamically allocated memory from MotorState message
+ * DON'T call this if you're aliasing stack-allocated memory!
  */
 int somatic_motorstate_free(Somatic__MotorState *msg)
 {
-	somatic_vector_free(msg->position);
-	somatic_vector_free(msg->velocity);
-	free(msg);
+	if (msg != NULL) {
+		somatic_vector_free(msg->position);
+		somatic_vector_free(msg->velocity);
+		free(msg);
+	}
 
 	return(0);
 }
@@ -87,8 +93,8 @@ int somatic_generate_motorcmd(ach_channel_t *chan, double *values, size_t n_modu
 	// publish
 	int r = somatic_motorcmd_publish(&msg, chan);
 
-	// Cleanup
-	somatic_motorcmd_free(&msg);
+	// Cleanup (can't use stock function, since values might on the stack)
+	free(msg.values);
 
 	return r;
 }

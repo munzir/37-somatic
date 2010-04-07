@@ -64,10 +64,21 @@ Somatic__Vector *somatic_vector_alloc(size_t size)
 }
 
 // Free allocated memory
+// * DON'T call this if you're aliasing stack-allocated memory!
 int somatic_vector_free(Somatic__Vector *msg)
 {
-	free(msg->data);
-	free(msg);
+	if (msg->data != NULL) {
+		printf("about to free msg->data: \n");
+		for (size_t i = 0; i < 7; ++i)
+			printf("%lf:: ",msg->data[i]);
+		printf("\n");
+		free(msg->data);
+	}
+	if (msg != NULL) {
+		printf("about to free msg\n");
+		free(msg);
+	}
+
 	return(0);
 }
 
@@ -101,6 +112,7 @@ void somatic_vector_print(Somatic__Vector *msg)
 /**
  * Somatic__Ivector message utils
  */
+
 // Allocate a Somatic__Ivector
 Somatic__Ivector *somatic_ivector_alloc(size_t size)
 {
@@ -112,10 +124,14 @@ Somatic__Ivector *somatic_ivector_alloc(size_t size)
 }
 
 // Free allocated memory
+// * DON'T call this if you're aliasing stack-allocated memory!
 int somatic_ivector_free(Somatic__Ivector *msg)
 {
-	free(msg->data);
-	free(msg);
+	if (msg->data != NULL)
+		free(msg->data);
+	if (msg != NULL)
+		free(msg);
+
 	return(0);
 }
 
