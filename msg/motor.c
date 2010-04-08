@@ -174,11 +174,10 @@ void somatic_motorcmd_print(Somatic__MotorCmd *msg)
 // Print the contents of a Somatic__MotorState message
 void somatic_motorstate_print(Somatic__MotorState *msg)
 {
-	fprintf(stdout, "Motor state ");
 	size_t i;
 
 	if (msg->position!= NULL) {
-		fprintf(stdout, "(position) ");
+		fprintf(stdout, "Motor state (position): ");
 		for (i = 0; i < msg->position->n_data; ++i)
 			if (i < msg->position->n_data - 1)
 				fprintf(stdout, "% 1.2lf::", msg->position->data[i]);
@@ -187,7 +186,7 @@ void somatic_motorstate_print(Somatic__MotorState *msg)
 	}
 
 	if (msg->velocity != NULL) {
-		fprintf(stdout, "(velocity) ");
+		fprintf(stdout, "Motor state (velocity): ");
 		for (i=0; i<msg->velocity->n_data; ++i)
 			if (i < msg->velocity->n_data - 1)
 				fprintf(stdout, "% 1.2lf::", msg->velocity->data[i]);
