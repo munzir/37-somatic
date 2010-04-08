@@ -68,14 +68,9 @@ Somatic__Vector *somatic_vector_alloc(size_t size)
 int somatic_vector_free(Somatic__Vector *msg)
 {
 	if (msg->data != NULL) {
-		printf("about to free msg->data: \n");
-		for (size_t i = 0; i < 7; ++i)
-			printf("%lf:: ",msg->data[i]);
-		printf("\n");
 		free(msg->data);
 	}
 	if (msg != NULL) {
-		printf("about to free msg\n");
 		free(msg);
 	}
 

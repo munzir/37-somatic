@@ -88,7 +88,9 @@ int somatic_generate_motorcmd(ach_channel_t *chan, double *values, size_t n_modu
 	somatic__vector__init(msg.values);
 	msg.values->data = values;
 	msg.values->n_data = n_modules;
-	// size_t size = somatic__motorcmd__get_packed_size(js_msg);
+
+	// Uncomment to test your application's motor command size:
+	// printf("motor cmd size = %d \n", somatic__motor_cmd__get_packed_size(&msg));
 
 	// publish
 	int r = somatic_motorcmd_publish(&msg, chan);
@@ -151,9 +153,9 @@ void somatic_motorcmd_print(Somatic__MotorCmd *msg)
 {
 	fprintf(stdout, "Motor command ");
 	if (msg->param == SOMATIC__MOTOR_PARAM__MOTOR_CURRENT)
-		fprintf(stdout, "current mode \n");
+		fprintf(stdout, "(current mode) \n");
 	else if (msg->param == SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY)
-		fprintf(stdout, "velocity mode\n");
+		fprintf(stdout, "(velocity mode)\n");
 	else if (msg->param == SOMATIC__MOTOR_PARAM__MOTOR_POSITION)
 		fprintf(stdout, "position mode\n");
 	else
@@ -166,7 +168,7 @@ void somatic_motorcmd_print(Somatic__MotorCmd *msg)
 			fprintf(stdout, "% 1.2lf::", msg->values->data[i]);
 		else
 			fprintf(stdout, "% 1.2lf\n", msg->values->data[i]);
-	fprintf(stdout, "\n");
+
 }
 
 // Print the contents of a Somatic__MotorState message
@@ -176,7 +178,7 @@ void somatic_motorstate_print(Somatic__MotorState *msg)
 	size_t i;
 
 	if (msg->position!= NULL) {
-		fprintf(stdout, "Position: ");
+		fprintf(stdout, "(position) ");
 		for (i = 0; i < msg->position->n_data; ++i)
 			if (i < msg->position->n_data - 1)
 				fprintf(stdout, "% 1.2lf::", msg->position->data[i]);
@@ -185,7 +187,7 @@ void somatic_motorstate_print(Somatic__MotorState *msg)
 	}
 
 	if (msg->velocity != NULL) {
-		fprintf(stdout, "Velocity: ");
+		fprintf(stdout, "(velocity) ");
 		for (i=0; i<msg->velocity->n_data; ++i)
 			if (i < msg->velocity->n_data - 1)
 				fprintf(stdout, "% 1.2lf::", msg->velocity->data[i]);
@@ -203,5 +205,4 @@ void somatic_motorstate_print(Somatic__MotorState *msg)
 		else if (msg->status == SOMATIC__MOTOR_STATUS__MOTOR_FAIL)
 			fprintf(stdout, "Motor failure!\n");
 	}
-	fprintf(stdout, "\n");
 }
