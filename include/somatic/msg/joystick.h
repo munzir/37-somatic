@@ -15,17 +15,6 @@
 #include "somatic/util.h"
 #include "somatic.pb-c.h"
 
-//TODO put these #defines in daemons (put in headers so we can include them?)
-#define JOYSTICK_CHANNEL_NAME "joystick-data"
-#define JACH_NBUTTONS 10
-#define JACH_NAXES 6
-
-#define SPACENAV_CHANNEL_NAME "spacenav-data"
-#define SPNAV_MOTION_MAX 512
-#define SNACH_NBUTTONS 2
-#define SNACH_NAXES 6
-
-
 // Allocate a Somatic__Joystick message for spacenav data
 Somatic__Joystick *somatic_joystick_alloc(size_t n_axes, size_t n_buttons);
 
