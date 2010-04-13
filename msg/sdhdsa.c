@@ -18,7 +18,6 @@
 #include <somatic/util.h>
 #include <somatic.pb-c.h>
 
-#include <spnav.h>
 
 #include "somatic/msg/sdhdsa.h"
 //#include "include/dsawrap.h"
