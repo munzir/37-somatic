@@ -39,7 +39,7 @@
 #define SOMATIC_H
 
 #include <ach.h>
-#include <genmsg.h>
+//#include <genmsg.h>
 
 /** \file somatic.h
  *  \author Neil T. Dantam

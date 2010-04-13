@@ -49,6 +49,8 @@ extern "C" {
 /// verbosity level for function somatic_verbprintf
 extern int somatic_opt_verbosity;
 
+/// mode_t mode for 666 access to daemon channels
+#define SOMATIC_CHANNEL_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
 
 /// macro to squash compiler warning about unused argument to function
 #define SOMATIC_UNUSED_ARG(expr) do { (void)(expr); } while (0)

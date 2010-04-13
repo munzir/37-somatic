@@ -36,6 +36,7 @@
 #ifndef SOMATIC_INCLUDES_H
 #define SOMATIC_INCLUDES_H
 
+#include <sys/stat.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -44,6 +45,7 @@
 #include <time.h>
 #include <string.h>
 #include <ach.h>
+
 #endif // SOMATIC_INCLUDES_H
 
 

@@ -167,6 +167,9 @@ ach_channel_t* somatic_open_channel(const char *name)
     somatic_hard_assert( ACH_OK == r, "Error opening channel: %s\n",
                          ach_result_to_string( r ) );
 
+    // Uncomment to set channel permissions on every open call
+    //ach_chmod( chan, SOMATIC_CHANNEL_MODE );
+
     r = ach_flush( chan );
     somatic_hard_assert( ACH_OK == r, "Error flushing channel: %s\n",
                          ach_result_to_string( r ) );
