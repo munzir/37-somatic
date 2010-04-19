@@ -48,7 +48,7 @@ btTransform somatic_ply_transform( Somatic__Transform * T) {
                                    T->translation->data[2] ) );
 }
 
-btTransform somatic_ply_transform( double *x, size_t n ) {
+btTransform somatic_ply_transform( const double *x, size_t n ) {
     assert( 7 == n );
     return btTransform( btQuaternion( x[0],
                                       x[1],
@@ -60,3 +60,25 @@ btTransform somatic_ply_transform( double *x, size_t n ) {
 }
 
 
+void somatic_opine_quaternion( double *x, size_t n, const btQuaternion &q ) {
+    assert( 4 <= n );
+    x[0] = q.x();
+    x[1] = q.y();
+    x[2] = q.z();
+    x[3] = q.w();
+
+}
+
+void somatic_opine_vector3( double *x, size_t n, const btVector3 &v ) {
+    assert( 3 <= n );
+    x[0] = v.x();
+    x[1] = v.y();
+    x[2] = v.z();
+}
+
+
+void somatic_opine_transform( double *x, size_t n, const btTransform &T ) {
+    assert( 7 == n );
+    somatic_opine_quaternion(x, n, T.getRotation() );
+    somatic_opine_vector3(x + 4, n - 4, T.getOrigin() );
+}

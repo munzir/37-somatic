@@ -51,7 +51,11 @@
 // somatic_MSGNAME_destroy
 
 btTransform somatic_ply_transform( Somatic__Transform * );
-btTransform somatic_ply_transform( double *x, size_t n );
+btTransform somatic_ply_transform( const double *x, size_t n );
+
+void somatic_opine_quaternion( double *x, size_t n, const btQuaternion &q );
+void somatic_opine_vector3( double *x, size_t n, const btVector3 &v );
+void somatic_opine_transform( double *x, size_t n, const btTransform &T );
 
 #endif
 

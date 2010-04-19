@@ -169,7 +169,10 @@ static void somatic_timespec_dump( const struct timespec t ) {
 
 /*----------------*/
 /* Printing/Error */
+
 /*----------------*/
+/// prefix string for somatic_verbprintf
+extern const char *somatic_verbprintf_prefix;
 
 /** printf's message if level <= somatic_opt_verbosity */
 void somatic_verbprintf( int level, const char fmt[], ... );

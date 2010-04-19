@@ -40,11 +40,12 @@
 int somatic_opt_verbosity = 0;
 int somatic_sig_received = 0;
 
+const char *somatic_verbprintf_prefix = "sns";
 void somatic_verbprintf( int level, const char fmt[], ... ) {
     va_list argp;
     va_start( argp, fmt );
     if( level <= somatic_opt_verbosity ) {
-        fprintf(stderr, "verb: ");
+        fprintf(stderr, "%s: ", somatic_verbprintf_prefix);
         vfprintf( stderr, fmt, argp );
     }
     va_end( argp );
