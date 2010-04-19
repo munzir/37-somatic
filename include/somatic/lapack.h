@@ -37,7 +37,7 @@
 /** \file lapack.h
  * \brief C prototypes to various fortran lapack routines.
  *
- * Since there is no official c binding to lapack is there as with
+ * Since there is no official c binding to lapack as there as with
  * BLAS, the only reasonable way to interface with lapack from C is to
  * call the fortran methods directly.
  *
