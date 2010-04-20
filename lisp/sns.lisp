@@ -36,6 +36,13 @@
 
 (in-package :sns)
 
+(defun sns-map (result-type function thing type)
+  (ach:ach-map result-type
+               (lambda (buffer)
+                 (funcall function
+                          (pb:unpack buffer (make-instance type))))
+               thing))
+
 ;;; Message Translation Generic Functions ;;;
 (defgeneric ply (msg))
 (defgeneric opine (value))
@@ -132,7 +139,11 @@
             (truncate (* 1e9 nsec))))
     msg))
 
-
+(defun timespec->seconds (time)
+  (declare (type somatic::timespec time))
+  (+ (slot-value time 'somatic::sec)
+     (/ (slot-value time 'somatic::nsec)
+        1000000000)))
 
 (defun opine-vector (v)
   (make-instance 'somatic::vector
