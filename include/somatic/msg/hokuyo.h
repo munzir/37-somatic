@@ -1,12 +1,12 @@
 /*
- * hokuyo_smm.h
+ * hokuyo.h
  *
  *  Created on: Apr 01, 2010
  *      Author: Hai-Ning Wu
  */
 
-#ifndef HOKUYO_SMM_H_
-#define HOKUYO_SMM_H_
+#ifndef HOKUYO_H_
+#define HOKUYO_H_
 
 /* calling C functions in CPP */
 #ifdef __cplusplus
@@ -49,4 +49,4 @@ void somatic_hokuyo_print(Somatic__Hokuyo *msg);
 }
 #endif
 
-#endif /* _SMM_H_ */
+#endif /* HOKUYO_H_ */

@@ -1,4 +1,3 @@
-/* -*- mode: C; c-basic-offset: 2  -*- */
 /*
  * Copyright (c) 2009-2010, Georgia Tech Research Corporation
  * All rights reserved.
@@ -34,6 +33,15 @@
  *
  */
 
+/**
+ * \file motor.h
+ *
+ *  Created on: Apr 2, 2010
+ *  \brief Library to manage motor command and state messages
+ *
+ *  \author Jon Scholz
+ */
+
 #ifndef MOTOR_H_
 #define MOTOR_H_
 
@@ -41,13 +49,9 @@
 #include "somatic/util.h"
 #include "somatic.pb-c.h"
 
-/** \file motor.h
- *
- *  Library to manage motor command and state messages
- *
- *  \author Jon Scholz
- */
-
+#ifdef __cplusplus
+extern "C" {
+#endif //__cplusplus
 
 /* Memory Management Functions */
 
@@ -116,5 +120,9 @@ void somatic_motorcmd_print(Somatic__MotorCmd *msg);
 
 /// Print the contents of a Somatic__MotorState message
 void somatic_motorstate_print(Somatic__MotorState *msg);
+
+#ifdef __cplusplus
+}
+#endif //__cplusplus
 
 #endif /* MOTOR_H_ */

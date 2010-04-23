@@ -33,11 +33,11 @@
  *
  */
 
-/*
- * base.h
+/**
+ * \file base.h
  *
  *  Created on: Apr 2, 2010
- *      Author: jscholz
+ * \author jscholz
  */
 
 #ifndef BASE_H_
@@ -46,6 +46,10 @@
 #include "somatic.h"
 #include "somatic/util.h"
 #include "somatic.pb-c.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif //__cplusplus
 
 /**
  * Somatic__Vector message utils
@@ -88,5 +92,9 @@ SOMATIC_DEC_WAIT_LAST_UNPACK(somatic_ivector_receive,
 
 // Print the contents of a Somatic__Ivector message
 void somatic_ivector_print(Somatic__Ivector *msg);
+
+#ifdef __cplusplus
+}
+#endif //__cplusplus
 
 #endif /* BASE_H_ */

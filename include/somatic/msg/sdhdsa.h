@@ -1,5 +1,5 @@
 /*
- * dsa_smm.h
+ * sdhdsa.h
  *
  *  Created on: Apr 2, 2010
  *      Author: Hyun-Soo Yi
@@ -7,6 +7,11 @@
 
 #ifndef DSA_SMM_H_
 #define DSA_SMM_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif //__cplusplus
+
 //==================================================
 //defines
 #define DSA_CHANNEL_NAME "dsa_ach_out"
@@ -28,4 +33,8 @@ SOMATIC_DEC_WAIT_LAST_UNPACK(somatic_dsa_receive,
 							somatic__dsa,
 							Somatic__Dsa);
 
-#endif /* DSA_SMM_H_ */
+#ifdef __cplusplus
+}
+#endif //__cplusplus
+
+#endif /* SDHDSA_H_ */
