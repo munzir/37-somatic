@@ -13,10 +13,6 @@ extern "C" {
 #endif //__cplusplus
 
 //==================================================
-//defines
-#define DSA_CHANNEL_NAME "dsa_ach_out"
-#define DSA_NDATA 504
-//==================================================
 //definitions
 typedef void* DSApointer;
 
