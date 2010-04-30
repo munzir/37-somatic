@@ -1,3 +1,4 @@
+/* -*- mode: C++; c-basic-offset: 4  -*- */
 package somatic;
 
 // Basic somatic messages
@@ -118,4 +119,9 @@ message dsa {
 
 message hokuyo {
 	optional vector ranges = 1;
+}
+
+message microphone {
+    optional timespec time = 1;
+    optional double volume = 2;
 }
