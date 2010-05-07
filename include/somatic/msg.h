@@ -63,4 +63,11 @@ static struct timespec somatic_ply_timespec( Somatic__Timespec * t) {
     return somatic_make_timespec( (time_t) t->sec, (long) t->nsec );
 }
 
+static void somatic_opine_timespec( Somatic__Timespec * t,
+                                    struct timespec ts ) {
+    t->sec = ts.tv_sec;
+    t->nsec = ts.tv_nsec;
+    t->has_nsec = 1;
+}
+
 #endif //SOMATIC_MSG_H

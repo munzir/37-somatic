@@ -37,4 +37,6 @@
   :description "Robot Stuff"
   :depends-on ("ach" "s-protobuf" "cl-numeri")
   :components ((:file "somatic")
-               (:file "sns" :depends-on ("somatic"))))
+               (:file "sns" :depends-on ("somatic"))
+               (:file "festival" :depends-on ("sns"))
+               ))

@@ -32,7 +32,10 @@
 
 
 (defpackage :sns
-  (:use :cl :numeri))
+  (:use :cl :numeri)
+  (:export :ply :opine :sns-map
+           :speech-open :speech-remote :speech-close :say)
+  )
 
 (in-package :sns)
 
