@@ -90,6 +90,7 @@ enum motor_param {
     MOTOR_CURRENT = 0;
     MOTOR_VELOCITY = 1;
     MOTOR_POSITION = 2;
+    MOTOR_HALT = 3;
 };
 
 message motor_cmd {
