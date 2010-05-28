@@ -148,6 +148,15 @@ SOMATIC_DEF_WAIT_LAST_UNPACK(somatic_motorstate_receive,
 							somatic__motor_state,
 							Somatic__MotorState);
 
+/**
+ * Define a receive function for motor get last statemessage type
+ */
+SOMATIC_DEF_GET_LAST_UNPACK(somatic_motorstate_receivelast,
+							somatic__motor_state,
+							Somatic__MotorState);
+
+
+
 // Print the contents of a Somatic__MotorCmd message
 void somatic_motorcmd_print(Somatic__MotorCmd *msg)
 {

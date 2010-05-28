@@ -92,6 +92,11 @@ SOMATIC_DEF_WAIT_LAST_UNPACK(somatic_vector_receive,
 							somatic__vector,
 							Somatic__Vector);
 
+// Defines a last receive function
+SOMATIC_DEF_GET_LAST_UNPACK(somatic_vector_lastreceive,
+							somatic__vector,
+							Somatic__Vector);
+
 // Print the contents of a Somatic__Vector message
 void somatic_vector_print(Somatic__Vector *msg)
 {
@@ -142,6 +147,11 @@ int somatic_ivector_publish(Somatic__Ivector *msg, ach_channel_t *chan)
 
 // Defines a receive function
 SOMATIC_DEF_WAIT_LAST_UNPACK(somatic_ivector_receive,
+							somatic__ivector,
+							Somatic__Ivector);
+
+// Defines a last receive function
+SOMATIC_DEF_GET_LAST_UNPACK(somatic_ivector_lastreceive,
 							somatic__ivector,
 							Somatic__Ivector);
 
