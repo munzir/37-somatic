@@ -37,6 +37,7 @@
 #define SOMATIC_UTIL_H
 
 #include <cblas.h>
+#include <signal.h>
 /** \file somatic/util.h
  *  \author Neil T. Dantam
  */
@@ -344,6 +345,12 @@ extern int somatic_sig_received;
  * signal.
  */
 void somatic_sighandler_simple_install();
+
+/* function sends an alive signal to the server (watchdog) program.
+ * Process with id pid will get a SIGUSR1 signal. By default, the server wants
+ * senders pid in sigval info.
+ */
+void somatic_sighandler_send_alive(pid_t pid, sigval_t sigval);
 
 
 #ifdef __cplusplus
