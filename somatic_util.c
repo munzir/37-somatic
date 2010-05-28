@@ -93,6 +93,7 @@ void somatic_sighandler_simple_install() {
     /* The SA_SIGINFO flag tells sigaction() to use the sa_sigaction field,
        not sa_handler. */
     act.sa_flags = SA_SIGINFO;
+    sigaction(SIGUSR1, &act, NULL);
 
     if (sigaction(SIGTERM, &act, NULL) < 0) {
         perror ("sigaction");
@@ -104,6 +105,10 @@ void somatic_sighandler_simple_install() {
         somatic_fail( "Couldn't install handler\n");
     }
 
+}
+
+void somatic_sighandler_send_alive(pid_t pid, sigval_t sigval) {
+	sigqueue(pid, SIGUSR1, sigval);
 }
 
 
