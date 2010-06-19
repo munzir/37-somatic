@@ -49,7 +49,12 @@ extern "C" {
 
 /// verbosity level for function somatic_verbprintf
 extern int somatic_opt_verbosity;
+/// future use. this has the pid of the watchdog
+extern pid_t spid;
 
+#define SIGMSTART SIGRTMIN+5
+#define SIGMSTOP SIGRTMIN+6
+#define SIGMABORT SIGRTMIN+7
 /// mode_t mode for 666 access to daemon channels
 #define SOMATIC_CHANNEL_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
 
@@ -334,8 +339,10 @@ int somatic_close_channel(ach_channel_t *chan);
 /* Signals */
 /*---------*/
 
-/// variable set when signal INT or TERM recieved by somatic's simple sighandler
+/// variable set when signal INT or TERM received by somatic's simple sighandler
 extern int somatic_sig_received;
+/// variable to control motor state in a process. Use with motor commands.
+extern int somatic_motor_state;
 
 /** installs handler for sigint and sigterm that sets
  * somatic_sig_received to 1.
@@ -346,12 +353,27 @@ extern int somatic_sig_received;
  */
 void somatic_sighandler_simple_install();
 
-/* function sends an alive signal to the server (watchdog) program.
+/** unused, deprecated!
+ *
+ * function sends an alive signal to the server (watchdog) program.
  * Process with id pid will get a SIGUSR1 signal. By default, the server wants
  * senders pid in sigval info.
  */
 void somatic_sighandler_send_alive(pid_t pid, sigval_t sigval);
 
+/** blocks till it can find the watchdog program running
+ *
+ * This should be used just after the somatic_sighandler_simple_install() function.
+ * It will block the program till the watchdog starts. This can be integrated into
+ * somatic_sighandler_simple_install, but not all daemons will wait on watchdog
+ */
+void somatic_wait_copd();
+
+/** function finds if the watchdog is running or not
+ *
+ * This is used internally within somatic_wait_copd
+ */
+int somatic_find_copd();
 
 #ifdef __cplusplus
 }
