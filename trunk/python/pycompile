@@ -1,0 +1,4 @@
+#!/usr/bin/python
+
+import py_compile
+py_compile.compile("somatic_pb2.py")

@@ -1,0 +1,140 @@
+/* -*- mode: C++; c-basic-offset: 4  -*- */
+
+package somatic;
+
+
+
+/*----------------------*/
+/* Basic Messages Types */
+/*----------------------*/
+
+
+// You can view this as either a one-dimensional array of data or
+// a real-valued vector.
+message vector {
+    repeated double data = 1;
+}
+
+// You can view this as either a one-dimensional array of data or
+// an integer-valued vector.
+message ivector {
+    repeated sint64 data = 1;
+}
+
+
+// Stores a column-major matrix. Packs the
+// matrix data into a single array of doubles,
+// and then provides either the row or the column count.
+message matrix {
+    repeated double data = 1; //COLUMN-MAJOR ORDER!
+
+    optional int32 rows = 2;
+    optional int32 cols = 3;
+}
+
+message timespec {
+   required int64 sec = 1;
+   optional int32 nsec = 2;
+}
+
+/*--------------------------*/
+/* Composite Message Types */
+/*--------------------------*/
+
+message label_vector {
+        required vector x = 1;
+        optional string label = 2;
+        optional timespec time = 3;
+}
+
+message ez_msg {
+    optional string label = 1;
+    optional sint64 code = 2;
+    optional vector x = 3;
+    optional ivector i = 4;
+    optional timespec time = 5;
+}
+
+message transform {
+        required vector translation = 1; // vector 3
+        required vector rotation = 2;    // xyzw quaternion
+}
+
+
+message point_cloud {
+    required matrix points = 1;
+    optional matrix distance_map = 2;
+    optional matrix amplitude_map = 3;
+    optional matrix confidence_map = 4;
+    optional timespec time = 5;
+}
+
+
+// A message containing a number of somatic_matrix
+// messages.
+message matrices {
+    repeated matrix data = 1;
+}
+
+message force_moment {
+    required vector force = 1;
+    required vector moment = 2;
+    optional timespec time = 3;
+}
+
+/*------------------------*/
+/* Hardware Message Types */
+/*------------------------*/
+
+enum motor_param {
+    MOTOR_CURRENT = 0;
+    MOTOR_VELOCITY = 1;
+    MOTOR_POSITION = 2;
+    MOTOR_HALT = 3;
+    MOTOR_RESET = 4;
+};
+
+message motor_cmd {
+    optional motor_param param = 1;
+    optional vector values = 2;
+}
+
+enum motor_status {
+    MOTOR_OK = 0;
+    MOTOR_FAIL = 1;
+};
+
+message motor_state {
+    optional motor_status status = 1;
+    optional vector position = 2;
+    optional vector velocity = 3;
+}
+
+message joystick {
+    optional ivector buttons = 1;
+    optional vector axes = 2;
+}
+
+message dsa {
+	optional ivector output = 1;
+}
+
+message hokuyo {
+	optional vector ranges = 1;
+}
+
+message microphone {
+    optional timespec time = 1;
+    optional double volume = 2;
+}
+
+
+// Maybe we'll use this someday....
+message can_msg {
+    required int32 id = 1;
+    required int32 data_size = 2;
+    required fixed64 data = 3;
+
+    optional bool extended = 4;
+    optional int32 bus = 5;
+}
