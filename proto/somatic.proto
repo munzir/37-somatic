@@ -14,13 +14,13 @@ package somatic;
 // You can view this as either a one-dimensional array of data or
 // a real-valued vector.
 message vector {
-    repeated double data = 1;
+    repeated double data = 1 [packed=true];
 }
 
 // You can view this as either a one-dimensional array of data or
 // an integer-valued vector.
 message ivector {
-    repeated sint64 data = 1;
+    repeated sint64 data = 1 [packed=true];
 }
 
 
@@ -28,7 +28,7 @@ message ivector {
 // matrix data into a single array of doubles,
 // and then provides either the row or the column count.
 message matrix {
-    repeated double data = 1; //COLUMN-MAJOR ORDER!
+    repeated double data = 1 [packed=true]; //COLUMN-MAJOR ORDER!
 
     optional int32 rows = 2;
     optional int32 cols = 3;
