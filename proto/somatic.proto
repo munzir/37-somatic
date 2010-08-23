@@ -1,20 +1,12 @@
 /* -*- mode: C++; c-basic-offset: 4  -*- */
+
 package somatic;
 
-// Basic somatic messages
 
 
-
-// Maybe we'll use this someday....
-message can_msg {
-    required int32 id = 1;
-    required int32 data_size = 2;
-    required fixed64 data = 3;
-
-    optional bool extended = 4;
-    optional int32 bus = 5;
-}
-
+/*----------------------*/
+/* Basic Messages Types */
+/*----------------------*/
 
 
 // You can view this as either a one-dimensional array of data or
@@ -24,7 +16,7 @@ message vector {
 }
 
 // You can view this as either a one-dimensional array of data or
-// a real-valued vector.
+// an integer-valued vector.
 message ivector {
     repeated sint64 data = 1;
 }
@@ -44,6 +36,10 @@ message timespec {
    required int64 sec = 1;
    optional int32 nsec = 2;
 }
+
+/*--------------------------*/
+/* Composite Message Types */
+/*--------------------------*/
 
 message label_vector {
         required vector x = 1;
@@ -86,6 +82,10 @@ message force_moment {
     optional timespec time = 3;
 }
 
+/*------------------------*/
+/* Hardware Message Types */
+/*------------------------*/
+
 enum motor_param {
     MOTOR_CURRENT = 0;
     MOTOR_VELOCITY = 1;
@@ -126,4 +126,15 @@ message hokuyo {
 message microphone {
     optional timespec time = 1;
     optional double volume = 2;
+}
+
+
+// Maybe we'll use this someday....
+message can_msg {
+    required int32 id = 1;
+    required int32 data_size = 2;
+    required fixed64 data = 3;
+
+    optional bool extended = 4;
+    optional int32 bus = 5;
 }
