@@ -22,8 +22,8 @@ MSG_OBJS := $(addsuffix .o, $(basename $(MSG_SRC_C))) $(addsuffix .o, $(basename
 CFLAGS += --std=gnu99
 
 # don't spit out warnings for all the static functions in headers
-CFLAGS += -Wno-unused-function -Wno-conversion
-CPPFLAGS += -Wno-unused-function -Wno-conversion
+CFLAGS += -Wno-unused-function -Wno-conversion -Wno-deprecated-declarations
+CPPFLAGS += -Wno-unused-function -Wno-conversion -Wno-deprecated-declarations
 
 all: $(LIBFILES) verbatim/share/somatic/somatic.protobin $(BINFILES)
 

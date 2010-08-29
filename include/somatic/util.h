@@ -36,6 +36,7 @@
 #ifndef SOMATIC_UTIL_H
 #define SOMATIC_UTIL_H
 
+#include <amino.h>
 #include <cblas.h>
 #include <signal.h>
 /** \file somatic/util.h
@@ -66,11 +67,13 @@ extern pid_t spid;
 /*------*/
 
 /// Fortran modulo, Ada mod
+static inline int64_t somatic_modulo( int a, int b ) AA_DEPRECATED;
 static inline int64_t somatic_modulo( int a, int b ) {
     return ((a % b) + b) % b;
 }
 
 /// Fortran mod, Ada rem
+static inline int64_t somatic_remainder( int a, int b ) AA_DEPRECATED ;
 static inline int64_t somatic_remainder( int a, int b ) {
     return a % b;
 }
@@ -80,6 +83,7 @@ static inline int64_t somatic_remainder( int a, int b ) {
 /*----------------*/
 
 /// create a struct timespec with given elements
+static struct timespec somatic_make_timespec( time_t sec, long nsec ) AA_DEPRECATED ;
 static struct timespec somatic_make_timespec( time_t sec, long nsec ) {
     struct timespec t;
     t.tv_sec = sec;
@@ -90,6 +94,7 @@ static struct timespec somatic_make_timespec( time_t sec, long nsec ) {
 
 /// create a struct timespec with given elements, fixing things up of
 /// nsec is negative of more than a billion
+static struct timespec somatic_make_timespec_norm( time_t sec, long nsec ) AA_DEPRECATED ;
 static struct timespec somatic_make_timespec_norm( time_t sec, long nsec ) {
     // FIXME: this is crap
     int32_t billion = 1e9;
@@ -115,6 +120,8 @@ static struct timespec somatic_timespec_delta( struct timespec t1,
 
 /// add two times: a + b
 static struct timespec somatic_timespec_add( struct timespec t1,
+                                             struct timespec t0 ) AA_DEPRECATED;
+static struct timespec somatic_timespec_add( struct timespec t1,
                                              struct timespec t0 ) {
     return somatic_make_timespec_norm( t1.tv_sec + t0.tv_sec,
                                        t1.tv_nsec + t0.tv_nsec );
@@ -129,6 +136,8 @@ static struct timespec somatic_timespec_sub( const struct timespec a,
 
 
 /// gets current time via CLOCK_REALTIME
+
+static struct timespec somatic_timespec_now() AA_DEPRECATED;
 static struct timespec somatic_timespec_now() {
     struct timespec t;
     clock_gettime( CLOCK_REALTIME, &t );
@@ -136,11 +145,13 @@ static struct timespec somatic_timespec_now() {
 }
 
 /** returns reltime + now */
+static struct timespec somatic_timespec_future( const struct timespec reltime ) AA_DEPRECATED;
 static struct timespec somatic_timespec_future( const struct timespec reltime ) {
     return somatic_timespec_add( reltime, somatic_timespec_now() );
 }
 
 /** t1 < t2: negative; t1 == t2: 0; t1 > t2: positive */
+static int somatic_timespec_cmp( const struct timespec t1, const struct timespec t2 ) AA_DEPRECATED;
 static int somatic_timespec_cmp( const struct timespec t1, const struct timespec t2 ) {
     return ( t1.tv_sec != t2.tv_sec ) ?
         (t1.tv_sec - t2.tv_sec) :
@@ -148,26 +159,31 @@ static int somatic_timespec_cmp( const struct timespec t1, const struct timespec
 }
 
 /// is the current time later than abstime?
+static int somatic_timespec_after( const struct timespec abstime ) AA_DEPRECATED;
 static int somatic_timespec_after( const struct timespec abstime ) {
     return somatic_timespec_cmp(somatic_timespec_now(), abstime) > 0;
 }
 
 /// convert timespec t to microseconds
+static int64_t somatic_timespec2us( const struct timespec t ) AA_DEPRECATED;
 static int64_t somatic_timespec2us( const struct timespec t ) {
     return t.tv_sec*1000000 + t.tv_nsec/1000;
 }
 
 /// convert timespec t to seconds
+static double somatic_timespec2s( const struct timespec t ) AA_DEPRECATED;
 static double somatic_timespec2s( const struct timespec t ) {
     return t.tv_sec+ t.tv_nsec/1e9;
 }
 /// convert seconds t to timespec
+static struct timespec somatic_s2timespec( double t ) AA_DEPRECATED;
 static struct timespec somatic_s2timespec( double t ) {
     time_t sec = (time_t) t;
     long nsec = (long) ((t-sec)*1e9);
     return somatic_make_timespec_norm( sec, nsec );
 }
 /// print a timespec on stderr
+static void somatic_timespec_dump( const struct timespec t ) AA_DEPRECATED;
 static void somatic_timespec_dump( const struct timespec t ) {
     fprintf( stderr, "{.tv_sec = %ld, .tv_nsec = %ld}\n",
              t.tv_sec, t.tv_nsec );
@@ -181,13 +197,13 @@ static void somatic_timespec_dump( const struct timespec t ) {
 extern const char *somatic_verbprintf_prefix;
 
 /** printf's message if level <= somatic_opt_verbosity */
-void somatic_verbprintf( int level, const char fmt[], ... );
+void somatic_verbprintf( int level, const char fmt[], ... ) AA_DEPRECATED;
 
 /** printf's message and exits */
 void somatic_fail( const char fmt[], ... );
 
 /** If test is false, printf's message and exits */
-void somatic_hard_assert( int test, const char fmt[], ... );
+void somatic_hard_assert( int test, const char fmt[], ... ) AA_DEPRECATED;
 
 
 /*------------*/
@@ -195,6 +211,7 @@ void somatic_hard_assert( int test, const char fmt[], ... );
 /*------------*/
 
 /// malloc n bytes and zero initialize.  Terminates on error.
+static inline void *somatic_xmalloc( size_t n ) AA_DEPRECATED;
 static inline void *somatic_xmalloc( size_t n ) {
     void *p = malloc(n);
     somatic_hard_assert( NULL != p, "Failed to allocate %d bytes.\n", n );
@@ -229,23 +246,27 @@ static void somatic_s2d( double *dst, const float *src, size_t cnt ) {
 }
 
 /// allocate and zero initialize n doubles
+static double *somatic_malloc_real( size_t n ) AA_DEPRECATED;
 static double *somatic_malloc_real( size_t n ) {
     return (double*) SOMATIC_NEW_AR( double, n );
 }
 
 /// copy n double floats from src to dst
+static void somatic_realcpy( double *dst, const double *src, size_t n ) AA_DEPRECATED;
 static void somatic_realcpy( double *dst, const double *src, size_t n ) {
     memcpy( dst, src, sizeof( dst[0] ) * n );
 }
 
 
 /// set n double floats to val
+static void somatic_realset( double *dst, double val, size_t n ) AA_DEPRECATED;
 static void somatic_realset( double *dst, double val, size_t n ) {
     for( size_t i = 0; i < n; i ++ )
         dst[i] = val;
 }
 
 /// set n double floats to val
+static void somatic_realprint( double *arr, size_t n ) AA_DEPRECATED;
 static void somatic_realprint( double *arr, size_t n ) {
     for( size_t i = 0; i < n; i ++ )
     	if (i < n - 1)
@@ -259,6 +280,7 @@ static void somatic_realprint( double *arr, size_t n ) {
 /*----------------*/
 
 /// calculate a column major matrix offset
+static size_t somatic_la_colmajor_k( size_t rows, size_t cols, size_t i, size_t j ) AA_DEPRECATED;
 static size_t somatic_la_colmajor_k( size_t rows, size_t cols, size_t i, size_t j ) {
     assert( i < rows );
     assert( j < cols );
@@ -268,6 +290,7 @@ static size_t somatic_la_colmajor_k( size_t rows, size_t cols, size_t i, size_t 
 }
 
 /// sum of squared differences
+static double somatic_la_ssd( const double *a, const double *b, size_t n ) AA_DEPRECATED;
 static double somatic_la_ssd( const double *a, const double *b, size_t n ) {
     double r = 0;
     for( size_t i = 0; i < n; i ++ ) {
@@ -278,17 +301,22 @@ static double somatic_la_ssd( const double *a, const double *b, size_t n ) {
 }
 /// get a column major matrix entry
 static double somatic_la_mget( const double *m, size_t rows, size_t cols,
+                               size_t i, size_t j ) AA_DEPRECATED;
+static double somatic_la_mget( const double *m, size_t rows, size_t cols,
                                size_t i, size_t j ) {
     return m[ somatic_la_colmajor_k( rows, cols, i, j ) ];
 }
 
 /// set a column major matrix entry
 static double somatic_la_mset( double *m, size_t rows, size_t cols,
+                             size_t i, size_t j, double v ) AA_DEPRECATED;
+static double somatic_la_mset( double *m, size_t rows, size_t cols,
                              size_t i, size_t j, double v ) {
     return m[ somatic_la_colmajor_k( rows, cols, i, j ) ] = v;
 }
 
 /// Set n*n matrix A to diagonal matrix with all diagonal entries equal to v.
+static void somatic_la_ident_v( double *A, size_t n, double v ) AA_DEPRECATED;
 static void somatic_la_ident_v( double *A, size_t n, double v ) {
     somatic_realset( A, 0, n*n );
     for( size_t i = 0; i < n; i ++ ) {
@@ -297,14 +325,17 @@ static void somatic_la_ident_v( double *A, size_t n, double v ) {
 }
 
 /// Set n*n matrix A to identity matrix.
+static void somatic_la_ident( double *A, size_t n ) AA_DEPRECATED;
 static void somatic_la_ident( double *A, size_t n ) {
     somatic_la_ident_v( A, n, 1 );
 }
 
 /// invert column major m*n matrix A in place.
-int somatic_la_invert( size_t m, size_t n, double *A );
+int somatic_la_invert( size_t m, size_t n, double *A ) AA_DEPRECATED;
 
 /** r = a - b */
+static inline void somatic_la_vec_sub( double *r, const double *a, const double *b,
+                                       size_t n ) AA_DEPRECATED;
 static inline void somatic_la_vec_sub( double *r, const double *a, const double *b,
                                        size_t n ) {
     somatic_realcpy( r, a, n ); // r := a
@@ -312,6 +343,9 @@ static inline void somatic_la_vec_sub( double *r, const double *a, const double 
 }
 /** y = alpha A x.
  A is column major. */
+static inline void somatic_la_gemv1( double *y, double alpha,
+                                     const double *A, const double *x,
+                                     size_t n_y, size_t n_x ) AA_DEPRECATED;
 static inline void somatic_la_gemv1( double *y, double alpha,
                                      const double *A, const double *x,
                                      size_t n_y, size_t n_x ) {
@@ -326,13 +360,13 @@ static inline void somatic_la_gemv1( double *y, double alpha,
 /*-------------*/
 
 // Open an ach channel or die trying
-ach_channel_t* somatic_open_channel(const char *name);
+ach_channel_t* somatic_open_channel(const char *name) AA_DEPRECATED;
 
 // Create an ach channel or die trying
-int somatic_create_channel(const char *name, size_t frame_cnt, size_t frame_size);
+int somatic_create_channel(const char *name, size_t frame_cnt, size_t frame_size) AA_DEPRECATED;
 
 // Close an ach channel or die trying
-int somatic_close_channel(ach_channel_t *chan);
+int somatic_close_channel(ach_channel_t *chan) AA_DEPRECATED;
 
 
 /*---------*/

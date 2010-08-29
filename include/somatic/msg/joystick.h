@@ -54,13 +54,13 @@ extern "C" {
 #endif //__cplusplus
 
 // Allocate a Somatic__Joystick message for spacenav data
-Somatic__Joystick *somatic_joystick_alloc(size_t n_axes, size_t n_buttons);
+Somatic__Joystick *somatic_joystick_alloc(size_t n_axes, size_t n_buttons) AA_DEPRECATED;
 
 // Free memory allocated by somatic_joystick_alloc
-int somatic_joystick_free(Somatic__Joystick *msg);
+int somatic_joystick_free(Somatic__Joystick *msg) AA_DEPRECATED;
 
 // Publish message on Ach channel
-int somatic_joystick_publish(Somatic__Joystick *msg, ach_channel_t *chan);
+int somatic_joystick_publish(Somatic__Joystick *msg, ach_channel_t *chan) AA_DEPRECATED;
 
 
 /**
@@ -72,7 +72,7 @@ SOMATIC_DEC_WAIT_LAST_UNPACK(somatic_joystick_receive,
 
 
 // Print the contents of a Somatic__Joystick message
-void somatic_joystick_print(Somatic__Joystick *msg);
+void somatic_joystick_print(Somatic__Joystick *msg) AA_DEPRECATED;
 
 #ifdef __cplusplus
 }

@@ -56,16 +56,16 @@ extern "C" {
 /* Memory Management Functions */
 
 /// Allocate a Somatic__MotorCmd message
-Somatic__MotorCmd *somatic_motorcmd_alloc(size_t n_modules);
+Somatic__MotorCmd *somatic_motorcmd_alloc(size_t n_modules) AA_DEPRECATED;
 
 /// Allocate a Somatic__MotorState message
-Somatic__MotorState *somatic_motorstate_alloc(size_t n_modules);
+Somatic__MotorState *somatic_motorstate_alloc(size_t n_modules) AA_DEPRECATED;
 
 /// Free memory allocated by somatic_motorcmd_alloc
-int somatic_motorcmd_free(Somatic__MotorCmd *msg);
+int somatic_motorcmd_free(Somatic__MotorCmd *msg) AA_DEPRECATED;
 
 /// Free memory allocated by somatic_motorstate_alloc
-int somatic_motorstate_free(Somatic__MotorState *msg);
+int somatic_motorstate_free(Somatic__MotorState *msg) AA_DEPRECATED;
 
 
 /* Main motor message commands */
@@ -96,30 +96,32 @@ int somatic_generate_motorcmd(ach_channel_t *chan, double *values, size_t n_modu
 /* Message IO */
 
 /// Publish command message on specified channel
-int somatic_motorcmd_publish(Somatic__MotorCmd *msg, ach_channel_t *chan);
+int somatic_motorcmd_publish(Somatic__MotorCmd *msg, ach_channel_t *chan) AA_DEPRECATED;
 
 /// Publish state message on specified channel
-int somatic_motorstate_publish(Somatic__MotorState *msg, ach_channel_t *chan);
+int somatic_motorstate_publish(Somatic__MotorState *msg, ach_channel_t *chan) AA_DEPRECATED;
 
 /**
  * Declare a receive function for motor command message type
  */
 SOMATIC_DEC_WAIT_LAST_UNPACK(somatic_motorcmd_receive,
 							somatic__motor_cmd,
-							Somatic__MotorCmd);
+							Somatic__MotorCmd)
+AA_DEPRECATED;
 
 /**
  * Declare a receive function for motor statemessage type
  */
 SOMATIC_DEC_WAIT_LAST_UNPACK(somatic_motorstate_receive,
 							somatic__motor_state,
-							Somatic__MotorState);
+							Somatic__MotorState)
+AA_DEPRECATED;
 
 /// Print the contents of a Somatic__MotorCmd message
-void somatic_motorcmd_print(Somatic__MotorCmd *msg);
+void somatic_motorcmd_print(Somatic__MotorCmd *msg) AA_DEPRECATED;
 
 /// Print the contents of a Somatic__MotorState message
-void somatic_motorstate_print(Somatic__MotorState *msg);
+void somatic_motorstate_print(Somatic__MotorState *msg) AA_DEPRECATED;
 
 #ifdef __cplusplus
 }

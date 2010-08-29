@@ -61,7 +61,7 @@ Somatic__Vector *somatic_vector_alloc(size_t size);
 int somatic_vector_free(Somatic__Vector *msg);
 
 // Publish message on Ach channel
-int somatic_vector_publish(Somatic__Vector *msg, ach_channel_t *chan);
+int somatic_vector_publish(Somatic__Vector *msg, ach_channel_t *chan) AA_DEPRECATED;
 
 
 // Declares a receive function
@@ -87,7 +87,7 @@ Somatic__Ivector *somatic_ivector_alloc(size_t size);
 int somatic_ivector_free(Somatic__Ivector *msg);
 
 // Publish message on Ach channel
-int somatic_ivector_publish(Somatic__Ivector *msg, ach_channel_t *chan);
+int somatic_ivector_publish(Somatic__Ivector *msg, ach_channel_t *chan) AA_DEPRECATED;
 
 
 // Declares a receive function
@@ -102,7 +102,7 @@ SOMATIC_DEC_GET_LAST_UNPACK(somatic_ivector_lastreceive,
 
 
 // Print the contents of a Somatic__Ivector message
-void somatic_ivector_print(Somatic__Ivector *msg);
+void somatic_ivector_print(Somatic__Ivector *msg) AA_DEPRECATED;
 
 #ifdef __cplusplus
 }
