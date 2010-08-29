@@ -32,6 +32,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+#include <amino.h>
 #include <signal.h>
 #include <dirent.h>
 #include <ctype.h>
@@ -50,8 +51,8 @@ const char *somatic_verbprintf_prefix = "sns";
 void somatic_verbprintf( int level, const char fmt[], ... ) {
     va_list argp;
     va_start( argp, fmt );
-    if( level <= somatic_opt_verbosity ) {
-        fprintf(stderr, "%s: ", somatic_verbprintf_prefix);
+    if( level <= aa_opt_verbosity ) {
+        fprintf(stderr, "%s: ", aa_verbf_prefix);
         vfprintf( stderr, fmt, argp );
     }
     va_end( argp );
@@ -84,30 +85,26 @@ void somatic_hard_assert( int test, const char fmt[], ... ) {
 static void somatic_sighandler_simple (int sig, siginfo_t *siginfo, void *context)
 {
     (void) context;
-    somatic_verbprintf (1,
-                        "Received Signal: %d, Sending PID: %ld, UID: %ld\n",
-                        sig, (long)siginfo->si_pid, (long)siginfo->si_uid);
+    aa_verbf (1,
+              "Received Signal: %d, Sending PID: %ld, UID: %ld\n",
+              sig, (long)siginfo->si_pid, (long)siginfo->si_uid);
 
-    if(sig == SIGINT) somatic_sig_received = 1;
-
-    if(sig == SIGMSTART) {
+    if(sig == SIGINT || sig == SIGTERM) {
+        aa_verbf (1, "setting somatic_sig_received=1\n");
+        somatic_sig_received = 1;
+    } else if(sig == SIGMSTART) {
     	somatic_motor_state = 1;
-    }
-
-    else if (sig == SIGMSTOP) {
+    } else if (sig == SIGMSTOP) {
     	somatic_motor_state = 0;
-    }
-
-    else if (sig == SIGMABORT) {
+    } else if (sig == SIGMABORT) {
     	somatic_motor_state = 0;
     	somatic_sig_received = 1;
-    }
-
-    else {
-    	somatic_verbprintf(1, "Received a signal. No action defined.\n");
+    } else {
+    	aa_verbf(1, "Received a signal. No action defined.\n");
     }
 }
 
+// FIXME: think about this more
 void somatic_sighandler_simple_install() {
     struct sigaction act;
     memset(&act, 0, sizeof(act));

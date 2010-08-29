@@ -27,7 +27,7 @@ CPPFLAGS += -Wno-unused-function -Wno-conversion
 
 all: $(LIBFILES) verbatim/share/somatic/somatic.protobin $(BINFILES)
 
-$(call LINKLIB, somatic, somatic_util.o ez.o somatic.pb-c.o msgply.o $(MSG_OBJS))
+$(call LINKLIB, somatic, somatic_util.o ez.o somatic.pb-c.o msgply.o $(MSG_OBJS), ach protobuf-c)
 
 ez.o: somatic.pb-c.c
 

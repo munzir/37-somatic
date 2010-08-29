@@ -105,6 +105,7 @@ message force_moment {
     optional metadata meta = 15;
 }
 
+
 /*------------------------*/
 /* Hardware Message Types */
 /*------------------------*/
@@ -159,6 +160,14 @@ message microphone {
     optional metadata meta = 15;
 }
 
+
+message token {
+    optional string type = 1;
+    optional sint64 code = 2;
+    optional vector fattr = 3;
+    optional vector iattr = 4;
+    optional metadata meta = 15;
+}
 
 // Maybe we'll use this someday....
 message can_msg {

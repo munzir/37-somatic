@@ -61,6 +61,29 @@
                  _somatic_private_n );                          \
     })
 
+
+
+
+/**
+ * \param ret: ach return code
+ * \param type: protobuf message type string (i.e. somatic__vector,
+ *  			NOT actual Somatic__Vector type)
+ * \param alloc: protobuf allocator (ie, &protobuf_c_system_allocator)
+ * \param buf: buffer to store data in
+ * \param size: size of buffer to give ach
+ * \param chan: ach channel pointer
+ */
+#define SOMATIC_GET_LAST_UNPACK_BUF(ret, type, chan, buf, size, alloc) \
+    ({                                                                  \
+        size_t _somatic_private_nread;                                  \
+        ret = ach_get_last( (chan), (buf), (size),                      \
+                            &_somatic_private_nread );                  \
+        ( ACH_OK == (ret) || ACH_MISSED_FRAME == (ret) ) ?              \
+            type ## __unpack( (alloc), _somatic_private_nread,          \
+                              (buf) ) :                                 \
+            NULL;                                                       \
+    })
+
 /**
  * \param ret: ach return code
  * \param type: protobuf message type string (i.e. somatic__vector,
