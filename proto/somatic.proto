@@ -165,7 +165,7 @@ message token {
     optional string type = 1;
     optional sint64 code = 2;
     optional vector fattr = 3;
-    optional vector iattr = 4;
+    optional ivector iattr = 4;
     optional metadata meta = 15;
 }
 
