@@ -169,6 +169,18 @@ message token {
     optional metadata meta = 15;
 }
 
+message crafty {
+    optional bytes boardstate = 1;
+    optional string move = 2;
+    optional metadata meta = 15;
+}
+
+message chess_perception {
+    optional vector boardstate = 1;
+    optional vector offset = 2;
+    optional metadata meta = 15;
+}
+
 // Maybe we'll use this someday....
 message can_msg {
     required int32 id = 1;
