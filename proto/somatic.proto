@@ -11,10 +11,130 @@ package somatic;
 // These types should be included as fields in other messages
 //
 
+// the physical unit represented by a number. Note that only MKS units
+// are listed here; that is intentional.
+//
+// commonly used units should have codes < 128 so that they fit in a
+// single byte when varint-encoded
+enum unit {
+    UNIT = 0;
+    // Fundamental
+    METER = 1;
+    KILOGRAM = 2;
+    SECOND = 3;
+    AMPERE = 4;
+    KELVIN = 5;
+    MOLE = 6;
+    CANDELA = 7;
+
+    // Special
+    HERTZ = 10;
+    RADIAN = 11;
+    STERADIAN = 12;
+    NEWTON = 13;
+    PASCAL = 14;
+    JOULE = 15;
+    WATT = 16;
+    COULOMB = 17;
+    VOLT = 18;
+    FARAD = 19;
+    OHM = 20;
+    SIEMENS = 21;
+    WEBER = 22;
+    TESLA = 23;
+    HENRY = 24;
+    CELSIUS = 25;
+    LUMEN = 26;
+    LUX = 27;
+    BECQUEREL = 28;
+    GRAY = 29;
+    SLEVERT = 30;
+    KATAL = 31;
+
+    // compound
+    SQUARE_METER = 50;                  // area
+    CUBIC_METER = 51;                   // volume
+
+    METER_PER_SECOND = 60;              // velocity
+    METER_PER_SECOND_SQUARED = 61;      // acceleration
+    METER_PER_SECOND_CUBED = 62;        // jerk
+    METER_PER_QUARTIC_SECOND = 63;      // snap
+
+    RADIAN_PER_SECOND = 65;             // angular velocity
+    RADIAN_PER_SECOND_SQUARED = 66;     // angular acceleration
+    RADIAN_PER_SECOND_CUBED = 67;       // angular jerk
+    RADIAN_PER_QUARTIC_SECOND = 68;     // angular snap
+
+    NEWTON_METER = 70;                  // torque/moment
+    NEWTON_SECOND = 71;                 // impulse
+
+    // end
+    BOGUS = 127;
+};
+
+// Physical quantities.  If at all possible, the code of the quanitity
+// should correspond to the code of the appropriate unit
+enum quantity {
+    VOID = 0;
+    // Fundamental
+    LENGTH = 1;
+    MASS = 2;
+    TIME = 3;
+    CURRENT = 4;
+    THERMODYNAMIC_TEMPERATURE = 5;
+    AMOUNT = 6;
+    LUMINOUS_INTENSITY = 7;
+
+    // derived
+    FREQUENCY = 10;
+    ANGLE = 11;
+    SOLID_ANGLE = 12;
+    FORCE = 13;
+    PRESSURE = 14;
+    ENERGY = 15;
+    POWER = 16;
+    CHARGE = 17;
+    VOLTAGE = 18;
+    CAPACITANCE = 19;
+    RESISTANCE = 20;
+    CONDUCTANCE = 21;
+    MAGNETIC_FLUX = 22;
+    MAGNETIC_FIELD = 23;
+    INDUCTANCE = 24;
+    TEMPERATURE = 25;
+    LUMINOUS_FLUX = 26;
+    ILLUMINANCE = 27;
+    RADIOACTIVITY = 28;
+    ABSORBED_DOSE = 29;
+    EQUIVALENT_DOSE = 30;
+    CATYLTIC_ACTIVITY = 31;
+
+    // compound
+    AREA = 50;
+    VOLUME = 51;
+
+    VELOCITY = 60;
+    ACCELERATION = 61;
+    JERK = 62;
+    SNAP = 63;
+
+    ANGULAR_VELOCITY = 65;
+    ANGULAR_ACCELERATION = 66;
+    ANGULAR_JERK = 67;
+    ANGULAR_SNAP = 68;
+
+    TORQUE = 70;
+    IMPULSE = 71;
+};
+
+
 // You can view this as either a one-dimensional array of data or
 // a real-valued vector.
 message vector {
     repeated double data = 1 [packed=true];
+    // the units represented by this vector
+    // may have length == 1 if all elements are the same unit
+    repeated unit units = 8 [packed=true];
 }
 
 // You can view this as either a one-dimensional array of data or
@@ -32,6 +152,11 @@ message matrix {
 
     optional int32 rows = 2;
     optional int32 cols = 3;
+
+    // the units represented by this matrix
+    // may have length == 1 if all elements are the same unit
+    repeated unit units = 8 [packed=true];
+
 }
 
 message timespec {
@@ -113,6 +238,7 @@ message force_moment {
 // Send these messages on ach channels
 //
 
+
 enum motor_param {
     MOTOR_CURRENT = 0;
     MOTOR_VELOCITY = 1;
@@ -150,6 +276,11 @@ message dsa {
     optional metadata meta = 15;
 }
 
+message touch {
+    repeated matrix values = 1;
+    optional metadata meta = 15;
+}
+
 message hokuyo {
     optional vector ranges = 1;
     optional metadata meta = 15;
@@ -170,7 +301,7 @@ message token {
 }
 
 message crafty {
-    optional bytes boardstate = 1;
+    //optional bytes boardstate = 1;
     optional string move = 2;
     optional metadata meta = 15;
 }
