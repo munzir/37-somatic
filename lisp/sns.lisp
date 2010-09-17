@@ -33,7 +33,8 @@
 
 (defpackage :sns
   (:use :cl :numeri)
-  (:export :ply :opine :sns-map
+  (:export :ply :opine :sns-map :sns-load
+           :extract-times
            :speech-open :speech-remote :speech-close :say)
   )
 
@@ -45,6 +46,31 @@
                  (funcall function
                           (pb:unpack buffer (make-instance type))))
                thing))
+
+(defun slot-value-k (object &rest slots)
+  (if slots
+      (apply #'slot-value-k (slot-value object (car slots))
+             (cdr slots))
+      object))
+
+(defun sns-load (file type)
+  (sns:sns-map 'list #'identity file type))
+
+(defun extract (message-sequence &rest slots)
+  (map 'list (lambda (x) (apply #'slot-value x slots)) message-sequence))
+
+(defun extract-times (message-sequence &optional (start-time 0))
+  (let* ((times (map 'list
+                     (lambda (m)
+                       (sns::timespec->seconds (slot-value-k m
+                                                             'somatic::meta
+                                                             'somatic::time)))
+                     message-sequence))
+         (times-d (mapcar (lambda (time)
+                            (coerce (- time (car times) start-time)
+                                   'double-float))
+                          times)))
+    times-d))
 
 ;;; Message Translation Generic Functions ;;;
 (defgeneric ply (msg))

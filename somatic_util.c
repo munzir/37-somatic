@@ -51,7 +51,7 @@ const char *somatic_verbprintf_prefix = "sns";
 void somatic_verbprintf( int level, const char fmt[], ... ) {
     va_list argp;
     va_start( argp, fmt );
-    if( level <= aa_opt_verbosity ) {
+    if( level <= somatic_opt_verbosity ) {
         fprintf(stderr, "%s: ", aa_verbf_prefix);
         vfprintf( stderr, fmt, argp );
     }

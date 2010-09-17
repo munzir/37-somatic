@@ -197,13 +197,13 @@ static void somatic_timespec_dump( const struct timespec t ) {
 extern const char *somatic_verbprintf_prefix;
 
 /** printf's message if level <= somatic_opt_verbosity */
-void somatic_verbprintf( int level, const char fmt[], ... ) AA_DEPRECATED;
+void somatic_verbprintf( int level, const char fmt[], ... );
 
 /** printf's message and exits */
 void somatic_fail( const char fmt[], ... );
 
 /** If test is false, printf's message and exits */
-void somatic_hard_assert( int test, const char fmt[], ... ) AA_DEPRECATED;
+void somatic_hard_assert( int test, const char fmt[], ... );
 
 
 /*------------*/
