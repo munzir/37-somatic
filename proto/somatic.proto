@@ -262,6 +262,7 @@ message motor_state {
     optional motor_status status = 1;
     optional vector position = 2;
     optional vector velocity = 3;
+    optional ivector statusword = 4;
     optional metadata meta = 15;
 }
 
