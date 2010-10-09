@@ -5,7 +5,7 @@ VERSION := 0.0.200100917
 PROJECT := somatic
 
 SHAREDLIBS := somatic
-BINFILES :=
+BINFILES := somatic_motor_plot
 
 
 default: all
@@ -27,7 +27,10 @@ CPPFLAGS += -Wno-unused-function -Wno-conversion -Wno-deprecated-declarations
 
 all: $(LIBFILES) verbatim/share/somatic/somatic.protobin $(BINFILES)
 
-$(call LINKLIB, somatic, somatic_util.o ez.o somatic.pb-c.o msgply.o $(MSG_OBJS), ach protobuf-c)
+LIB_OBJS := somatic_util.o ez.o somatic.pb-c.o msgply.o $(MSG_OBJS)
+
+$(call LINKLIB, somatic, $(LIB_OBJS), ach protobuf-c)
+$(call LINKBIN, somatic_motor_plot, somatic_motor_plot_argp.o somatic_motor_plot.o $(LIB_OBJS), ach protobuf-c amino stdc++)
 
 ez.o: somatic.pb-c.c
 

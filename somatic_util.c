@@ -52,7 +52,7 @@ void somatic_verbprintf( int level, const char fmt[], ... ) {
     va_list argp;
     va_start( argp, fmt );
     if( level <= somatic_opt_verbosity ) {
-        fprintf(stderr, "%s: ", aa_verbf_prefix);
+        fprintf(stderr, "[%s] ", somatic_verbprintf_prefix);
         vfprintf( stderr, fmt, argp );
     }
     va_end( argp );
