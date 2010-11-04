@@ -1,6 +1,6 @@
 ## Makefile for somatic
 
-VERSION := 0.0.200100917
+VERSION := 0.0.200101104
 
 PROJECT := somatic
 

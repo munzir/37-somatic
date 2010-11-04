@@ -85,12 +85,12 @@ void somatic_hard_assert( int test, const char fmt[], ... ) {
 static void somatic_sighandler_simple (int sig, siginfo_t *siginfo, void *context)
 {
     (void) context;
-    aa_verbf (1,
-              "Received Signal: %d, Sending PID: %ld, UID: %ld\n",
-              sig, (long)siginfo->si_pid, (long)siginfo->si_uid);
+    somatic_verbprintf (1,
+                      "Received Signal: %d, Sending PID: %ld, UID: %ld\n",
+                        sig, (long)siginfo->si_pid, (long)siginfo->si_uid);
 
     if(sig == SIGINT || sig == SIGTERM) {
-        aa_verbf (1, "setting somatic_sig_received=1\n");
+        somatic_verbprintf(1, "setting somatic_sig_received=1\n");
         somatic_sig_received = 1;
     } else if(sig == SIGMSTART) {
     	somatic_motor_state = 1;
@@ -100,7 +100,7 @@ static void somatic_sighandler_simple (int sig, siginfo_t *siginfo, void *contex
     	somatic_motor_state = 0;
     	somatic_sig_received = 1;
     } else {
-    	aa_verbf(1, "Received a signal. No action defined.\n");
+    	somatic_verbprintf(1, "Received a signal. No action defined.\n");
     }
 }
 
