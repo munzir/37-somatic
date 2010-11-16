@@ -5,7 +5,7 @@ VERSION := 0.0.200101104
 PROJECT := somatic
 
 SHAREDLIBS := somatic
-BINFILES := somatic_motor_plot
+BINFILES := somatic_motor_plot somatic_dump
 
 
 default: all
@@ -14,9 +14,9 @@ default: all
 CC := g++
 include /usr/share/make-common/common.1.mk
 
-MSG_SRC_C := $(wildcard $(SRCDIR)/msg/*.c)
-MSG_SRC_CPP := $(wildcard $(SRCDIR)/msg/*.cpp)
-MSG_OBJS := $(addsuffix .o, $(basename $(MSG_SRC_C))) $(addsuffix .o, $(basename $(MSG_SRC_CPP)))
+#MSG_SRC_C := $(wildcard $(SRCDIR)/msg/*.c)
+#MSG_SRC_CPP := $(wildcard $(SRCDIR)/msg/*.cpp)
+#MSG_OBJS := $(addsuffix .o, $(basename $(MSG_SRC_C))) $(addsuffix .o, $(basename $(MSG_SRC_CPP)))
 
 # apparently ach requires this, or at least c99
 CFLAGS += --std=gnu99
@@ -27,9 +27,12 @@ CPPFLAGS += -Wno-unused-function -Wno-conversion -Wno-deprecated-declarations
 
 all: $(LIBFILES) verbatim/share/somatic/somatic.protobin $(BINFILES)
 
-LIB_OBJS := somatic_util.o ez.o somatic.pb-c.o msgply.o $(MSG_OBJS)
+LIB_OBJS := somatic_util.o ez.o somatic.pb-c.o msgply.o msg.o #$(MSG_OBJS)
 
 $(call LINKLIB, somatic, $(LIB_OBJS), ach protobuf-c)
+$(call LINKBIN, somatic_dump, somatic_dump.o $(LIB_OBJS), ach protobuf-c amino stdc++)
+
+
 $(call LINKBIN, somatic_motor_plot, somatic_motor_plot_argp.o somatic_motor_plot.o $(LIB_OBJS), ach protobuf-c amino stdc++)
 
 ez.o: somatic.pb-c.c

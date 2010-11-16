@@ -45,10 +45,10 @@
 
 
 // naming convention
-// somatic_MSGNAME_ply
-// somatic_MSGNAME_opine
-// somatic_MSGNAME_create
-// somatic_MSGNAME_destroy
+// somatic_MSGNAME_alloc
+// somatic_MSGNAME_free
+// somatic_MSGNAME_set_FIELD
+// somatic_MSGNAME_get_FIELD
 
 btTransform somatic_ply_transform( Somatic__Transform * );
 btTransform somatic_ply_transform( const double *x, size_t n );
@@ -60,7 +60,7 @@ void somatic_opine_transform( double *x, size_t n, const btTransform &T );
 #endif
 
 static struct timespec somatic_ply_timespec( Somatic__Timespec * t) {
-    return somatic_make_timespec( (time_t) t->sec, (long) t->nsec );
+    return aa_tm_make( (time_t) t->sec, (long) t->nsec );
 }
 
 static void somatic_opine_timespec( Somatic__Timespec * t,
@@ -69,5 +69,46 @@ static void somatic_opine_timespec( Somatic__Timespec * t,
     t->nsec = ts.tv_nsec;
     t->has_nsec = 1;
 }
+
+
+
+//=== Timespec ===
+
+Somatic__Timespec *somatic_timespec_alloc();
+void somatic_timespec_free(Somatic__Timespec *pb);
+
+//=== Vector ===
+Somatic__Vector *somatic_vector_alloc(size_t size);
+void somatic_vector_free(Somatic__Vector *pb);
+void somatic_vector_set_unit(Somatic__Vector *pb, int unit);
+
+
+//=== Transform ===
+Somatic__Transform *somatic_transform_alloc();
+void somatic_transform_free(Somatic__Transform *pb);
+void somatic_transform_set_quat( Somatic__Transform *pb, const double r[4] );
+void somatic_transform_set_vec( Somatic__Transform *pb, const double r[3] );
+void somatic_transform_set_tf12( Somatic__Transform *pb, double r[12] );
+void somatic_transform_get_quat( Somatic__Transform *pb, double r[4] );
+void somatic_transform_get_vec( Somatic__Transform *pb, double r[3] );
+void somatic_transform_get_tf12( Somatic__Transform *pb, double r[12] );
+
+//=== Metadata ===
+/// heap allocates metadata object
+Somatic__Metadata *somatic_metadata_alloc();
+/// frees heap allocated metadata object and all children
+void somatic_metadata_free( Somatic__Metadata *pb );
+/// strdups the label
+void somatic_metadata_set_label( Somatic__Metadata *pb, const char *label );
+/// heap allocates timespec for time field
+void somatic_metadata_set_time( Somatic__Metadata *pb, int64_t sec, int32_t nsec );
+/// heap allocates timespec for until field
+void somatic_metadata_set_until( Somatic__Metadata *pb, int64_t sec, int32_t nsec );
+
+
+//=== Multi Transform ===
+Somatic__MultiTransform *somatic_multi_transform_alloc(size_t n);
+void somatic_multi_transform_free(Somatic__MultiTransform *pb);
+
 
 #endif //SOMATIC_MSG_H

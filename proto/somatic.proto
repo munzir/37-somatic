@@ -207,6 +207,12 @@ message transform {
 }
 
 
+message multi_transform {
+    optional transform origin = 1;
+    repeated transform tf = 2;
+    optional metadata meta = 15;
+}
+
 message point_cloud {
     required matrix points = 1;
     optional matrix distance_map = 2;

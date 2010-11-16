@@ -38,7 +38,12 @@
 #ifndef SOMATIC_H
 #define SOMATIC_H
 
+#include <amino.h>
 #include <ach.h>
+#include <somatic.pb-c.h>
+#include "somatic/msg.h"
+#include "somatic/util.h"
+
 //#include <genmsg.h>
 
 /** \file somatic.h
