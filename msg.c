@@ -159,6 +159,15 @@ void somatic_metadata_set_time( Somatic__Metadata *pb, int64_t sec, int32_t nsec
     pb->time->nsec = nsec;
     pb->time->has_nsec = 1;
 }
+
+void somatic_metadata_set_time_timespec( Somatic__Metadata *pb, struct timespec ts ) {
+    somatic_metadata_set_time( pb, ts.tv_sec, ts.tv_nsec );
+}
+
+void somatic_metadata_set_time_now( Somatic__Metadata *pb ) {
+    somatic_metadata_set_time_timespec( pb, aa_tm_now() );
+}
+
 void somatic_metadata_set_until( Somatic__Metadata *pb, int64_t sec, int32_t nsec ) {
     if( NULL == pb->until ) {
         pb->until = somatic_timespec_alloc();
@@ -166,6 +175,16 @@ void somatic_metadata_set_until( Somatic__Metadata *pb, int64_t sec, int32_t nse
     pb->until->sec = sec;
     pb->until->nsec = nsec;
     pb->until->has_nsec = 1;
+}
+
+
+void somatic_metadata_set_until_duration( Somatic__Metadata *pb,
+                                          double duration ) {
+    struct timespec now;
+    now.tv_sec = pb->time->sec;
+    now.tv_nsec = pb->time->has_nsec ?  pb->time->nsec : 0;
+    struct timespec until = aa_tm_add(now,  aa_tm_sec2timespec( duration ) );
+    somatic_metadata_set_until( pb, until.tv_sec, until.tv_nsec );
 }
 
 //=== Multi Transform ===
@@ -189,4 +208,30 @@ void somatic_multi_transform_free(Somatic__MultiTransform *pb) {
             }
         }
     }
+}
+
+//=== Force Moment ===
+Somatic__ForceMoment *somatic_force_moment_alloc( int alloc_force, int alloc_moment ) {
+    Somatic__ForceMoment *pb = AA_NEW0(Somatic__ForceMoment);
+    somatic__force_moment__init( pb );
+    if( alloc_force ) pb->force = somatic_vector_alloc(3);
+    if( alloc_moment ) pb->moment = somatic_vector_alloc(3);
+    return pb;
+}
+
+void somatic_force_moment_free( Somatic__ForceMoment *pb ) {
+    if( pb ) {
+        somatic_vector_free( pb->force );
+        somatic_vector_free( pb->moment );
+        somatic_metadata_free( pb->meta );
+    }
+}
+
+void somatic_force_moment_set( Somatic__ForceMoment *pb, const double v[6] ) {
+    aa_fcpy( pb->force->data, v, 3 );
+    aa_fcpy( pb->moment->data, v+3, 3 );
+}
+void somatic_force_moment_get( const Somatic__ForceMoment *pb, double v[6] ) {
+    aa_fcpy( v, pb->force->data, 3 );
+    aa_fcpy( v+3, pb->moment->data, 3 );
 }

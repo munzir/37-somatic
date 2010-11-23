@@ -159,9 +159,15 @@ void indent() {
 }
 
 
+void dump_vector (Somatic__Vector *pb, const char *fmt) {
+    for( size_t i = 0; i < pb->n_data; i++ ) {
+        printf(fmt, pb->data[i]);
+    }
+}
+
 void dump_transform( Somatic__Transform *pb ) {
     indent();
-    printf("Transform: ");
+    printf("[Transform] ");
     if( pb->translation ) {
         printf("\t%6.3f\t%6.3f\t%6.3f",
                pb->translation->data[0],
@@ -179,33 +185,113 @@ void dump_transform( Somatic__Transform *pb ) {
     printf("\n");
 }
 
+void dump_timespec( Somatic__Timespec *pb, const char *name ) {
+    indent();
+    printf("[%s : Timespec]\t%lld.%09ds\n",
+           name, pb->sec, pb->has_nsec ? pb->nsec : 0 );
+}
+
+void dump_metadata( Somatic__Metadata *pb ) {
+    indent();
+    printf("[Metadata] \n");
+    sd_indent++;
+    if( pb->time ) {
+        dump_timespec(pb->time, "time");
+    }
+    if( pb->until ) {
+        dump_timespec(pb->until, "until");
+    }
+    if( pb->has_type ) {
+        indent();
+        const char *c;
+        switch( pb->type ) {
+        case SOMATIC__MSG_TYPE__FORCE_MOMENT:
+            c = "ForceMoment";
+            break;
+        default:
+            c = "unknown";
+        }
+        printf("[type] %s\n", c);
+    }
+    sd_indent--;
+}
+
 void dump_multi_transform( Somatic__MultiTransform *pb ) {
     indent();
-    printf("MultiTransform: ");
+    printf("[MultiTransform]\t");
+    sd_indent++;
     if( pb->tf ) {
-        sd_indent++;
-        printf("\n");
         for( size_t i = 0; i < pb->n_tf; i++ )
             dump_transform(pb->tf[i]);
-        sd_indent--;
     }
+    if( pb->meta )
+        dump_metadata( pb->meta );
+    sd_indent--;
+
+}
+
+
+void dump_force_moment( Somatic__ForceMoment *pb ) {
+    indent();
+    printf("[ForceMoment]\n");
+    sd_indent++;
+    indent();
+    printf("[force]");
+    if( pb->force )
+        dump_vector(pb->force, "\t%6.3f");
+    printf("\n");
+    indent();
+    printf("[moment]");
+    if( pb->moment )
+        dump_vector(pb->force, "\t%6.3f");
+    printf("\n");
+    if( pb->meta )
+        dump_metadata( pb->meta );
+    sd_indent--;
 
 }
 
 void run() {
     while( !somatic_sig_received ) {
         read_ach();
-        if( 0 == strcasecmp( opt_msg_type, "multi_transform" ) ||
-            0 == strcasecmp( opt_msg_type, "multitransform" ) ) {
-            Somatic__MultiTransform *msg =
-                somatic__multi_transform__unpack(&protobuf_c_system_allocator,
-                                                 sd_frame_size, sd_achbuf);
-            dump_multi_transform(msg);
-            somatic__multi_transform__free_unpacked(
-                msg, &protobuf_c_system_allocator);
+
+        Somatic__BaseMsg *base = somatic__base_msg__unpack( &protobuf_c_system_allocator,
+                                                            sd_frame_size, sd_achbuf);
+        if( base->meta && base->meta->has_type ) {
+            switch ( base->meta->type ) {
+            case SOMATIC__MSG_TYPE__FORCE_MOMENT:
+            {
+                Somatic__ForceMoment *msg =
+                    somatic__force_moment__unpack( &protobuf_c_system_allocator,
+                                                   sd_frame_size, sd_achbuf);
+                dump_force_moment( msg );
+                somatic__force_moment__free_unpacked( msg,  &protobuf_c_system_allocator );
+                break;
+            }
+            case SOMATIC__MSG_TYPE__MULTI_TRANSFORM:
+            {
+                Somatic__MultiTransform *msg =
+                    somatic__multi_transform__unpack(&protobuf_c_system_allocator,
+                                                     sd_frame_size, sd_achbuf);
+                dump_multi_transform(msg);
+                somatic__multi_transform__free_unpacked(
+                    msg, &protobuf_c_system_allocator);
+                break;
+            }
+            default: printf("Unknown Message\n");
+            }
         } else {
-            printf("Unknown Message Type\n");
+             printf("Unknown Message\n");
         }
+        somatic__base_msg__free_unpacked( base, &protobuf_c_system_allocator );
+
+        /* if( 0 == strcasecmp( opt_msg_type, "multi_transform" ) || */
+        /*     0 == strcasecmp( opt_msg_type, "multitransform" ) ) { */
+        /* } else if( 0 == strcasecmp(opt_msg_type, "force_moment") || */
+        /*            0 == strcasecmp( opt_msg_type, "forcemoment" ) ) { */
+        /* }else { */
+        /*     printf("Unknown Message Type\n"); */
+        /* } */
         assert( 0 == sd_indent );
     }
 }
@@ -220,7 +306,7 @@ int main( int argc, char **argv ) {
     somatic_verbprintf_prefix="somatic_dump";
 
     aa_hard_assert( NULL != opt_chan_name, "Must set channel name\n");
-    aa_hard_assert( NULL != opt_msg_type, "Must set protobuf type\n");
+    //aa_hard_assert( NULL != opt_msg_type, "Must set protobuf type\n");
 
     somatic_verbprintf( 1, "Channel %s\n", opt_chan_name );
     somatic_verbprintf( 1, "Protobuf %s\n", opt_msg_type );

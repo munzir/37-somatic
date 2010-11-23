@@ -164,6 +164,18 @@ message timespec {
    optional int32 nsec = 2;
 }
 
+// codes for self-describing messages
+enum msg_type {
+    MOTOR_CMD = 1;
+    MOTOR_STATE = 2;
+    TRANSFORM = 3;
+    MULTI_TRANSFORM = 4;
+    FORCE_MOMENT = 5;
+    POINT_CLOUD = 6;
+    JOYSTICK = 7;
+    TOUCH = 8;
+    MICROPHONE = 9;
+};
 
 // included in every top-level message
 // used for logging and graceful failures
@@ -173,6 +185,7 @@ message metadata {
     optional timespec time = 2;   // time the message was sent
     optional timespec until = 3;  // absolute time until which the message is invalid
     optional string label = 4;    // string label
+    optional msg_type type = 5;        // type of message
 }
 
 /************************/
@@ -186,18 +199,23 @@ message metadata {
 // Send these messages on ach channels
 //
 
-message label_vector {
-        required vector x = 1;
-        optional string label = 2;
-        optional timespec time = 3;
-}
+// message label_vector {
+//         required vector x = 1;
+//         optional string label = 2;
+//         optional timespec time = 3;
+// }
 
-message ez_msg {
-    optional string label = 1;
-    optional sint64 code = 2;
-    optional vector x = 3;
-    optional ivector i = 4;
-    optional timespec time = 5;
+// message ez_msg {
+//     optional string label = 1;
+//     optional sint64 code = 2;
+//     optional vector x = 3;
+//     optional ivector i = 4;
+//     optional timespec time = 5;
+// }
+
+// all wire messages should be parsable as this
+message base_msg {
+    optional metadata meta = 15;
 }
 
 message transform {
@@ -225,9 +243,9 @@ message point_cloud {
 
 // A message containing a number of somatic_matrix
 // messages.
-message matrices {
-    repeated matrix data = 1;
-}
+// message matrices {
+//     repeated matrix data = 1;
+// }
 
 message force_moment {
     required vector force = 1;

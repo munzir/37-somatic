@@ -40,7 +40,7 @@
 
 #include <amino.h>
 #include <ach.h>
-#include <somatic.pb-c.h>
+#include "somatic.pb-c.h"
 #include "somatic/msg.h"
 #include "somatic/util.h"
 

@@ -76,6 +76,13 @@ static void somatic_opine_timespec( Somatic__Timespec * t,
 
 Somatic__Timespec *somatic_timespec_alloc();
 void somatic_timespec_free(Somatic__Timespec *pb);
+static inline void somatic_timespec_set_s( Somatic__Timespec *pb, int64_t s ) {
+    pb->sec = s;
+}
+static inline void somatic_timespec_set_ns( Somatic__Timespec *pb, int32_t ns ) {
+    pb->nsec = ns;
+    pb->has_nsec = 1;
+}
 
 //=== Vector ===
 Somatic__Vector *somatic_vector_alloc(size_t size);
@@ -102,13 +109,25 @@ void somatic_metadata_free( Somatic__Metadata *pb );
 void somatic_metadata_set_label( Somatic__Metadata *pb, const char *label );
 /// heap allocates timespec for time field
 void somatic_metadata_set_time( Somatic__Metadata *pb, int64_t sec, int32_t nsec );
+/// heap allocates timespec for time field and sets to current time
+void somatic_metadata_set_time_now( Somatic__Metadata *pb );
+/// heap allocates timespec for time field and sets to timespec
+void somatic_metadata_set_time_timespec( Somatic__Metadata *pb, struct timespec ts );
 /// heap allocates timespec for until field
 void somatic_metadata_set_until( Somatic__Metadata *pb, int64_t sec, int32_t nsec );
+/// heap allocates timespec for until field and sets to secs offset from pb->time
+void somatic_metadata_set_until_duration( Somatic__Metadata *pb,
+                                          double secs );
 
 
 //=== Multi Transform ===
 Somatic__MultiTransform *somatic_multi_transform_alloc(size_t n);
 void somatic_multi_transform_free(Somatic__MultiTransform *pb);
 
+//=== Force Moment ===
+Somatic__ForceMoment *somatic_force_moment_alloc( int alloc_force, int alloc_moment );
+void somatic_force_moment_free( Somatic__ForceMoment *pb );
+void somatic_force_moment_set( Somatic__ForceMoment *pb, const double[6] );
+void somatic_force_moment_get( const Somatic__ForceMoment *pb, double[6] );
 
 #endif //SOMATIC_MSG_H
