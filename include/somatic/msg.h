@@ -88,6 +88,7 @@ static inline void somatic_timespec_set_ns( Somatic__Timespec *pb, int32_t ns ) 
 Somatic__Vector *somatic_vector_alloc(size_t size);
 void somatic_vector_free(Somatic__Vector *pb);
 void somatic_vector_set_unit(Somatic__Vector *pb, int unit);
+void somatic_vector_set_data(Somatic__Vector *pb, const double *x, size_t n);
 
 
 //=== Transform ===
@@ -129,5 +130,23 @@ Somatic__ForceMoment *somatic_force_moment_alloc( int alloc_force, int alloc_mom
 void somatic_force_moment_free( Somatic__ForceMoment *pb );
 void somatic_force_moment_set( Somatic__ForceMoment *pb, const double[6] );
 void somatic_force_moment_get( const Somatic__ForceMoment *pb, double[6] );
+
+//=== Motor Cmd ===
+Somatic__MotorCmd *somatic_motor_cmd_alloc( size_t n );
+void somatic_motor_cmd_free( Somatic__MotorCmd *pb );
+void somatic_motor_cmd_set( Somatic__MotorCmd *pb,
+                            Somatic__MotorParam param, const double *x, size_t n );
+
+//=== Motor State ===
+Somatic__MotorState *somatic_motor_state_alloc();
+void somatic_motor_state_free(Somatic__MotorState *pb);
+void somatic_motor_state_set_position( Somatic__MotorState *pb,
+                                       const double *x, size_t n );
+void somatic_motor_state_set_velocity( Somatic__MotorState *pb,
+                                       const double *x, size_t n );
+void somatic_motor_state_set_acceleraton( Somatic__MotorState *pb,
+                                          const double *x, size_t n );
+void somatic_motor_state_set_current( Somatic__MotorState *pb,
+                                      const double *x, size_t n );
 
 #endif //SOMATIC_MSG_H
