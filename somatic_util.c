@@ -38,6 +38,7 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "somatic.h"
 #include "somatic/includes.h"
 #include "somatic/util.h"
 #include "somatic/lapack.h"
@@ -274,4 +275,40 @@ int somatic_close_channel(ach_channel_t *chan)
 	                         ach_result_to_string( r ) );
 
 	return(r);
+}
+
+
+
+
+const somatic_prototable_t *somatic_prototable_lookup_key( const somatic_prototable_t *table,
+                                                     const char *key) {
+    for( size_t i = 0; NULL != table[i].key; i ++ ) {
+        if( 0 == strcmp(key, table[i].key ) ) return &table[i];
+    }
+    return NULL;
+}
+const somatic_prototable_t *somatic_prototable_lookup_value( const somatic_prototable_t *table,
+                                                       uint32_t value) {
+
+    for( size_t i = 0; NULL != table[i].key; i ++ ) {
+        if( value == table[i].value ) return &table[i];
+    }
+    return NULL;
+}
+
+/* int somatic_prototable_key2value( somatic_prototable_t *table, */
+/*                                   const char *key, */
+/*                                   uint32_t *value ) { */
+/*     somatic_prototable_t *ent = somatic_prototable_lookup_key(table, key); */
+/*     if( ent ) {  */
+/*         *value = ent->value; */
+/*         return 0;  */
+/*     } else return -1; */
+/* } */
+
+const char* somatic_prototable_value2key( const somatic_prototable_t *table,
+                                          uint32_t value) {
+    const somatic_prototable_t *ent = somatic_prototable_lookup_value(table, value);
+    if( ent ) return ent->key;
+    else return "unknown";
 }

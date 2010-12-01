@@ -152,4 +152,27 @@
         return SOMATIC_WAIT_LAST_UNPACK( *ach_result, ftype, alloc, msg_size, chan, abstime ); \
     }
 
+
+/** A structure to define binary protocol data.
+ */
+typedef struct {
+    const char *key;
+    uint32_t value;
+    const char *desc;
+    int typecode;
+} somatic_prototable_t;
+
+const somatic_prototable_t *somatic_prototable_lookup_key( const somatic_prototable_t *table,
+                                                     const char *key);
+const somatic_prototable_t *somatic_prototable_lookup_value( const somatic_prototable_t *table,
+                                                       uint32_t value);
+
+
+int somatic_prototable_key2value( const somatic_prototable_t *table,
+                                  const char *key,
+                                  uint32_t *value);
+const char* somatic_prototable_value2key( const somatic_prototable_t *table,
+                                          uint32_t value);
+
+
 #endif
