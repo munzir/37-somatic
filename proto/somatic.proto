@@ -185,7 +185,7 @@ message metadata {
     optional timespec time = 2;   // time the message was sent
     optional timespec until = 3;  // absolute time until which the message is invalid
     optional string label = 4;    // string label
-    optional msg_type type = 5;        // type of message
+    optional msg_type type = 5;   // type of message
 }
 
 /************************/
@@ -347,5 +347,70 @@ message can_msg {
     optional bool extended = 4;
     optional int32 bus = 5;
 
+    optional metadata meta = 15;
+}
+
+
+message limit {
+    enum ranges {
+        OK = 0;
+        LO = 1;
+        HI = 2;
+    };
+    required quantity quantity = 1;
+    required ranges range = 2;
+    optional int32 index = 3;
+    optional double limit = 4;
+    optional double actual = 5;
+}
+
+message event {
+    enum levels {
+        EMERG = 0;    // system is unusable
+        ALERT = 1;    // action must be take immediately
+        CRIT = 2;     // critical conditions
+        ERR = 3;      // error conditions
+        WARNING = 4;  // warning conditions
+        NOTICE = 5;   // normal but significant condition
+        INFO = 6;     // informational
+        DEBUG = 7;    // debug-level messages
+    };
+    optional int32 level = 1;
+
+    enum codes {
+        UNKNOWN = 0;
+        PROC_HEARTBEAT  = 1;    // period "everything's ok" message
+        PROC_STARTING  = 2;   // daemon is starting up
+        PROC_RUNNING = 3;      // daemon initialized and running
+        PROC_STOPPING = 4;     // daemon is stopping
+        PROC_HALTED = 5;       // daemon has halted
+        PROC_ERR = 6;          // daemon in an error state
+        PROC_RECOVER = 7;      // daemon has recovered from error
+
+        COMM_BAD_MSG = 20;            // invalid message received
+        COMM_FAILED_TRANSPORT = 21;   // couldn't send message
+        COMM_TIMEOUT = 22;            // message timeout
+
+        LIMIT = 30;                   // limit condition
+
+        BAD_PARAM = 40;               // invalid parameter
+
+        INSANE = 100;                  // really bad
+    };
+
+    optional codes code = 2;        // numeric code for event type
+    optional string type = 3;       // string name for event
+    optional int32 facility = 4;    //
+    optional string category = 5;
+
+    optional string host = 6;
+
+
+    repeated limit limit = 10;
+
+    optional vector attr = 12;
+    optional ivector iattr = 13;
+
+    optional string comment = 14;
     optional metadata meta = 15;
 }
