@@ -164,6 +164,11 @@ void dump_vector (Somatic__Vector *pb, const char *fmt) {
         printf(fmt, pb->data[i]);
     }
 }
+void dump_ivector (Somatic__Ivector *pb, const char *fmt) {
+    for( size_t i = 0; i < pb->n_data; i++ ) {
+        printf(fmt, pb->data[i]);
+    }
+}
 
 void dump_transform( Somatic__Transform *pb ) {
     indent();
@@ -251,6 +256,32 @@ void dump_force_moment( Somatic__ForceMoment *pb ) {
 
 }
 
+void dump_joystick( Somatic__Joystick *pb ) {
+    indent();
+    printf("[Joystick]\n");
+    sd_indent++;
+    indent();
+    printf("[axes]");
+    dump_vector(pb->axes, "\t%6.3f");
+    printf("\n");
+    indent();
+    printf("[buttons]\t");
+    dump_ivector(pb->buttons, "%d:");
+    printf("\n");
+    sd_indent--;
+}
+
+void dump_motor_cmd( Somatic__MotorCmd *pb ) {
+    indent();
+    printf("[MotorCmd]\n");
+    sd_indent++;
+    indent();
+    printf("[values]");
+    dump_vector(pb->values, "\t%6.3f");
+    printf("\n");
+    sd_indent--;
+}
+
 void run() {
     while( !somatic_sig_received ) {
         read_ach();
@@ -278,10 +309,28 @@ void run() {
                     msg, &protobuf_c_system_allocator);
                 break;
             }
-            default: printf("Unknown Message\n");
+            case SOMATIC__MSG_TYPE__JOYSTICK:
+            {
+                Somatic__Joystick *msg =
+                    somatic__joystick__unpack(&protobuf_c_system_allocator,
+                                                     sd_frame_size, sd_achbuf);
+                dump_joystick(msg);
+                somatic__joystick__free_unpacked( msg, &protobuf_c_system_allocator);
+                break;
+            }
+            case SOMATIC__MSG_TYPE__MOTOR_CMD:
+            {
+                Somatic__MotorCmd *msg =
+                    somatic__motor_cmd__unpack(&protobuf_c_system_allocator,
+                                               sd_frame_size, sd_achbuf);
+                dump_motor_cmd(msg);
+                somatic__motor_cmd__free_unpacked( msg, &protobuf_c_system_allocator);
+                break;
+            }
+            default: printf("Unknown Message: %d\n",base->meta->type);
             }
         } else {
-             printf("Unknown Message\n");
+            printf("Unknown Message, no type info\n");
         }
         somatic__base_msg__free_unpacked( base, &protobuf_c_system_allocator );
 

@@ -90,6 +90,23 @@ void somatic_vector_set_data(Somatic__Vector *pb, const double *x, size_t n) {
     aa_fcpy( pb->data, x, n );
 }
 
+
+//=== IVector ===
+Somatic__Ivector *somatic_ivector_alloc(size_t size) {
+    Somatic__Ivector *pb = AA_NEW0( Somatic__Ivector );
+    somatic__ivector__init( pb );
+    pb->data = AA_NEW0_AR(int64_t, size);
+    pb->n_data = size;
+    return pb;
+}
+
+void somatic_ivector_free(Somatic__Ivector *pb) {
+    if( pb ) {
+        aa_free_if_valid( pb->data );
+        free( pb );
+    }
+}
+
 //=== Transform ===
 Somatic__Transform *somatic_transform_alloc() {
     Somatic__Transform *pb = AA_NEW0(Somatic__Transform);
@@ -253,6 +270,7 @@ Somatic__MotorCmd *somatic_motor_cmd_alloc( size_t n ) {
     pb->values = somatic_vector_alloc( n );
     pb->meta = somatic_metadata_alloc();
     pb->meta->type = SOMATIC__MSG_TYPE__MOTOR_CMD;
+    pb->meta->has_type = 1;
     return pb;
 }
 void somatic_motor_cmd_free( Somatic__MotorCmd *pb ) {
@@ -305,4 +323,24 @@ void somatic_motor_state_set_acceleraton( Somatic__MotorState *pb,
 void somatic_motor_state_set_current( Somatic__MotorState *pb,
                                       const double *x, size_t n ) {
     VECTOR_FIELD_SET( pb, current, n, x );
+}
+
+//=== Joystick ===
+Somatic__Joystick *somatic_joystick_alloc(size_t n_axes, size_t n_buttons) {
+    Somatic__Joystick *pb = AA_NEW0(Somatic__Joystick);
+    somatic__joystick__init(pb);
+    pb->meta = somatic_metadata_alloc();
+    pb->meta->type = SOMATIC__MSG_TYPE__JOYSTICK;
+    pb->meta->has_type = 1;
+    pb->axes = somatic_vector_alloc(n_axes);
+    pb->buttons = somatic_ivector_alloc(n_buttons);
+    return pb;
+}
+void somatic_joystick_free(Somatic__Joystick *pb) {
+    if(pb) {
+        somatic_vector_free(pb->axes);
+        somatic_ivector_free(pb->buttons);
+        somatic_metadata_free(pb->meta);
+        free(pb);
+    }
 }

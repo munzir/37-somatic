@@ -59,7 +59,7 @@ verbatim/share/somatic/somatic.protobin: proto/somatic.proto
 	protoc -o$@ $<
 
 clean:
-	rm -rf .deps $(GENHEADERS) debian *.deb *.lzma *.so $(INCLUDEDIR)/somatic.pb-c* $(SRCDIR)/somatic.pb-c* $(SRCDIR)/*.o doc $(MSG_OBJS) python/somatic_pb2.*
+	rm -rf .deps $(GENHEADERS) debian *.deb *.lzma *.so $(INCLUDEDIR)/somatic.pb-c* $(SRCDIR)/somatic.pb-c* $(SRCDIR)/*.o doc $(MSG_OBJS) python/somatic_pb2.* $(BINFILES)
 
 .PHONY: doc
 
