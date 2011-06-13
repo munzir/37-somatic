@@ -1,4 +1,4 @@
-;; Copyright 2009, Georgia Tech Research Corporation
+;; Copyright 2011, Georgia Tech Research Corporation
 ;; All rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or without
@@ -31,13 +31,43 @@
 ;; OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-(cl:defpackage :somatic
-  (:nicknames)
-  (:export :vector :matrix :points :rows :cols :point-cloud :data
-           :event :level :code))
+(in-package :sns)
 
-(cl:in-package :somatic)
 
-;(cl:declaim (cl:optimize (cl:debug 3) (cl:speed 0)))
+(defvar *channel-event-read*)
+(defvar *channel-event-write*)
 
-(protoc:load-proto-set "/usr/share/somatic/somatic.protobin")
+(defvar *category* "somatic")
+(defvar *facility* 0)
+(defvar *host* (machine-instance))
+
+(defun open-channels ()
+  (setq *channel-event-read* (ach:open-channel "event"))
+  (setq *channel-event-write* (ach:open-channel "event"))
+  (ach:flush *channel-event-read*)
+  )
+
+(defun close-channels ()
+  (ach:close-channel *channel-event-read*)
+  (ach:close-channel *channel-event-write*))
+
+
+(defun post-event (level code &key
+                   (category *category*)
+                   (facility *facility*)
+                   (host *host*)
+                   comment)
+  (ach:put *channel-event-write*
+           (pb:encode (make-instance 'somatic::event
+                                     :level level
+                                     :code code
+                                     :category category
+                                     :facility facility
+                                     :host host
+                                     :comment comment))))
+
+(defun next-event ()
+  (pb:unpack (ach:wait-next *channel-event-read*)
+             (make-instance 'somatic::event)))
+
+

@@ -40,6 +40,22 @@
 
 (in-package :sns)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 (defun sns-map (result-type function thing type)
   (ach:ach-map result-type
                (lambda (buffer)
@@ -211,23 +227,3 @@
       (setf (slot-value msg 'somatic::time)
             (opine-timespec time)))
     msg))
-
-(defun opine-label-vector (v &key label time)
-  (let ((msg (make-instance 'somatic::label-vector
-                            :x (opine-vector v))))
-    (when label
-      (setf (slot-value msg 'somatic::label)
-            label))
-    (when time
-      (setf (slot-value msg 'somatic::time)
-            (opine-timespec time)))
-    msg))
-
-(defmethod ply ((msg somatic::label-vector))
-  (let ((lisp-vec (slot-value (slot-value msg 'somatic::x)
-                              'somatic::data)))
-    (values (slot-value msg 'somatic::label)
-            (make-array (length lisp-vec)
-                        :element-type 'double-float
-                        :initial-contents lisp-vec))))
-

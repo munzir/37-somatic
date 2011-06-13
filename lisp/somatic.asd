@@ -35,8 +35,10 @@
 
 (asdf:defsystem somatic
   :description "Robot Stuff"
-  :depends-on ("ach" "s-protobuf" "cl-numeri")
+  :depends-on ("ach" "s-protobuf" "cl-numeri" "clix")
   :components ((:file "somatic")
                (:file "sns" :depends-on ("somatic"))
+               (:file "event" :depends-on ("somatic"))
+               (:file "slogd" :depends-on ("event"))
                (:file "festival" :depends-on ("sns"))
                ))

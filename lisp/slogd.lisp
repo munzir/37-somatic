@@ -1,4 +1,4 @@
-;; Copyright 2009, Georgia Tech Research Corporation
+;; Copyright 2011, Georgia Tech Research Corporation
 ;; All rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or without
@@ -31,13 +31,38 @@
 ;; OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-(cl:defpackage :somatic
-  (:nicknames)
-  (:export :vector :matrix :points :rows :cols :point-cloud :data
-           :event :level :code))
+(in-package :sns)
 
-(cl:in-package :somatic)
 
-;(cl:declaim (cl:optimize (cl:debug 3) (cl:speed 0)))
+(defun slogd-init ()
+  (open-channels)
+  (post-event :notice :proc-starting)
+  (clix:openlog "slogd")
+  )
 
-(protoc:load-proto-set "/usr/share/somatic/somatic.protobin")
+
+(defun slogd-run ()
+  (post-event :notice :proc-running)
+  (loop
+     for event = (next-event)
+     do
+       (clix:syslog (slot-value event 'somatic::level)
+                    "[~A].(~A)~@[ ~A~]"
+                    (slot-value event 'somatic::category)
+                    (slot-value event 'somatic::code)
+                    (slot-value event 'somatic::comment))
+     until (eq :sys-halt (slot-value event 'somatic::code))))
+
+(defun slogd-destroy ()
+  (post-event :notice :proc-stopping)
+  (clix:closelog)
+  (post-event :notice :proc-halted)
+  (close-channels))
+
+
+
+(defun slogd-toplevel ()
+  (let ((*category* "slogd"))
+    (slogd-init)
+    (slogd-run)
+    (slogd-destroy)))

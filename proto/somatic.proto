@@ -375,17 +375,17 @@ message event {
         INFO = 6;     // informational
         DEBUG = 7;    // debug-level messages
     };
-    optional int32 level = 1;
+    optional levels level = 1;
 
     enum codes {
         UNKNOWN = 0;
-        PROC_HEARTBEAT  = 1;    // period "everything's ok" message
-        PROC_STARTING  = 2;   // daemon is starting up
-        PROC_RUNNING = 3;      // daemon initialized and running
-        PROC_STOPPING = 4;     // daemon is stopping
-        PROC_HALTED = 5;       // daemon has halted
-        PROC_ERR = 6;          // daemon in an error state
-        PROC_RECOVER = 7;      // daemon has recovered from error
+        PROC_HEARTBEAT  = 1;          // period "everything's ok" message
+        PROC_STARTING  = 2;           // daemon is starting up
+        PROC_RUNNING = 3;             // daemon initialized and running
+        PROC_STOPPING = 4;            // daemon is stopping
+        PROC_HALTED = 5;              // daemon has halted
+        PROC_ERR = 6;                 // daemon in an error state
+        PROC_FAILED = 7;              // daemon has failed mysteriously
 
         COMM_BAD_MSG = 20;            // invalid message received
         COMM_FAILED_TRANSPORT = 21;   // couldn't send message
@@ -395,7 +395,11 @@ message event {
 
         BAD_PARAM = 40;               // invalid parameter
 
-        INSANE = 100;                  // really bad
+        LOGIC = 50;                   // logic error
+
+        SYS_HALT = 90;                // shutdown everything
+
+        INSANE = 100;                 // really bad
     };
 
     optional codes code = 2;        // numeric code for event type
@@ -408,9 +412,38 @@ message event {
 
     repeated limit limit = 10;
 
-    optional vector attr = 12;
-    optional ivector iattr = 13;
+    optional vector attr = 11;
+    optional ivector iattr = 12;
+    optional string sattr = 13;
 
     optional string comment = 14;
+    optional metadata meta = 15;
+}
+
+
+message monitor_cmd {
+    enum cmd_codes {
+        PROC_START = 1;     ///< start a process
+        PROC_STOP = 2;      ///< stop a process
+        PROC_RESTART = 3;   ///< restart a process
+        PROC_LIST = 4;      ///< start a process
+    }
+    required cmd_codes cmd = 1;  ///< command
+
+    optional string proc = 3; ///< process name / id
+
+    optional vector attr = 5;
+    optional ivector iattr = 6;
+    repeated string sattrs = 7;
+
+    optional metadata meta = 15;
+}
+
+message monitor_resp {
+
+    optional vector attr = 5;
+    optional ivector iattr = 6;
+    repeated string sattrs = 7;
+
     optional metadata meta = 15;
 }
