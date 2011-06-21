@@ -1,11 +1,11 @@
 ## Makefile for somatic
 
-VERSION := 0.0.200101104
+VERSION := 0.0.20110621
 
 PROJECT := somatic
 
 SHAREDLIBS := somatic
-BINFILES := somatic_motor_plot somatic_dump
+BINFILES := somatic_motor_plot somatic_dump somatic_exampled
 
 
 default: all
@@ -25,15 +25,20 @@ CFLAGS += --std=gnu99
 CFLAGS += -Wno-unused-function -Wno-conversion -Wno-deprecated-declarations
 CPPFLAGS += -Wno-unused-function -Wno-conversion -Wno-deprecated-declarations
 
+LISPDIR := lisp
+
 all: $(LIBFILES) verbatim/share/somatic/somatic.protobin $(BINFILES)
 
-LIB_OBJS := somatic_util.o somatic.pb-c.o msgply.o msg.o #$(MSG_OBJS)
+LIB_OBJS := somatic_util.o somatic.pb-c.o msgply.o msg.o daemon.o
 
 $(call LINKLIB, somatic, $(LIB_OBJS), ach protobuf-c)
 $(call LINKBIN, somatic_dump, somatic_dump.o $(LIB_OBJS), ach protobuf-c amino stdc++)
 
 
 $(call LINKBIN, somatic_motor_plot, somatic_motor_plot_argp.o somatic_motor_plot.o $(LIB_OBJS), ach protobuf-c amino stdc++)
+
+$(call LINKBIN, somatic_exampled, somatic_exampled.o $(LIB_OBJS), ach protobuf-c amino stdc++)
+
 
 
 $(MSG_OBJS): somatic.pb-c.c

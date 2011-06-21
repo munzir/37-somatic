@@ -50,6 +50,20 @@
  *  \author Neil T. Dantam
  */
 
+/** \page main Overview
+ *
+ * Somatic provides facilities to develop robot-control software as a
+ * set of communicating daemons.
+ *
+ * Each daemon runs as a separate unix process.  Interprocess
+ * communication between daemons is implemented via message passing.
+ * Messages are formatted using Google Protocol Buffers and
+ * transported using Ach, and shared-memory circular buffer library
+ * written at the Georgia Tech Humanoids Lab.
+ *
+ */
+
+
 /**
  * \param chan: ach channel to send over
  * \param type: protobuf message type string (i.e. somatic__vector,

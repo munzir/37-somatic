@@ -1,3 +1,4 @@
+#!/usr/bin/sbcl --script
 ;; Copyright 2011, Georgia Tech Research Corporation
 ;; All rights reserved.
 ;;
@@ -31,50 +32,51 @@
 ;; OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-(in-package :sns)
+;; find quicklisp
+(let ((ql0 (merge-pathnames "quicklisp/setup.lisp"
+                            (user-homedir-pathname)))
+      (ql1 (merge-pathnames ".quicklisp/setup.lisp"
+                            (user-homedir-pathname))))
+  (cond
+    ((probe-file ql0)
+     (load ql0))
+    ((probe-file ql1)
+     (load ql1))
+    (t (format t "Can't find quicklisp.")
+       (sb-ext:quit :unix-status 1))))
+
+;; load package
+(ql:quickload "somatic")
+
+(defvar *event-frame-count* 512)
+(defvar *event-frame-size* 4096)
+
+;; load config
+(when (probe-file (pathname "/etc/somatic/somatic-config.lisp"))
+  (load "/etc/somatic/somatic-config.lisp"))
+
+;; dispatch
+(labels ((start ()
+           (unless (probe-file (pathname "/dev/shm/achshm-event"))
+             (ach:create-channel "event" *event-frame-count* *event-frame-size*))
+           (clix:daemonize :out "/var/run/somatic/slogd.out"
+                           :err "/var/run/somatic/slogd.err"
+                           :pid "/var/run/somatic/slogd.pid")
+           (sns::slogd-toplevel))
+         (stop  ()
+           (sns::open-channels)
+           (sns::post-event :notice :sys-halt)
+           (sns::close-channels)))
+  ;; parse arg
+  (let ((arg (cadr sb-ext:*posix-argv*)))
+    (cond
+      ((string= arg "start")  (start))
+      ((string= arg "stop")  (stop))
+      (t (format t "Usage: somatic {start | stop}")))))
 
 
-(defun slogd-init ()
-  (open-channels)
-  (post-event :notice :proc-starting)
-  (clix:openlog "slogd")
-  )
 
 
-(defun syslog-priority (x)
-  (ecase x
-    (:emerg :log-emerg)
-    (:alert :log-alert)
-    (:crit :log-crit)
-    (:err :log-err)
-    (:warning :log-warning)
-    (:notice :log-notice)
-    (:info :log-info)
-    (:debug :log-debug)))
-
-(defun slogd-run ()
-  (post-event :notice :proc-running)
-  (loop
-     for event = (next-event)
-     do
-       (clix:syslog (syslog-priority (slot-value event 'somatic::level))
-                    "[~A].(~A)~@[ ~A~]"
-                    (slot-value event 'somatic::category)
-                    (slot-value event 'somatic::code)
-                    (slot-value event 'somatic::comment))
-     until (eq :sys-halt (slot-value event 'somatic::code))))
-
-(defun slogd-destroy ()
-  (post-event :notice :proc-stopping)
-  (clix:closelog)
-  (post-event :notice :proc-halted)
-  (close-channels))
-
-
-
-(defun slogd-toplevel ()
-  (let ((*category* "slogd"))
-    (slogd-init)
-    (slogd-run)
-    (slogd-destroy)
-    (libc::exit 0)))
+;;; Local Variables: ***
+;;; mode:lisp ***
+;;; End: ***

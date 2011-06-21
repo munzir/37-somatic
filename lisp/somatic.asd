@@ -38,7 +38,7 @@
   :depends-on ("ach" "s-protobuf" "cl-numeri" "clix")
   :components ((:file "somatic")
                (:file "sns" :depends-on ("somatic"))
-               (:file "event" :depends-on ("somatic"))
+               (:file "event" :depends-on ("somatic" "sns"))
                (:file "slogd" :depends-on ("event"))
                (:file "festival" :depends-on ("sns"))
                ))
