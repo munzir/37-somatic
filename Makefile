@@ -26,6 +26,7 @@ CFLAGS += -Wno-unused-function -Wno-conversion -Wno-deprecated-declarations
 CPPFLAGS += -Wno-unused-function -Wno-conversion -Wno-deprecated-declarations
 
 LISPDIR := lisp
+ETCDIR := ./etc
 
 all: $(LIBFILES) verbatim/share/somatic/somatic.protobin $(BINFILES)
 
