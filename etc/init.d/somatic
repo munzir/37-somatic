@@ -42,7 +42,7 @@
      (load ql0))
     ((probe-file ql1)
      (load ql1))
-    (t (format t "Can't find quicklisp.")
+    (t (format t "Can't find quicklisp.~%")
        (sb-ext:quit :unix-status 1))))
 
 ;; load package
@@ -59,6 +59,7 @@
 (labels ((start ()
            (unless (probe-file (pathname "/dev/shm/achshm-event"))
              (ach:create-channel "event" *event-frame-count* *event-frame-size*))
+           (ensure-directories-exist (pathname "/var/run/somatic/slogd.out"))
            (clix:daemonize :out "/var/run/somatic/slogd.out"
                            :err "/var/run/somatic/slogd.err"
                            :pid "/var/run/somatic/slogd.pid")
