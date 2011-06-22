@@ -47,7 +47,7 @@ src/somatic.pb-c.c: proto/somatic.proto
 	mv proto/somatic.pb-c.h $(INCLUDEDIR)
 
 
-$(INCLUDEDIR)/somatic.pb-c.h: somatic.pb-c.c
+$(INCLUDEDIR)/somatic.pb-c.h: src/somatic.pb-c.c
 
 somatic.pb-c.o: $(INCLUDEDIR)/somatic.pb-c.h
 

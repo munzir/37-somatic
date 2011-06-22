@@ -57,9 +57,9 @@
   (loop
      for event = (next-event)
      do
-       (clix:syslog (syslog-priority (slot-value event 'somatic::level))
+       (clix:syslog (syslog-priority (slot-value event 'somatic::priority))
                     "[~A].(~A)~@[ ~A~]"
-                    (slot-value event 'somatic::category)
+                    (slot-value event 'somatic::ident)
                     (slot-value event 'somatic::code)
                     (slot-value event 'somatic::comment))
      until (eq :sys-halt (slot-value event 'somatic::code))))
@@ -73,7 +73,7 @@
 
 
 (defun slogd-toplevel ()
-  (let ((*category* "slogd"))
+  (let ((*ident* "slogd"))
     (slogd-init)
     (slogd-run)
     (slogd-destroy)

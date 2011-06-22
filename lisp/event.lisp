@@ -37,7 +37,7 @@
 (defvar *channel-event-read*)
 (defvar *channel-event-write*)
 
-(defvar *category* "somatic")
+(defvar *ident* "somatic")
 (defvar *facility* 0)
 (defvar *host* (machine-instance))
 
@@ -52,16 +52,16 @@
   (ach:close-channel *channel-event-write*))
 
 
-(defun post-event (level code &key
-                   (category *category*)
+(defun post-event (priority code &key
+                   (ident *ident*)
                    (facility *facility*)
                    (host *host*)
                    comment)
   (ach:put *channel-event-write*
            (pb:encode (make-instance 'somatic::event
-                                     :level level
+                                     :priority priority
                                      :code code
-                                     :category category
+                                     :ident ident
                                      :facility facility
                                      :host host
                                      :comment comment))))
