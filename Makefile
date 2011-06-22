@@ -14,9 +14,6 @@ default: all
 CC := g++
 include /usr/share/make-common/common.1.mk
 
-#MSG_SRC_C := $(wildcard $(SRCDIR)/msg/*.c)
-#MSG_SRC_CPP := $(wildcard $(SRCDIR)/msg/*.cpp)
-#MSG_OBJS := $(addsuffix .o, $(basename $(MSG_SRC_C))) $(addsuffix .o, $(basename $(MSG_SRC_CPP)))
 
 # apparently ach requires this, or at least c99
 CFLAGS += --std=gnu99
@@ -42,7 +39,6 @@ $(call LINKBIN, somatic_exampled, somatic_exampled.o $(LIB_OBJS), ach protobuf-c
 
 
 
-$(MSG_OBJS): somatic.pb-c.c
 
 src/somatic.pb-c.c: proto/somatic.proto
 	cd proto && \
@@ -65,7 +61,10 @@ verbatim/share/somatic/somatic.protobin: proto/somatic.proto
 	protoc -o$@ $<
 
 clean:
-	rm -rf .deps $(GENHEADERS) debian *.deb *.lzma *.so $(INCLUDEDIR)/somatic.pb-c* $(SRCDIR)/somatic.pb-c* $(SRCDIR)/*.o doc $(MSG_OBJS) python/somatic_pb2.* $(BINFILES)
+	rm -rf .deps $(GENHEADERS) debian *.deb \
+		$(BUILDDIR)/* $(LISPDIR)/*.fasl \
+		$(INCLUDEDIR)/somatic.pb-c* $(SRCDIR)/somatic.pb-c*  \
+		doc python/somatic_pb2.*
 
 .PHONY: doc
 
