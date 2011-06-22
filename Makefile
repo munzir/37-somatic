@@ -44,7 +44,7 @@ $(call LINKBIN, somatic_exampled, somatic_exampled.o $(LIB_OBJS), ach protobuf-c
 
 $(MSG_OBJS): somatic.pb-c.c
 
-somatic.pb-c.c: proto/somatic.proto
+src/somatic.pb-c.c: proto/somatic.proto
 	cd proto && \
 	  protoc-c --c_out=. somatic.proto
 	mv proto/somatic.pb-c.c $(SRCDIR)
