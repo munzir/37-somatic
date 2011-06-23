@@ -158,12 +158,12 @@ AA_API void somatic_d_limit( somatic_d_t *d, int level, int quantity,
 /** Checks that test is true, otherwise logs an event at level.
  * \param priority The severity level of the check
  * \param code The event type to issue on failure
- * \param test The condition to check, zero on success
+ * \param test The condition to check, true on success
  * \param fmt A format string for the log message.
  * \return The test parameter.
  */
-AA_API int somatic_d_check( somatic_d_t *d, int priority, int code,
-                            int test, const char *type, const char fmt[], ... );
+AA_API void somatic_d_check( somatic_d_t *d, int priority, int code,
+                             int test, const char *type, const char fmt[], ... );
 
 
 /** Terminates the process when things get really bad.*/

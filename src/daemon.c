@@ -150,9 +150,9 @@ AA_API void somatic_d_limit( somatic_d_t *d, int level, int quantity,
                         int range, int index, double limit, double actual );
 
 
-AA_API int somatic_d_check( somatic_d_t *d, int priority, int code,
+AA_API void somatic_d_check( somatic_d_t *d, int priority, int code,
                             int test, const char *type, const char fmt[], ... ) {
-    if( 0 != test ) {
+    if( !test ) {
         va_list argp;
         va_start( argp, fmt );
         somatic_d_vevent(d, priority, code, type, fmt, argp);
