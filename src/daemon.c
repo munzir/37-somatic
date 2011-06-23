@@ -66,16 +66,38 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
     }
 
     // set pid
-    // set category
+
+    // set ident
+    d->ident = strdup((opts && opts->ident) ? opts->ident : "somatic");
 
     // set host
 
     // set state
+
+    // log direct
+    syslog(LOG_NOTICE, "init daemon");
+
+    // notify event
+    somatic_d_event( d, SOMATIC__EVENT__PRIORITIES__NOTICE,
+                     SOMATIC__EVENT__CODES__PROC_STARTING,
+                     NULL, NULL );
+
 }
 
 AA_API void somatic_d_destroy( somatic_d_t *d) {
+    somatic_d_event( d, SOMATIC__EVENT__PRIORITIES__NOTICE,
+                     SOMATIC__EVENT__CODES__PROC_HALTED,
+                     NULL, NULL );
+
     int r;
+    // close channels
     r = ach_close(&d->chan_event);
+
+    // free things
+    if( d->ident ) free(d->ident);
+
+    // close log
+    syslog(LOG_NOTICE, "destroy daemon");
     closelog();
 }
 
@@ -85,16 +107,58 @@ AA_API void somatic_d_state( somatic_d_t *d, int state );
 AA_API void somatic_d_heartbeat( somatic_d_t *d );
 
 
+
+static void somatic_d_vevent( somatic_d_t *d, int level, int code,
+                              const char *type, const char comment_fmt[], va_list argp ) {
+    Somatic__Event pb;
+    memset(&pb, 0, sizeof pb);
+    somatic__event__init(&pb);
+    pb.priority = level;
+    pb.has_priority = 1;
+    pb.code = code;
+    pb.has_code = 1;
+    pb.ident = d->ident;
+    char cpy_type[ type ? strlen(type) : 0 ];
+    char fmt_buf[ 512 ] = {0};
+    if(type) {
+        strcpy(cpy_type, type);
+        pb.type = cpy_type;
+    }
+
+    if( comment_fmt ) {
+        vsnprintf( fmt_buf, sizeof(fmt_buf)-2, comment_fmt, argp );
+        pb.comment =  fmt_buf;
+    }
+
+    int r = SOMATIC_PACK_SEND( &d->chan_event, somatic__event, &pb );
+    if( ACH_OK != r ) {
+        syslog( LOG_ERR, "couldn't send event: %s",
+                ach_result_to_string(r));
+    }
+}
+
 AA_API void somatic_d_event( somatic_d_t *d, int level, int code,
-                        const char *type, const char comment_fmt[], ... );
+                             const char *type, const char comment_fmt[], ... ) {
+    va_list argp;
+    va_start( argp, comment_fmt );
+    somatic_d_vevent(d, level, code, type, comment_fmt, argp);
+    va_end( argp );
+
+}
 
 AA_API void somatic_d_limit( somatic_d_t *d, int level, int quantity,
                         int range, int index, double limit, double actual );
 
 
-AA_API int somatic_d_check( somatic_d_t *d, int level, int test,
-                            const char fmt[], ... );
-
+AA_API int somatic_d_check( somatic_d_t *d, int priority, int code,
+                            int test, const char *type, const char fmt[], ... ) {
+    if( 0 != test ) {
+        va_list argp;
+        va_start( argp, fmt );
+        somatic_d_vevent(d, priority, code, type, fmt, argp);
+        va_end( argp );
+    }
+}
 AA_API void somatic_d_die() {
     abort();
 }

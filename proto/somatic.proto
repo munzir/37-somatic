@@ -397,6 +397,8 @@ message event {
 
         LOGIC = 50;                   // logic error
 
+        UI = 60;                      // user interaction
+
         SYS_HALT = 90;                // shutdown everything
 
         INSANE = 100;                 // really bad

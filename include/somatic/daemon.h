@@ -115,9 +115,8 @@ typedef struct {
 } somatic_d_t;
 
 typedef struct {
-    char *ident;
-    char *prefix;
-
+    const char *ident;
+    const char *prefix; ///< unused
 } somatic_d_opts_t;
 
 /** Initialize somatic daemon context struct.
@@ -157,13 +156,14 @@ AA_API void somatic_d_limit( somatic_d_t *d, int level, int quantity,
                         int range, int index, double limit, double actual );
 
 /** Checks that test is true, otherwise logs an event at level.
- * \param level The severity level of the check
- * \param test The condition to check
+ * \param priority The severity level of the check
+ * \param code The event type to issue on failure
+ * \param test The condition to check, zero on success
  * \param fmt A format string for the log message.
  * \return The test parameter.
  */
-AA_API int somatic_d_check( somatic_d_t *d, int level, int test,
-                            const char fmt[], ... );
+AA_API int somatic_d_check( somatic_d_t *d, int priority, int code,
+                            int test, const char *type, const char fmt[], ... );
 
 
 /** Terminates the process when things get really bad.*/
