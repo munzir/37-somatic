@@ -352,16 +352,11 @@ message can_msg {
 
 
 message limit {
-    enum ranges {
-        OK = 0;
-        LO = 1;
-        HI = 2;
-    };
-    required quantity quantity = 1;
-    required ranges range = 2;
-    optional int32 index = 3;
-    optional double limit = 4;
-    optional double actual = 5;
+    optional quantity quantity = 1;
+    optional int32 index = 2;
+    optional double actual = 3;
+    optional double min = 4;
+    optional double max = 5;
 }
 
 message event {
@@ -410,6 +405,7 @@ message event {
     optional string ident = 5;      // string for what thing the event is about
 
     optional string host = 6;
+    optional int32 pid = 7;
 
 
     repeated limit limit = 10;

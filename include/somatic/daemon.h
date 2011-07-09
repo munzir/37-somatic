@@ -152,8 +152,10 @@ AA_API void somatic_d_event( somatic_d_t *d, int level, int code,
 
 /** Sends a limit message on the event channel.
  */
-AA_API void somatic_d_limit( somatic_d_t *d, int level, int quantity,
-                        int range, int index, double limit, double actual );
+AA_API void somatic_d_limit( somatic_d_t *d, int level,
+                             const char *type, int quantity,
+                             int index, double actual,
+                             double min, double max );
 
 /** Checks that test is true, otherwise logs an event at level.
  * \param priority The severity level of the check
@@ -165,8 +167,26 @@ AA_API void somatic_d_limit( somatic_d_t *d, int level, int quantity,
 AA_API void somatic_d_check( somatic_d_t *d, int priority, int code,
                              int test, const char *type, const char fmt[], ... );
 
+/** Checks if data is outside of limits.
+ * \return 0 if within limits, nonzero otherwise
+ */
+AA_API int somatic_d_check_limit( somatic_d_t *d, int priority,
+                                  const char *type,
+                                  Somatic__Quantity quanity,
+                                  double *data,
+                                  double *min, double *max, size_t n );
+
 
 /** Terminates the process when things get really bad.*/
 AA_API void somatic_d_die();
+
+
+/** Opens a channel or dies if it can't */
+AA_API void somatic_d_channel_open(somatic_d_t *d,
+                                   ach_channel_t *chan, const char *name,
+                                   ach_attr_t *attr);
+
+/** Closes a channel */
+AA_API void somatic_d_channel_close(somatic_d_t *d, ach_channel_t *chan );
 
 #endif // SOMATIC_DAEMON_H

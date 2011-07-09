@@ -40,6 +40,7 @@
 (defvar *ident* "somatic")
 (defvar *facility* 0)
 (defvar *host* (machine-instance))
+(defvar *pid* (libc:getpid))
 
 (defun open-channels ()
   (setq *channel-event-read* (ach:open-channel "event"))
@@ -55,16 +56,20 @@
 (defun post-event (priority code &key
                    (ident *ident*)
                    (facility *facility*)
+                   (pid *pid*)
                    (host *host*)
                    comment)
-  (ach:put *channel-event-write*
-           (pb:encode (make-instance 'somatic::event
+  (let ((event (make-instance 'somatic::event
                                      :priority priority
                                      :code code
                                      :ident ident
                                      :facility facility
+                                     :pid pid
                                      :host host
-                                     :comment comment))))
+                                     :comment comment)))
+    (ach:put *channel-event-write*
+             (pb:encode event))
+    event))
 
 (defun next-event ()
   (pb:unpack (ach:wait-next *channel-event-read*)

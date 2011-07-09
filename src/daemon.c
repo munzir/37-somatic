@@ -35,6 +35,7 @@
  */
 
 #include <amino.h>
+#include <unistd.h>
 #include "somatic.h"
 #include "somatic/daemon.h"
 
@@ -43,6 +44,8 @@
 #define SOMATIC_SYSLOG_IDENT "somatic"
 #define SOMATIC_SYSLOG_FACILITY LOG_USER
 #define SOMATIC_SYSLOG_OPTION (LOG_CONS | LOG_NDELAY | LOG_PERROR)
+
+#define HOSTNAME_MAX_SIZE 512
 
 AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
     // open syslog
@@ -58,24 +61,40 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
     }
 
     // open channels
-    int r;
-    if( 0 != (r = ach_open(&d->chan_event, "event", NULL)) ) {
-        syslog(LOG_EMERG, "Couldn't open event channel: %s\n",
-               ach_result_to_string(r));
-        exit(1);
+    {
+        int r;
+        if( 0 != (r = ach_open(&d->chan_event, "event", NULL)) ) {
+            syslog(LOG_EMERG, "Couldn't open event channel: %s\n",
+                   ach_result_to_string(r));
+            exit(1);
+        }
     }
 
     // set pid
+    d->pid = getpid();
 
     // set ident
     d->ident = strdup((opts && opts->ident) ? opts->ident : "somatic");
 
     // set host
+    {
+        char buf[HOSTNAME_MAX_SIZE];
+        int r = gethostname(buf,HOSTNAME_MAX_SIZE-2);
+        if( 0 == r ) {
+            d->host = strdup(buf);
+        }else{
+            d->host = strdup("0.0.0.0");
+            syslog(LOG_ERR, "Couldn't get hostname: %s", strerror(errno));
+        }
+    }
 
     // set state
 
     // log direct
     syslog(LOG_NOTICE, "init daemon");
+
+    // install signale handler
+    somatic_sighandler_simple_install();
 
     // notify event
     somatic_d_event( d, SOMATIC__EVENT__PRIORITIES__NOTICE,
@@ -118,6 +137,9 @@ static void somatic_d_vevent( somatic_d_t *d, int level, int code,
     pb.code = code;
     pb.has_code = 1;
     pb.ident = d->ident;
+    pb.host = d->host;
+    pb.pid = d->pid;
+    pb.has_pid = 1;
     char cpy_type[ type ? strlen(type) : 0 ];
     char fmt_buf[ 512 ] = {0};
     if(type) {
@@ -146,8 +168,6 @@ AA_API void somatic_d_event( somatic_d_t *d, int level, int code,
 
 }
 
-AA_API void somatic_d_limit( somatic_d_t *d, int level, int quantity,
-                        int range, int index, double limit, double actual );
 
 
 AA_API void somatic_d_check( somatic_d_t *d, int priority, int code,
@@ -157,8 +177,89 @@ AA_API void somatic_d_check( somatic_d_t *d, int priority, int code,
         va_start( argp, fmt );
         somatic_d_vevent(d, priority, code, type, fmt, argp);
         va_end( argp );
+        fprintf(stderr, "[%s]:%d (%d).(%s) ",
+                d->ident, priority, code, type ? type : "");
+        va_start( argp, fmt );
+        vfprintf(stderr, fmt, argp );
+        va_end( argp );
     }
 }
 AA_API void somatic_d_die() {
     abort();
+}
+
+void somatic_d_channel_open(somatic_d_t *d,
+                                   ach_channel_t *chan, const char *name,
+                                   ach_attr_t *attr) {
+    int r =  ach_open( chan, name, attr );
+    somatic_d_check(d, SOMATIC__EVENT__PRIORITIES__EMERG,
+                    SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
+                    ACH_OK == r, "ach_open",
+                    "opening channel `%s': %s\n",
+                    name, ach_result_to_string(r));
+    if( ACH_OK != r ) somatic_d_die();
+    r =  ach_flush( chan );
+    somatic_d_check(d, SOMATIC__EVENT__PRIORITIES__EMERG,
+                    SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
+                    ACH_OK == r, "fflush",
+                    "flushing channel `%s': %s\n",
+                    name, ach_result_to_string(r));
+    if( ACH_OK != r ) somatic_d_die();
+}
+
+void somatic_d_channel_close(somatic_d_t *d, ach_channel_t *chan ) {
+    int r =  ach_close( chan );
+    // not much to do if it fails, just log it
+    somatic_d_check(d, SOMATIC__EVENT__PRIORITIES__ERR,
+                    SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
+                    ACH_OK == r, "ach_close",
+                    "closing channel: %s\n",
+                    ach_result_to_string(r));
+}
+
+AA_API void somatic_d_limit( somatic_d_t *d, int level,
+                             const char *type, int quantity,
+                             int idx, double actual,
+                             double min, double max ) {
+
+    Somatic__Event pb;
+    memset(&pb, 0, sizeof pb);
+    somatic__event__init(&pb);
+    pb.priority = level;
+    pb.has_priority = 1;
+    pb.code = SOMATIC__EVENT__CODES__LIMIT;
+    pb.has_code = 1;
+    pb.ident = d->ident;
+    pb.host = d->host;
+    pb.pid = d->pid;
+    pb.has_pid = 1;
+    char cpy_type[ type ? strlen(type) : 0 ];
+    if(type) {
+        strcpy(cpy_type, type);
+        pb.type = cpy_type;
+    }
+
+
+    int r = SOMATIC_PACK_SEND( &d->chan_event, somatic__event, &pb );
+    if( ACH_OK != r ) {
+        syslog( LOG_ERR, "couldn't send event: %s",
+                ach_result_to_string(r));
+    }
+
+
+ };
+
+AA_API int somatic_d_check_limit( somatic_d_t *d, int priority,
+                                  const char *type,
+                                  Somatic__Quantity quantity,
+                                  double *data,
+                                  double *min, double *max, size_t n ) {
+    int ok = 0;
+    for( size_t i = 0; i < n; i ++ ) {
+        if( data[i] < min[i] || data[i] > max[i] ) {
+            somatic_d_limit( d, priority, type, quantity, i, data[i], min[i], max[i] );
+            ok = 1;
+        }
+    }
+    return ok;
 }

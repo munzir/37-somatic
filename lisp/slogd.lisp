@@ -35,6 +35,7 @@
 
 
 (defun slogd-init ()
+  (setq *pid* (libc:getpid))
   (open-channels)
   (post-event :notice :proc-starting)
   (clix:openlog "slogd")
@@ -52,22 +53,31 @@
     (:info :log-info)
     (:debug :log-debug)))
 
+(defun slog-syslog (event)
+  (clix:syslog (syslog-priority (slot-value event 'somatic::priority))
+               "[~A].(~A)~@[.(~A)~]~@[ ~A~]~@[ ~A~]"
+               (slot-value event 'somatic::ident)
+               (slot-value event 'somatic::code)
+               (slot-value event 'somatic::type)
+               (when (find (slot-value event 'somatic::code)
+                           '(:proc-starting :proc-running
+                             :proc-stopping :proc-halted))
+                 (format nil "~A@~A"
+                         (slot-value event 'somatic::pid)
+                         (slot-value event 'somatic::host)))
+               (slot-value event 'somatic::comment)))
+
 (defun slogd-run ()
   (post-event :notice :proc-running)
   (loop
      for event = (next-event)
-     do
-       (clix:syslog (syslog-priority (slot-value event 'somatic::priority))
-                    "[~A].(~A)~@[ ~A~]"
-                    (slot-value event 'somatic::ident)
-                    (slot-value event 'somatic::code)
-                    (slot-value event 'somatic::comment))
-     until (eq :sys-halt (slot-value event 'somatic::code))))
+     do (slog-syslog event)
+     until (eq :sys-halt (slot-value event 'somatic::code)))
+  (slog-syslog (post-event :notice :proc-stopping)))
 
 (defun slogd-destroy ()
-  (post-event :notice :proc-stopping)
+  (slog-syslog (post-event :notice :proc-halted))
   (clix:closelog)
-  (post-event :notice :proc-halted)
   (close-channels))
 
 
@@ -77,4 +87,5 @@
     (slogd-init)
     (slogd-run)
     (slogd-destroy)
-    (libc::exit 0)))
+    (sleep 2)
+    (clix::exit 0)))

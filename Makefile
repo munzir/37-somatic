@@ -1,11 +1,11 @@
 ## Makefile for somatic
 
-VERSION := 0.0.20110622
+VERSION := 0.0.20110708
 
 PROJECT := somatic
 
 SHAREDLIBS := somatic
-BINFILES := somatic_motor_plot somatic_dump somatic_exampled
+BINFILES := somatic_motor_plot somatic_dump somatic_exampled somatic_live_plot
 
 
 default: all
@@ -32,6 +32,7 @@ LIB_OBJS := somatic_util.o somatic.pb-c.o msgply.o msg.o daemon.o
 $(call LINKLIB, somatic, $(LIB_OBJS), ach protobuf-c)
 $(call LINKBIN, somatic_dump, somatic_dump.o $(LIB_OBJS), ach protobuf-c amino stdc++)
 
+$(call LINKBIN, somatic_live_plot, somatic_live_plot.o $(LIB_OBJS), ach protobuf-c amino stdc++)
 
 $(call LINKBIN, somatic_motor_plot, somatic_motor_plot_argp.o somatic_motor_plot.o $(LIB_OBJS), ach protobuf-c amino stdc++)
 
