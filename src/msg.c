@@ -287,7 +287,7 @@ void somatic_motor_cmd_set( Somatic__MotorCmd *pb,
     }
     pb->param = param;
     pb->has_param = 1;
-    somatic_vector_set_data( pb->values, x, n );
+    if( x ) somatic_vector_set_data( pb->values, x, n );
 }
 
 //=== Motor State ===

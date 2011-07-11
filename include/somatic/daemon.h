@@ -164,21 +164,38 @@ AA_API void somatic_d_limit( somatic_d_t *d, int level,
  * \param fmt A format string for the log message.
  * \return The test parameter.
  */
-AA_API void somatic_d_check( somatic_d_t *d, int priority, int code,
-                             int test, const char *type, const char fmt[], ... );
+AA_API int somatic_d_check( somatic_d_t *d, int priority, int code,
+                            int test, const char *type, const char fmt[], ... );
 
 /** Checks if data is outside of limits.
- * \return 0 if within limits, nonzero otherwise
+ * \return 1 if within limits, zero otherwise
  */
-AA_API int somatic_d_check_limit( somatic_d_t *d, int priority,
-                                  const char *type,
-                                  Somatic__Quantity quanity,
-                                  double *data,
-                                  double *min, double *max, size_t n );
+AA_API int somatic_d_check_v( somatic_d_t *d, int priority, int code,
+                              const char *type,
+                              double *data, size_t n,
+                              double *min, double *max, size_t n_desired );
 
+/// Use macro SOMATIC_D_CHECK_PARM instead of calling directly
+AA_API int somatic_d_check_param( somatic_d_t *d, int test,
+                                  const char *file_name, unsigned int line_no,
+                                  const char *fun_name, const char *test_exp);
+
+#define SOMATIC_D_CHECK_PARM( d, test ) \
+    somatic_d_check_param( d, test, __FILE__, __LINE__, __func__, #test )
+
+/** Validate a message
+ * \returns test parameter
+ */
+AA_API int somatic_d_check_msg( somatic_d_t *d, int test,
+                                const char *type, const char *fmt, ... );
+/** Validate a vector in a message
+ */
+AA_API int somatic_d_check_msg_v( somatic_d_t *d, const char *type,
+                                  double *data, size_t n,
+                                  double *min, double *max, size_t n_desired );
 
 /** Terminates the process when things get really bad.*/
-AA_API void somatic_d_die();
+AA_API void somatic_d_die(somatic_d_t *d);
 
 
 /** Opens a channel or dies if it can't */
@@ -188,5 +205,8 @@ AA_API void somatic_d_channel_open(somatic_d_t *d,
 
 /** Closes a channel */
 AA_API void somatic_d_channel_close(somatic_d_t *d, ach_channel_t *chan );
+
+
+
 
 #endif // SOMATIC_DAEMON_H

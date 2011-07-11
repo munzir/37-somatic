@@ -1,11 +1,11 @@
 ## Makefile for somatic
 
-VERSION := 0.0.20110708
+VERSION := 0.0.20110711
 
 PROJECT := somatic
 
 SHAREDLIBS := somatic
-BINFILES := somatic_motor_plot somatic_dump somatic_exampled somatic_live_plot
+BINFILES := somatic_motor_plot somatic_dump somatic_live_plot
 
 
 default: all
@@ -27,7 +27,7 @@ ETCDIR := ./etc
 
 all: $(LIBFILES) verbatim/share/somatic/somatic.protobin $(BINFILES)
 
-LIB_OBJS := somatic_util.o somatic.pb-c.o msgply.o msg.o daemon.o
+LIB_OBJS := somatic_util.o somatic.pb-c.o msgply.o msg.o daemon.o motor.o
 
 $(call LINKLIB, somatic, $(LIB_OBJS), ach protobuf-c)
 $(call LINKBIN, somatic_dump, somatic_dump.o $(LIB_OBJS), ach protobuf-c amino stdc++)

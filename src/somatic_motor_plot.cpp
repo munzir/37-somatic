@@ -46,7 +46,6 @@
 #include <string.h>
 #include <stdint.h>
 #include <unistd.h>
-#include <comedilib.h>
 #include <cblas.h>
 #include <somatic.pb-c.h>
 #include <somatic/util.h>

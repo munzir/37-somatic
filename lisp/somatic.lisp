@@ -31,7 +31,6 @@
 ;; OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-
 (cl:defpackage :somatic
   (:nicknames)
   (:export :vector :matrix :points :rows :cols :point-cloud :data

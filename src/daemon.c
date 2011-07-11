@@ -88,13 +88,15 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
         }
     }
 
-    // set state
 
     // log direct
     syslog(LOG_NOTICE, "init daemon");
 
     // install signale handler
     somatic_sighandler_simple_install();
+
+    // set state
+    d->is_initialized = 1;
 
     // notify event
     somatic_d_event( d, SOMATIC__EVENT__PRIORITIES__NOTICE,
@@ -170,21 +172,41 @@ AA_API void somatic_d_event( somatic_d_t *d, int level, int code,
 
 
 
-AA_API void somatic_d_check( somatic_d_t *d, int priority, int code,
+static int somatic_d_vcheck( somatic_d_t *d, int priority, int code,
+                             int test, const char *type,
+                             const char fmt[], va_list argp ) {
+    if( !test ) {
+        va_list argp2;
+        va_copy( argp2, argp );
+        if( d && d->is_initialized ) {
+            somatic_d_vevent(d, priority, code, type, fmt, argp);
+        }else {
+            fprintf(stderr, "no valid somatic context, can't send event\n");
+        }
+
+        fprintf(stderr, "[%s]:%d (%d).(%s) ",
+                d ? d->ident : "unknown",
+                priority, code, type ? type : "");
+        vfprintf(stderr, fmt, argp );
+        fputc('\n', stderr);
+        va_end(argp2);
+    }
+    return test;
+}
+
+AA_API int somatic_d_check( somatic_d_t *d, int priority, int code,
                             int test, const char *type, const char fmt[], ... ) {
     if( !test ) {
         va_list argp;
         va_start( argp, fmt );
-        somatic_d_vevent(d, priority, code, type, fmt, argp);
-        va_end( argp );
-        fprintf(stderr, "[%s]:%d (%d).(%s) ",
-                d->ident, priority, code, type ? type : "");
-        va_start( argp, fmt );
-        vfprintf(stderr, fmt, argp );
+        somatic_d_vcheck( d, priority, code, test, type, fmt, argp );
         va_end( argp );
     }
+    return test;
 }
-AA_API void somatic_d_die() {
+
+AA_API void somatic_d_die(somatic_d_t *d) {
+    (void)d;
     abort();
 }
 
@@ -197,14 +219,14 @@ void somatic_d_channel_open(somatic_d_t *d,
                     ACH_OK == r, "ach_open",
                     "opening channel `%s': %s\n",
                     name, ach_result_to_string(r));
-    if( ACH_OK != r ) somatic_d_die();
+    if( ACH_OK != r ) somatic_d_die(d);
     r =  ach_flush( chan );
     somatic_d_check(d, SOMATIC__EVENT__PRIORITIES__EMERG,
                     SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
                     ACH_OK == r, "fflush",
                     "flushing channel `%s': %s\n",
                     name, ach_result_to_string(r));
-    if( ACH_OK != r ) somatic_d_die();
+    if( ACH_OK != r ) somatic_d_die(d);
 }
 
 void somatic_d_channel_close(somatic_d_t *d, ach_channel_t *chan ) {
@@ -233,11 +255,12 @@ AA_API void somatic_d_limit( somatic_d_t *d, int level,
     pb.host = d->host;
     pb.pid = d->pid;
     pb.has_pid = 1;
-    char cpy_type[ type ? strlen(type) : 0 ];
+    char cpy_type[ type ? strlen(type)+2 : 0 ];
     if(type) {
         strcpy(cpy_type, type);
         pb.type = cpy_type;
     }
+    // FIXME: add limit stuff
 
 
     int r = SOMATIC_PACK_SEND( &d->chan_event, somatic__event, &pb );
@@ -246,20 +269,62 @@ AA_API void somatic_d_limit( somatic_d_t *d, int level,
                 ach_result_to_string(r));
     }
 
+    fprintf(stderr, "[%s]:%d (%d).(%s) LIMIT\n",
+            d ? d->ident : "unknown",
+            pb.priority, pb.code, type ? type : "");
 
  };
 
-AA_API int somatic_d_check_limit( somatic_d_t *d, int priority,
-                                  const char *type,
-                                  Somatic__Quantity quantity,
-                                  double *data,
-                                  double *min, double *max, size_t n ) {
-    int ok = 0;
-    for( size_t i = 0; i < n; i ++ ) {
-        if( data[i] < min[i] || data[i] > max[i] ) {
-            somatic_d_limit( d, priority, type, quantity, i, data[i], min[i], max[i] );
-            ok = 1;
-        }
+AA_API int somatic_d_check_v( somatic_d_t *d, int priority,
+                              int code,
+                              const char *type,
+                              double *data, size_t n,
+                              double *min, double *max, size_t n_desired ) {
+    int r = aa_valid_v( data, n, min, max, n_desired );
+    somatic_d_check( d, priority, code,
+                     r >= 0 && n == n_desired, type,
+                     "length mismatch: %d given, %d wanted", n, n_desired );
+    if( r > 0 ) {
+        int idx = r-1;
+        somatic_d_limit( d, priority, type, 0,
+                         idx, data[idx], min[idx], max[idx] );
+
     }
-    return ok;
+    return 0 == r ? 1 : 0;
+}
+
+AA_API int somatic_d_check_param( somatic_d_t *d, int test_val,
+                                  const char *file_name,
+                                  unsigned int line_no,
+                                  const char *fun_name,
+                                  const char *test_exp) {
+    if( !test_val ) {
+        somatic_d_check( d, SOMATIC__EVENT__PRIORITIES__ERR,
+                         SOMATIC__EVENT__CODES__BAD_PARAM,
+                         test_val,
+                         fun_name, "%s:%d `%s'",
+                         file_name, line_no, test_exp );
+    }
+    return test_val;
+}
+
+AA_API int somatic_d_check_msg( somatic_d_t *d, int test,
+                                const char *type, const char *fmt, ... ) {
+    if( !test) {
+        va_list argp;
+        va_start( argp, fmt );
+        somatic_d_vcheck( d, SOMATIC__EVENT__PRIORITIES__ERR,
+                          SOMATIC__EVENT__CODES__COMM_BAD_MSG,
+                          test, type, fmt, argp );
+        va_end(argp);
+    }
+    return test;
+}
+
+AA_API int somatic_d_check_msg_v( somatic_d_t *d, const char *type,
+                              double *data, size_t n,
+                              double *min, double *max, size_t n_desired ) {
+    return somatic_d_check_v( d, SOMATIC__EVENT__PRIORITIES__ERR,
+                              SOMATIC__EVENT__CODES__COMM_BAD_MSG,
+                              type, data, n, min, max, n_desired );
 }
