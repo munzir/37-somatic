@@ -262,16 +262,16 @@ AA_API void somatic_d_limit( somatic_d_t *d, int level,
     }
     // FIXME: add limit stuff
 
-
     int r = SOMATIC_PACK_SEND( &d->chan_event, somatic__event, &pb );
     if( ACH_OK != r ) {
         syslog( LOG_ERR, "couldn't send event: %s",
                 ach_result_to_string(r));
     }
 
-    fprintf(stderr, "[%s]:%d (%d).(%s) LIMIT\n",
+    fprintf(stderr, "[%s]:%d (%d).(%s) LIMIT i: %d, val: %f, min: %f, max: %f\n",
             d ? d->ident : "unknown",
-            pb.priority, pb.code, type ? type : "");
+            pb.priority, pb.code, type ? type : "",
+            idx, actual, min, max);
 
  };
 

@@ -280,6 +280,8 @@ message motor_cmd {
 enum motor_status {
     MOTOR_OK = 0;
     MOTOR_FAIL = 1;
+    MOTOR_COMM_FAIL = 2;
+    MOTOR_HW_FAIL = 4;
 };
 
 message motor_state {
@@ -385,6 +387,7 @@ message event {
         COMM_BAD_MSG = 20;            // invalid message received
         COMM_FAILED_TRANSPORT = 21;   // couldn't send message
         COMM_TIMEOUT = 22;            // message timeout
+        COMM_DEV = 23;                // couldn't talk to device
 
         LIMIT = 30;                   // limit condition
 
@@ -393,6 +396,8 @@ message event {
         LOGIC = 50;                   // logic error
 
         UI = 60;                      // user interaction
+
+        DEV_ERR = 70;                 // device error
 
         SYS_HALT = 90;                // shutdown everything
 
