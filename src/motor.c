@@ -116,6 +116,7 @@ void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
             Somatic__Vector *vals = m->cmd_msg->values;
             m->cmd_msg->values = NULL;
             m->cmd_msg->param = cmd_type;
+            m->cmd_msg->has_param = 1;
             m->cmd_msg->values = vals;
         }
         int r = SOMATIC_PACK_SEND( &m->cmd_chan, somatic__motor_cmd, m->cmd_msg );
