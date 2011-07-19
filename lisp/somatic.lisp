@@ -36,7 +36,6 @@
   (:export :vector :matrix :points :rows :cols :point-cloud :data
            :event :level :code))
 
-
 (cl:in-package :somatic)
 
 (protoc:load-proto-set "/usr/share/somatic/somatic.protobin")

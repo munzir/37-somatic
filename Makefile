@@ -1,6 +1,6 @@
 ## Makefile for somatic
 
-VERSION := 0.0.20110718
+VERSION := 0.0.20110719
 
 PROJECT := somatic
 
@@ -16,7 +16,7 @@ include /usr/share/make-common/common.1.mk
 
 
 # apparently ach requires this, or at least c99
-CFLAGS += --std=gnu99
+CFLAGS += --std=gnu99 -O2
 
 # don't spit out warnings for all the static functions in headers
 CFLAGS += -Wno-unused-function -Wno-conversion -Wno-deprecated-declarations

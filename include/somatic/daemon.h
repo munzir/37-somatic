@@ -167,6 +167,12 @@ AA_API void somatic_d_limit( somatic_d_t *d, int level,
 AA_API int somatic_d_check( somatic_d_t *d, int priority, int code,
                             int test, const char *type, const char fmt[], ... );
 
+
+/** Logs an essertion error if test is false. */
+AA_API int somatic_d_assert_err( somatic_d_t *d, int test,
+                                 const char fmt[], ... );
+
+
 /** Checks if data is outside of limits.
  * \return 1 if within limits, zero otherwise
  */

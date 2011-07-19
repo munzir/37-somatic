@@ -41,6 +41,32 @@
 #include "somatic.pb-c.h"
 #include "somatic/msg.h"
 
+
+static void *pbregalloc_closure_alloc(void *cx, size_t size) {
+    return aa_region_alloc( (aa_region_t*)cx, size);
+}
+static void pbregalloc_closure_free(void *cx, void *ptr) {
+    (void)cx;
+    (void)ptr;
+}
+
+AA_API void somatic_pbregalloc_init( somatic_pbregalloc_t *pba, size_t n ) {
+    memset(pba, 0, sizeof(*pba));
+    aa_region_t *reg = AA_NEW0(aa_region_t);
+    aa_region_init(reg,n);
+    pba->allocator_data = reg;
+    pba->alloc = pbregalloc_closure_alloc;
+    pba->tmp_alloc = pbregalloc_closure_alloc;
+    pba->free = pbregalloc_closure_free;
+}
+AA_API void somatic_pbregalloc_destroy( somatic_pbregalloc_t *a ) {
+    aa_region_destroy( (aa_region_t*) a->allocator_data );
+    free( a->allocator_data );
+}
+AA_API void somatic_pbregalloc_release( somatic_pbregalloc_t *a ) {
+    aa_region_release( (aa_region_t*) a->allocator_data );
+}
+
 #define VECTOR_FIELD_INIT( PB, FIELD, SIZE )              \
     if( NULL == (PB)->FIELD ) {                           \
         (PB)->FIELD = somatic_vector_alloc( (SIZE) );     \

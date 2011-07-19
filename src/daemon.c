@@ -205,6 +205,20 @@ AA_API int somatic_d_check( somatic_d_t *d, int priority, int code,
     return test;
 }
 
+AA_API int somatic_d_assert_err( somatic_d_t *d, int test,
+                                 const char fmt[], ... ) {
+    if( !test ) {
+        va_list argp;
+        va_start( argp, fmt );
+        somatic_d_vcheck( d, SOMATIC__EVENT__PRIORITIES__ERR,
+                          SOMATIC__EVENT__CODES__BAD_ASSERT,
+                          test, "assert", fmt, argp );
+        va_end( argp );
+    }
+    return test;
+}
+
+
 AA_API void somatic_d_die(somatic_d_t *d) {
     (void)d;
     abort();

@@ -71,6 +71,12 @@ static void somatic_opine_timespec( Somatic__Timespec * t,
 }
 
 
+//=== Allocator ===
+typedef ProtobufCAllocator somatic_pbregalloc_t;
+
+AA_API void somatic_pbregalloc_init( somatic_pbregalloc_t *a, size_t n );
+AA_API void somatic_pbregalloc_release( somatic_pbregalloc_t *a );
+AA_API void somatic_pbregalloc_destroy( somatic_pbregalloc_t *a );
 
 //=== Timespec ===
 

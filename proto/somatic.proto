@@ -401,6 +401,7 @@ message event {
 
         SYS_HALT = 90;                // shutdown everything
 
+        BAD_ASSERT = 99;              // assertion error
         INSANE = 100;                 // really bad
     };
 
