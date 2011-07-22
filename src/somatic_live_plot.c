@@ -74,6 +74,7 @@ typedef struct {
     ach_channel_t chan_in;
     uint8_t work[1024*64];
     gnuplot_live_t plot;
+    size_t n_msg;
 } cx_t;
 
 /** Initialize the daemon */
@@ -109,6 +110,8 @@ static double opt_range_max = 10;
 static size_t opt_samples = 100;
 static double opt_frequency = 10;
 static char *opt_labels = NULL;
+static size_t *opt_indices = 0;
+static size_t opt_n_indices = 0;
 
 
 
@@ -140,13 +143,19 @@ static void init(cx_t *cx) {
 
     // init struct
     Somatic__Event *msg = next_msg(cx);
-    somatic_d_check(&cx->d_cx, SOMATIC__EVENT__PRIORITIES__EMERG,
-                    SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
-                    NULL != msg, "next_msg",
-                    "no initial msg");
-    if( NULL == msg ) { somatic_d_die(&cx->d_cx); }
+    if( !somatic_d_check(&cx->d_cx, SOMATIC__EVENT__PRIORITIES__EMERG,
+                         SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
+                         NULL != msg, "next_msg",
+                         "no initial msg") )
+    { somatic_d_die(&cx->d_cx); }
     cx->plot.n_samples = opt_samples;
-    cx->plot.n_each = msg->attr->n_data;
+    cx->n_msg = msg->attr->n_data;
+    cx->plot.n_each = opt_indices ? opt_n_indices : msg->attr->n_data;
+    for( size_t i = 0; i < opt_n_indices; i ++ ) {
+        if( opt_indices[i] >= cx->n_msg ) {
+            somatic_d_die(&cx->d_cx);
+        }
+    }
     cx->plot.data = AA_NEW0_AR(double, cx->plot.n_samples*cx->plot.n_each);
     // data labels
     if( opt_labels ) {
@@ -190,7 +199,7 @@ static Somatic__Event *next_msg(cx_t *cx) {
         // check msg
         int msg_ok =  msg->attr &&
             msg->attr->data &&
-            (msg->attr->n_data == cx->plot.n_each
+            (msg->attr->n_data == cx->n_msg
              || NULL == cx->plot.data);
         somatic_d_check(&cx->d_cx, SOMATIC__EVENT__PRIORITIES__ERR,
                         SOMATIC__EVENT__CODES__COMM_BAD_MSG,
@@ -209,9 +218,21 @@ static void update(cx_t *cx) {
     // get message
     Somatic__Event *msg = next_msg(cx);
     if( msg ) {
+        double tmpdat[cx->plot.n_each];
+        // pull out requested indices
+        for( size_t i = 0; i < opt_n_indices; i++ ) {
+            assert( opt_indices[i] < msg->attr->n_data );
+            assert( i < cx->plot.n_each );
+            tmpdat[i] = msg->attr->data[opt_indices[i]];
+        }
         // store message
-        aa_fcpy( cx->plot.data + (cx->plot.i*cx->plot.n_each), msg->attr->data,
-                 cx->plot.n_each );
+        if (opt_indices) {
+            aa_fcpy( cx->plot.data + (cx->plot.i*cx->plot.n_each), tmpdat,
+                     cx->plot.n_each );
+        } else {
+            aa_fcpy( cx->plot.data + (cx->plot.i*cx->plot.n_each), msg->attr->data,
+                     cx->plot.n_each );
+        }
         cx->plot.i = (cx->plot.i + 1) % cx->plot.n_samples;
         // free message
         somatic__event__free_unpacked( msg, &protobuf_c_system_allocator );
@@ -255,16 +276,16 @@ static void plot(gnuplot_live_t *pl) {
     if( ! pl->printed_header ) {
         pl->printed_header = 1;
         if( pl->labels )
-            fprintf(pl->gnuplot, "plot '-' with lines title '%s'",
+            fprintf(pl->gnuplot, "plot '-' with points title '%s'",
                 pl->labels[0]);
         else
-            fprintf(pl->gnuplot, "plot '-' with lines title '0'");
+            fprintf(pl->gnuplot, "plot '-' with points title '0'");
         for( size_t j = 1; j < pl->n_each; j++ ) {
             if( pl->labels )
-                fprintf(pl->gnuplot, ", '-' with lines title '%s'",
+                fprintf(pl->gnuplot, ", '-' with points title '%s'",
                     pl->labels[j]);
             else
-                fprintf(pl->gnuplot, ", '-' with lines title '%d'", j);
+                fprintf(pl->gnuplot, ", '-' with points title '%d'", j);
         }
         fprintf(pl->gnuplot, "\n");
     } else {
@@ -291,6 +312,11 @@ int main( int argc, char **argv ) {
   (void) argv;
   static cx_t cx;
   //somatic_verbprintf_prefix = "motor_plot";
+  if( opt_indices ) {
+      for(size_t i = 0; i < opt_n_indices; i++ ) {
+          fprintf(stderr, "index: %"PRIuPTR"\n", opt_indices[i]);
+      }
+  }
   argp_parse (&argp, argc, argv, 0, NULL, NULL);
   init(&cx);
   run(&cx);
@@ -333,6 +359,24 @@ int parse_opt( int key, char *arg, struct argp_state *state) {
     case 'L':
         opt_labels = strdup(arg);
         break;
+    case 'I':
+    {
+        char *str = strdup(arg);
+        size_t i;
+        for( i = 0; '\0' != str[i]; i++ ) {
+            if( ':' == str[i] ) opt_n_indices++;
+        }
+        opt_n_indices++;
+        opt_indices = AA_NEW0_AR(size_t,opt_n_indices);
+        char *s;
+        for( s = strtok(str, ":"), i = 0; s;
+             s = strtok(NULL, ":"), i++ ) {
+            assert( i < opt_n_indices );
+            opt_indices[i] = atoi(s);
+        }
+        free(str);
+        break;
+    }
     };
     return 0;
 }
@@ -363,6 +407,13 @@ struct argp_option argp_options[] = {
         .arg = "label-list",
         .flags = 0,
         .doc = "colon-seprated list of data labels"
+    },
+    {
+        .name = "indices",
+        .key = 'I',
+        .arg = "index-list",
+        .flags = 0,
+        .doc = "colon-seprated list of data indices"
     },
     {
         .name = "samples",
