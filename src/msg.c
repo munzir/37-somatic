@@ -50,14 +50,19 @@ static void pbregalloc_closure_free(void *cx, void *ptr) {
     (void)ptr;
 }
 
-AA_API void somatic_pbregalloc_init( somatic_pbregalloc_t *pba, size_t n ) {
-    memset(pba, 0, sizeof(*pba));
-    aa_region_t *reg = AA_NEW0(aa_region_t);
-    aa_region_init(reg,n);
+
+AA_API void somatic_pbregalloc_set( somatic_pbregalloc_t *pba, aa_region_t *reg ) {
     pba->allocator_data = reg;
     pba->alloc = pbregalloc_closure_alloc;
     pba->tmp_alloc = pbregalloc_closure_alloc;
     pba->free = pbregalloc_closure_free;
+}
+
+AA_API void somatic_pbregalloc_init( somatic_pbregalloc_t *pba, size_t n ) {
+    memset(pba, 0, sizeof(*pba));
+    aa_region_t *reg = AA_NEW0(aa_region_t);
+    aa_region_init(reg,n);
+    somatic_pbregalloc_set(pba, reg);
 }
 AA_API void somatic_pbregalloc_destroy( somatic_pbregalloc_t *a ) {
     aa_region_destroy( (aa_region_t*) a->allocator_data );

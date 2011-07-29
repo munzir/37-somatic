@@ -98,16 +98,19 @@ void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
         SOMATIC_D_CHECK_PARM(d,
                              SOMATIC__MOTOR_PARAM__MOTOR_CURRENT == cmd_type  ||
                              SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY == cmd_type ||
+                             SOMATIC__MOTOR_PARAM__MOTOR_POSITION == cmd_type ||
                              SOMATIC__MOTOR_PARAM__MOTOR_HALT == cmd_type  ||
                              SOMATIC__MOTOR_PARAM__MOTOR_RESET == cmd_type ) &&
         // valid array
         SOMATIC_D_CHECK_PARM(d,
                              (SOMATIC__MOTOR_PARAM__MOTOR_CURRENT == cmd_type  ||
                               SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY == cmd_type ||
+                              SOMATIC__MOTOR_PARAM__MOTOR_POSITION == cmd_type ||
                               SOMATIC__MOTOR_PARAM__MOTOR_HALT == cmd_type ) ?
                              x && m->n == n : 1 ) ) {
         if( SOMATIC__MOTOR_PARAM__MOTOR_CURRENT == cmd_type  ||
             SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY == cmd_type ||
+            SOMATIC__MOTOR_PARAM__MOTOR_POSITION == cmd_type ||
             SOMATIC__MOTOR_PARAM__MOTOR_HALT == cmd_type ) {
             // value message
             somatic_motor_cmd_set(m->cmd_msg, cmd_type, x, n);

@@ -112,12 +112,17 @@ typedef struct {
     char *ident;                  ///< identifier for this daemon
     char *host;                   ///< hostname for this daemon
     int state;                    ///< {starting,running,stopping,halted,err}
+    aa_region_t memreg;           ///< memory region
+    somatic_pbregalloc_t pballoc;  ///< protobuf-c allocator
 } somatic_d_t;
 
 typedef struct {
     const char *ident;
     const char *prefix; ///< unused
+    size_t region_size;
 } somatic_d_opts_t;
+
+#define SOMATIC_D_DEFAULT_REGION_SIZE (1024*64)
 
 /** Initialize somatic daemon context struct.
 

@@ -92,6 +92,13 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
     // log direct
     syslog(LOG_NOTICE, "init daemon");
 
+    // setup memory allocator
+    aa_region_init( &d->memreg,
+                    opts->region_size ?
+                    opts->region_size :
+                    SOMATIC_D_DEFAULT_REGION_SIZE );
+    somatic_pbregalloc_set( &d->pballoc, &d->memreg );
+
     // install signale handler
     somatic_sighandler_simple_install();
 
