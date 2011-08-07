@@ -34,8 +34,13 @@
  *
  */
 
+// needed for getsid
+#define _GNU_SOURCE
+
 #include <amino.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include "somatic.h"
 #include "somatic/daemon.h"
 
@@ -47,7 +52,87 @@
 
 #define HOSTNAME_MAX_SIZE 512
 
+#define SOMATIC_RUNROOT "/var/run/somatic/"
+#define SOMATIC_LOCKFLEN 0
+
+static void d_check(int test, const char *fmt, ... ) {
+    if( ! test ) {
+        va_list ap;
+        va_start(ap, fmt);
+        vsyslog(LOG_CRIT, fmt, ap);
+        va_end(ap);
+        exit(EXIT_FAILURE);
+    }
+}
+
+AA_API void somatic_d_daemonize( somatic_d_t *d ) {
+    // Q: Should we do some setup work before or after the fork?
+
+    // check if already daemonized
+    if( 1 == getppid() ) { // getppid always successful
+        syslog(LOG_NOTICE, "parent is init, odd");
+        return;
+    }
+    // open pid file
+    const char *pidnam = aa_region_printf(&d->memreg, SOMATIC_RUNROOT"%s.pid", d->ident);
+    int pidfileno = open( pidnam, O_RDWR| O_CREAT,0640);
+    d_check( 0 < pidfileno, "Couldn't open pidfile `%s': %s", pidnam, strerror(errno));
+
+
+    // check pid file lock
+    d_check( pidfileno >= 0, "Bad pid file number: %d", pidfileno );
+    d_check( 0 == lockf( pidfileno, F_TEST, SOMATIC_LOCKFLEN ), "Couldn't lock `%s', daemon already running", pidnam );
+
+    // open new fds
+    const char *outnam = aa_region_printf(&d->memreg,SOMATIC_RUNROOT"%s.out", d->ident);
+    int new_out = open( outnam, O_APPEND|O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH );
+    d_check( new_out >= 0, "Couldn't open daemon output `%s': %s", outnam, strerror(errno));
+
+    // chdir
+    const char *wd = "/";
+    d_check( 0 == chdir(wd),  "Couldn't chdir to `%s': %s", wd, strerror(errno));
+
+    // fork
+    int pid = fork();
+    // parent dies, now in child
+    if( 0 < pid ) exit(EXIT_SUCCESS);
+    d_check( pid == 0, "fork failed: %s", strerror(errno) );
+    d->pid = getpid();
+
+    // lock pid file
+    d_check( 0 == lockf(pidfileno, F_TLOCK, SOMATIC_LOCKFLEN),
+             "Couldn't lock `%s' in child, possible race: %s", strerror(errno));
+    d->lockfile = fdopen(pidfileno, "w");
+    d_check( NULL != d->lockfile, "Couldn't fdopen pidfile `%s': %s", pidnam, strerror(errno));
+    // write pid
+    int r =  fprintf(d->lockfile, "%d", d->pid );
+    d_check( 0 < r, "Couldn't write pid to `%s': printf said %d", pidnam, r);
+    do{ r = fflush(d->lockfile); }
+    while( 0 != r && EINTR == errno );
+    d_check( 0 == r, "Couldn't flush pid to `%s':  %s", pidnam, strerror(errno));
+
+    // set session id
+    pid_t csid = getsid(0);
+    pid_t pgrp = getpgrp();
+    pid_t sid = setsid();
+    d_check( sid > 0, "Couldn't set sesion id, pid: %d, pgrp: %d, setsid %d, getsid: %d: %s",
+             d->pid, pgrp, sid, csid, strerror(errno) );
+
+    // dup fds
+    d_check( dup2( new_out, STDOUT_FILENO ) , "dup to stdout failed: %s", strerror(errno) );
+    d_check( dup2( new_out, STDERR_FILENO ) , "dup to stderr failed: %s", strerror(errno) );
+    close(new_out);
+
+    // file mask
+    umask(0); // always successful
+}
+
 AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
+    // copy opts
+    d->opts = *opts;
+    d->opts.ident = NULL;
+    d->opts.prefix = NULL;
+
     // open syslog
     openlog( (opts && opts->ident) ? opts->ident: "somatic",
             SOMATIC_SYSLOG_OPTION,
@@ -57,40 +142,11 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
     if( 0 != d->is_initialized ) {
         syslog(LOG_EMERG,
                "Tried to reinitialize somatic_d_t instance.  Quitting.");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
-
-    // open channels
-    {
-        int r;
-        if( 0 != (r = ach_open(&d->chan_event, "event", NULL)) ) {
-            syslog(LOG_EMERG, "Couldn't open event channel: %s\n",
-                   ach_result_to_string(r));
-            exit(1);
-        }
-    }
-
-    // set pid
-    d->pid = getpid();
 
     // set ident
     d->ident = strdup((opts && opts->ident) ? opts->ident : "somatic");
-
-    // set host
-    {
-        char buf[HOSTNAME_MAX_SIZE];
-        int r = gethostname(buf,HOSTNAME_MAX_SIZE-2);
-        if( 0 == r ) {
-            d->host = strdup(buf);
-        }else{
-            d->host = strdup("0.0.0.0");
-            syslog(LOG_ERR, "Couldn't get hostname: %s", strerror(errno));
-        }
-    }
-
-
-    // log direct
-    syslog(LOG_NOTICE, "init daemon");
 
     // setup memory allocator
     aa_region_init( &d->memreg,
@@ -104,6 +160,36 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
 
     somatic_pbregalloc_set( &d->pballoc, &d->memreg );
 
+    // daemonize
+    if( d->opts.daemonize ) {
+        somatic_d_daemonize(d);
+    } else d->pid = getpid();
+
+    // open channels
+    {
+        int r;
+        if( 0 != (r = ach_open(&d->chan_event, "event", NULL)) ) {
+            syslog(LOG_EMERG, "Couldn't open event channel: %s\n",
+                   ach_result_to_string(r));
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    // set host
+    {
+        char buf[HOSTNAME_MAX_SIZE];
+        int r = gethostname(buf,HOSTNAME_MAX_SIZE-2);
+        if( 0 == r ) {
+            d->host = strdup(buf);
+        }else{
+            d->host = strdup("0.0.0.0");
+            syslog(LOG_ERR, "Couldn't get hostname: %s", strerror(errno));
+        }
+    }
+
+    // log direct
+    syslog(LOG_NOTICE, "init daemon");
+
     // install signale handler
     if( ! opts->skip_sighandler )
         somatic_sighandler_simple_install();
@@ -115,6 +201,8 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
     somatic_d_event( d, SOMATIC__EVENT__PRIORITIES__NOTICE,
                      SOMATIC__EVENT__CODES__PROC_STARTING,
                      NULL, NULL );
+    // release regions
+    aa_region_release(&d->memreg);
 
 }
 
@@ -124,6 +212,15 @@ AA_API void somatic_d_destroy( somatic_d_t *d) {
                      NULL, NULL );
 
     int r;
+    // undaemonize
+    if( d->opts.daemonize ) {
+        // close the pid file, this clobbers our lock as well
+        if( 0 != fclose(d->lockfile) ) {
+            syslog(LOG_ERR, "Error closing lockfile: %s", strerror(errno) );
+        }
+    }
+
+
     // close channels
     r = ach_close(&d->chan_event);
 
@@ -361,17 +458,15 @@ AA_API int somatic_d_check_msg_v( somatic_d_t *d, const char *type,
 AA_API void *somatic_d_get( somatic_d_t *d, ach_channel_t *chan, size_t *frame_size,
                             const struct timespec *ACH_RESTRICT abstime, int options, int *ret ) {
     size_t fs;
-    do {
+    while(1){
         fs = 0;
         // try to get the frame
         *ret = ach_get( chan, aa_region_ptr(&d->tmpreg), aa_region_freesize(&d->tmpreg),
                         &fs, abstime, options );
-        if( ACH_OVERFLOW == *ret ) {
-            // if region is too small, get a bigger buffer
-            aa_region_tmpalloc( &d->tmpreg, *frame_size );
-            continue;
-        } else break;
-    } while(1);
+        if( ACH_OVERFLOW != *ret ) break;
+        // if region is too small, get a bigger buffer
+        aa_region_tmpalloc( &d->tmpreg, *frame_size );
+    }
     *frame_size = fs;
     return aa_region_ptr(&d->tmpreg);
 }

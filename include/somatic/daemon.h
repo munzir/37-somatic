@@ -101,6 +101,16 @@
  *
  */
 
+
+typedef struct {
+    const char *ident;
+    const char *prefix; ///< unused
+    size_t region_size;
+    size_t tmpregion_size;
+    int skip_sighandler;
+    int daemonize;
+} somatic_d_opts_t;
+
 /** A somatic daemon context.*/
 typedef struct {
     int is_initialized;           ///< is the struct initialized
@@ -114,17 +124,10 @@ typedef struct {
     int state;                    ///< {starting,running,stopping,halted,err}
     aa_region_t memreg;           ///< memory region
     aa_region_t tmpreg;           ///< memory region for temporaries, ie ach buffers, lapack work arrays
-    somatic_pbregalloc_t pballoc;  ///< protobuf-c allocator that uses memreg
+    somatic_pbregalloc_t pballoc; ///< protobuf-c allocator that uses memreg
+    somatic_d_opts_t opts;        ///< options used for this daemon
+    FILE *lockfile;               ///< lock file
 } somatic_d_t;
-
-typedef struct {
-    const char *ident;
-    const char *prefix; ///< unused
-    size_t region_size;
-    size_t tmpregion_size;
-    int skip_sighandler;
-    int daemonize;
-} somatic_d_opts_t;
 
 #define SOMATIC_D_DEFAULT_REGION_SIZE    (64 * (1<<10))
 #define SOMATIC_D_DEFAULT_TMPREGION_SIZE (16 * (1<<10))

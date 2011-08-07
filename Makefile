@@ -16,7 +16,7 @@ include /usr/share/make-common/common.1.mk
 
 
 # apparently ach requires this, or at least c99
-CFLAGS += --std=gnu99 -O2
+CFLAGS += --std=gnu99 -O0
 
 # don't spit out warnings for all the static functions in headers
 CFLAGS += -Wno-unused-function -Wno-conversion -Wno-deprecated-declarations
