@@ -40,7 +40,7 @@
 #ifdef __cplusplus
 
 #include "somatic.pb-c.h"
-#include <bullet/LinearMath/btTransform.h>
+//#include <bullet/LinearMath/btTransform.h>
 #include "util.h"
 
 
@@ -50,12 +50,12 @@
 // somatic_MSGNAME_set_FIELD
 // somatic_MSGNAME_get_FIELD
 
-btTransform somatic_ply_transform( Somatic__Transform * );
-btTransform somatic_ply_transform( const double *x, size_t n );
+//btTransform somatic_ply_transform( Somatic__Transform * );
+//btTransform somatic_ply_transform( const double *x, size_t n );
 
-void somatic_opine_quaternion( double *x, size_t n, const btQuaternion &q );
-void somatic_opine_vector3( double *x, size_t n, const btVector3 &v );
-void somatic_opine_transform( double *x, size_t n, const btTransform &T );
+//void somatic_opine_quaternion( double *x, size_t n, const btQuaternion &q );
+//void somatic_opine_vector3( double *x, size_t n, const btVector3 &v );
+//void somatic_opine_transform( double *x, size_t n, const btTransform &T );
 
 #endif
 
@@ -163,5 +163,10 @@ AA_API void somatic_motor_state_set_current( Somatic__MotorState *pb,
 //=== Joystick ===
 AA_API Somatic__Joystick *somatic_joystick_alloc(size_t n_axes, size_t n_buttons);
 AA_API void somatic_joystick_free(Somatic__Joystick *pb);
+
+
+//=== Event ===
+const char *somatic_event_code2str(Somatic__Event__Codes code);
+const char *somatic_event_pri2str(Somatic__Event__Priorities pri);
 
 #endif //SOMATIC_MSG_H

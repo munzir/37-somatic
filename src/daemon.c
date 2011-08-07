@@ -97,10 +97,16 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
                     opts->region_size ?
                     opts->region_size :
                     SOMATIC_D_DEFAULT_REGION_SIZE );
+    aa_region_init( &d->tmpreg,
+                    opts->tmpregion_size ?
+                    opts->tmpregion_size :
+                    SOMATIC_D_DEFAULT_TMPREGION_SIZE );
+
     somatic_pbregalloc_set( &d->pballoc, &d->memreg );
 
     // install signale handler
-    somatic_sighandler_simple_install();
+    if( ! opts->skip_sighandler )
+        somatic_sighandler_simple_install();
 
     // set state
     d->is_initialized = 1;
@@ -123,6 +129,8 @@ AA_API void somatic_d_destroy( somatic_d_t *d) {
 
     // free things
     if( d->ident ) free(d->ident);
+    aa_region_destroy(&d->memreg);
+    aa_region_destroy(&d->tmpreg);
 
     // close log
     syslog(LOG_NOTICE, "destroy daemon");
@@ -349,3 +357,22 @@ AA_API int somatic_d_check_msg_v( somatic_d_t *d, const char *type,
                               SOMATIC__EVENT__CODES__COMM_BAD_MSG,
                               type, data, n, min, max, n_desired );
 }
+
+AA_API void *somatic_d_get( somatic_d_t *d, ach_channel_t *chan, size_t *frame_size,
+                            const struct timespec *ACH_RESTRICT abstime, int options, int *ret ) {
+    size_t fs;
+    do {
+        fs = 0;
+        // try to get the frame
+        *ret = ach_get( chan, aa_region_ptr(&d->tmpreg), aa_region_freesize(&d->tmpreg),
+                        &fs, abstime, options );
+        if( ACH_OVERFLOW == *ret ) {
+            // if region is too small, get a bigger buffer
+            aa_region_tmpalloc( &d->tmpreg, *frame_size );
+            continue;
+        } else break;
+    } while(1);
+    *frame_size = fs;
+    return aa_region_ptr(&d->tmpreg);
+}
+

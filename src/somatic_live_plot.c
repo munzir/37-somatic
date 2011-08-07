@@ -285,7 +285,7 @@ static void plot(gnuplot_live_t *pl) {
                 fprintf(pl->gnuplot, ", '-' with points title '%s'",
                     pl->labels[j]);
             else
-                fprintf(pl->gnuplot, ", '-' with points title '%d'", j);
+                fprintf(pl->gnuplot, ", '-' with points title '%"PRIuPTR"'", j);
         }
         fprintf(pl->gnuplot, "\n");
     } else {

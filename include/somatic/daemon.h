@@ -113,16 +113,21 @@ typedef struct {
     char *host;                   ///< hostname for this daemon
     int state;                    ///< {starting,running,stopping,halted,err}
     aa_region_t memreg;           ///< memory region
-    somatic_pbregalloc_t pballoc;  ///< protobuf-c allocator
+    aa_region_t tmpreg;           ///< memory region for temporaries, ie ach buffers, lapack work arrays
+    somatic_pbregalloc_t pballoc;  ///< protobuf-c allocator that uses memreg
 } somatic_d_t;
 
 typedef struct {
     const char *ident;
     const char *prefix; ///< unused
     size_t region_size;
+    size_t tmpregion_size;
+    int skip_sighandler;
+    int daemonize;
 } somatic_d_opts_t;
 
-#define SOMATIC_D_DEFAULT_REGION_SIZE (1024*64)
+#define SOMATIC_D_DEFAULT_REGION_SIZE    (64 * (1<<10))
+#define SOMATIC_D_DEFAULT_TMPREGION_SIZE (16 * (1<<10))
 
 /** Initialize somatic daemon context struct.
 
@@ -217,7 +222,57 @@ AA_API void somatic_d_channel_open(somatic_d_t *d,
 /** Closes a channel */
 AA_API void somatic_d_channel_close(somatic_d_t *d, ach_channel_t *chan );
 
+/** Gets a frame from the ach channel, storing in memory region
+ * d->tmpreg.  If d->tmpreg is too small to hold the next frame, the
+ * region will be enlarged and the get() retried.
+ *
+ * \pre chan is an opened and d is initialized
+ *
+ * \post The head pointer of d->tmpreg is NOT incremented.  The head
+ * pointer of d->tmpreg points to the frame buffer.
+ *
+ * \return pointer to the frame data buffer, allocated from d->tmpreg
+ */
+AA_API void *somatic_d_get( somatic_d_t *d, ach_channel_t *chan, size_t *frame_size,
+                            const struct timespec *ACH_RESTRICT abstime, int options, int *ret );
 
+/**
+ * \param d: somatic_daemon_t context struct
+ * \param ret: ach return code
+ * \param type: protobuf message type string (i.e. somatic__vector,
+ *  			NOT actual Somatic__Vector type)
+ * \param alloc: protobuf allocator (ie, &protobuf_c_system_allocator)
+ * \param size: size of buffer to give ach
+ * \param chan: ach channel pointer
+ */
+#define SOMATIC_D_GET(ret, type, d, chan, abstime, opts )               \
+    ({                                                                  \
+        size_t _somatic_private_nread = 0;                              \
+        uint8_t *_somatic_private_buf = (uint8_t*)                      \
+            somatic_d_get( (d), (chan), &_somatic_private_nread,        \
+                           (abstime), (opts), (ret) );                  \
+        ( _somatic_private_nread ) ?                                    \
+            type ## __unpack( &(d)->pballoc, _somatic_private_nread,     \
+                              _somatic_private_buf ) :                  \
+            NULL ;                                                      \
+    })
 
+/**
+ * \param d: daemon context
+ * \param chan: ach channel to send over
+ * \param type: protobuf message type string (i.e. somatic__vector,
+ *  			NOT actual Somatic__Vector type)
+ * \param msg: pointer to the protobuf message
+ */
+#define SOMATIC_D_PUT( type, d, chan, msg )                     \
+    ({                                                          \
+        size_t _somatic_private_n =                             \
+            type ## __get_packed_size(msg);                     \
+        uint8_t *_somatic_private_buf =                         \
+            aa_region_tmpalloc(&d->tmpreg, _somatic_private_n); \
+        type ## __pack( msg, &_somatic_private_buf[0] );        \
+        ach_put( chan, _somatic_private_buf,                    \
+                 _somatic_private_n );                          \
+    })
 
 #endif // SOMATIC_DAEMON_H

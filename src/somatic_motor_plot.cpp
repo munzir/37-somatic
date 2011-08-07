@@ -37,6 +37,10 @@
 /** Author: Neil Dantam
  */
 
+#include "somatic.h"
+#include "somatic/daemon.h"
+#include <amino.h>
+#include <inttypes.h>
 #include <argp.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -166,7 +170,7 @@ static void plot() {
 
     // plot header
      fprintf(global_gnuplot, "plot '-' with lines title '0'");
-     for( size_t i = 0; i < global_samples.front().size(); i++ ) {
+     for( int i = 0; i < (int)global_samples.front().size(); i++ ) {
          fprintf(global_gnuplot, ", '-' with lines title '%d'", i);
      }
      fprintf(global_gnuplot, "\n");

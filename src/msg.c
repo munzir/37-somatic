@@ -375,3 +375,46 @@ void somatic_joystick_free(Somatic__Joystick *pb) {
         free(pb);
     }
 }
+
+
+//=== Event ===
+
+const char *somatic_event_pri2str(Somatic__Event__Priorities pri) {
+    switch(pri) {
+    case SOMATIC__EVENT__PRIORITIES__EMERG: return "EMERG";
+    case SOMATIC__EVENT__PRIORITIES__CRIT: return "CRIT";
+    case SOMATIC__EVENT__PRIORITIES__ALERT: return "ALERT";
+    case SOMATIC__EVENT__PRIORITIES__ERR: return "ERR";
+    case SOMATIC__EVENT__PRIORITIES__WARNING: return "WARNING";
+    case SOMATIC__EVENT__PRIORITIES__NOTICE: return "NOTICE";
+    case SOMATIC__EVENT__PRIORITIES__INFO: return "INFO";
+    case SOMATIC__EVENT__PRIORITIES__DEBUG: return "DEBUG";
+    }
+    return "unknown";
+}
+
+const char *somatic_event_code2str(Somatic__Event__Codes code) {
+    switch(code) {
+    case SOMATIC__EVENT__CODES__UNKNOWN: return "UNKNOWN";
+    case SOMATIC__EVENT__CODES__PROC_HEARTBEAT: return "PROC_HEARTBEAT";
+    case SOMATIC__EVENT__CODES__PROC_STARTING: return "PROC_STARTING";
+    case SOMATIC__EVENT__CODES__PROC_RUNNING: return "PROC_RUNNING";
+    case SOMATIC__EVENT__CODES__PROC_STOPPING: return "PROC_STOPPING";
+    case SOMATIC__EVENT__CODES__PROC_HALTED: return "PROC_HALTED";
+    case SOMATIC__EVENT__CODES__PROC_ERR: return "PROC_ERR";
+    case SOMATIC__EVENT__CODES__PROC_FAILED: return "PROC_FAILED";
+    case SOMATIC__EVENT__CODES__COMM_BAD_MSG: return "COMM_BAD_MSG";
+    case SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT: return "COMM_FAILED_TRANSPORT";
+    case SOMATIC__EVENT__CODES__COMM_TIMEOUT: return "COMM_TIMEOUT";
+    case SOMATIC__EVENT__CODES__COMM_DEV: return "COMM_DEV";
+    case SOMATIC__EVENT__CODES__LIMIT: return "LIMIT";
+    case SOMATIC__EVENT__CODES__BAD_PARAM: return "BAD_PARAM";
+    case SOMATIC__EVENT__CODES__LOGIC: return "LOGIC";
+    case SOMATIC__EVENT__CODES__UI: return "UI";
+    case SOMATIC__EVENT__CODES__DEV_ERR: return "DEV_ERR";
+    case SOMATIC__EVENT__CODES__SYS_HALT: return "SYS_HALT";
+    case SOMATIC__EVENT__CODES__BAD_ASSERT: return "BAD_ASSERT";
+    case SOMATIC__EVENT__CODES__INSANE: return "INSANE";
+    }
+    return "unknown";
+}

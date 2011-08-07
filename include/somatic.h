@@ -82,7 +82,6 @@
 
 
 
-
 /**
  * \param ret: ach return code
  * \param type: protobuf message type string (i.e. somatic__vector,

@@ -58,7 +58,10 @@
 ;; dispatch
 (labels ((start ()
            (unless (probe-file (pathname "/dev/shm/achshm-event"))
-             (ach:create-channel "event" *event-frame-count* *event-frame-size*))
+             (ach:create-channel "event" *event-frame-count* *event-frame-size*)
+             (let ((chan (ach:open-channel "event")))
+               (ach:chmod chan #o666)
+               (ach:close-channel chan)))
            (ensure-directories-exist (pathname "/var/run/somatic/slogd.out"))
            (clix:daemonize :out "/var/run/somatic/slogd.out"
                            :err "/var/run/somatic/slogd.err"

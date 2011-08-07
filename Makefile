@@ -5,7 +5,7 @@ VERSION := 0.0.20110719
 PROJECT := somatic
 
 SHAREDLIBS := somatic
-BINFILES := somatic_motor_plot somatic_dump somatic_live_plot
+BINFILES := somatic_motor_plot somatic_dump somatic_live_plot somatic_test_source slogd
 
 
 default: all
@@ -27,16 +27,18 @@ ETCDIR := ./etc
 
 all: $(LIBFILES) verbatim/share/somatic/somatic.protobin $(BINFILES)
 
-LIB_OBJS := somatic_util.o somatic.pb-c.o msgply.o msg.o daemon.o motor.o
+LIB_OBJS := somatic_util.o somatic.pb-c.o  msg.o daemon.o motor.o
 
 $(call LINKLIB, somatic, $(LIB_OBJS), ach protobuf-c)
 $(call LINKBIN, somatic_dump, somatic_dump.o $(LIB_OBJS), ach protobuf-c amino stdc++)
 
 $(call LINKBIN, somatic_live_plot, somatic_live_plot.o $(LIB_OBJS), ach protobuf-c amino stdc++)
+$(call LINKBIN, somatic_test_source, somatic_test_source.o $(LIB_OBJS), ach protobuf-c amino stdc++)
 
 $(call LINKBIN, somatic_motor_plot, somatic_motor_plot_argp.o somatic_motor_plot.o $(LIB_OBJS), ach protobuf-c amino stdc++)
 
 $(call LINKBIN, somatic_exampled, somatic_exampled.o $(LIB_OBJS), ach protobuf-c amino stdc++)
+$(call LINKBIN, slogd, slogd.o $(LIB_OBJS), ach protobuf-c amino)
 
 
 
@@ -49,6 +51,8 @@ src/somatic.pb-c.c: proto/somatic.proto
 
 
 $(INCLUDEDIR)/somatic.pb-c.h: src/somatic.pb-c.c
+
+dep: $(INCLUDEDIR)/somatic.pb-c.h
 
 somatic.pb-c.o: $(INCLUDEDIR)/somatic.pb-c.h
 
