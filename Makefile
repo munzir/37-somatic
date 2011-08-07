@@ -5,7 +5,7 @@ VERSION := 0.0.20110719
 PROJECT := somatic
 
 SHAREDLIBS := somatic
-BINFILES := somatic_motor_plot somatic_dump somatic_live_plot somatic_test_source slogd
+BINFILES := somatic_motor_plot somatic_dump somatic_live_plot somatic_test_source slogd sns
 
 
 default: all
@@ -39,6 +39,7 @@ $(call LINKBIN, somatic_motor_plot, somatic_motor_plot_argp.o somatic_motor_plot
 
 $(call LINKBIN, somatic_exampled, somatic_exampled.o $(LIB_OBJS), ach protobuf-c amino stdc++)
 $(call LINKBIN, slogd, slogd.o $(LIB_OBJS), ach protobuf-c amino)
+$(call LINKBIN, sns, sns.o $(LIB_OBJS), ach protobuf-c amino)
 
 
 

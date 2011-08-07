@@ -132,6 +132,8 @@ typedef struct {
 #define SOMATIC_D_DEFAULT_REGION_SIZE    (64 * (1<<10))
 #define SOMATIC_D_DEFAULT_TMPREGION_SIZE (16 * (1<<10))
 
+#define SOMATIC_RUNROOT "/var/run/somatic/"
+
 /** Initialize somatic daemon context struct.
 
     Call this function before doing anything else in your daemon.

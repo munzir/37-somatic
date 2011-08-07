@@ -52,7 +52,6 @@
 
 #define HOSTNAME_MAX_SIZE 512
 
-#define SOMATIC_RUNROOT "/var/run/somatic/"
 #define SOMATIC_LOCKFLEN 0
 
 static void d_check(int test, const char *fmt, ... ) {
@@ -215,8 +214,13 @@ AA_API void somatic_d_destroy( somatic_d_t *d) {
     // undaemonize
     if( d->opts.daemonize ) {
         // close the pid file, this clobbers our lock as well
+        char *nam = aa_region_printf(&d->memreg, SOMATIC_RUNROOT"%s.pid", d->ident);
         if( 0 != fclose(d->lockfile) ) {
-            syslog(LOG_ERR, "Error closing lockfile: %s", strerror(errno) );
+            syslog(LOG_ERR, "Error closing `%s': %s", nam, strerror(errno) );
+        }
+        // unlink pid file so nobody gets confuse later
+        if( 0 != unlink(nam) ) {
+            syslog(LOG_ERR, "Error unlinking `%s': %s", nam, strerror(errno) );
         }
     }
 
