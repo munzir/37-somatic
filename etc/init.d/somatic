@@ -1,0 +1,37 @@
+#!/bin/bash
+
+SLOGD_IDENT="slogd"
+CHANFILE_EVENT=`ach -F event`
+
+start() {
+    # create channel
+    ach --once --create event --mode 666 --msg-size 4096 --msg-cnt 512
+
+    # create rundir
+    mkdir -p /var/run/somatic
+    chmod 777 /var/run/somatic
+
+    # start daemon
+    /usr/bin/slogd -d -I "$SLOGD_IDENT" || (echo "Failed to start slogd" && exit 1)
+}
+
+stop() {
+    sns -k "$SLOGD_IDENT"
+}
+
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage: /etc/init.d/somatic {start|stop|restart}"
+        exit 1;
+esac
