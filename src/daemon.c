@@ -46,13 +46,10 @@
 
 #include <syslog.h>
 
-#define SOMATIC_SYSLOG_IDENT "somatic"
 #define SOMATIC_SYSLOG_FACILITY LOG_USER
 #define SOMATIC_SYSLOG_OPTION (LOG_CONS | LOG_NDELAY | LOG_PERROR)
 
 #define HOSTNAME_MAX_SIZE 512
-
-#define SOMATIC_LOCKFLEN 0
 
 static void d_check(int test, const char *fmt, ... ) {
     if( ! test ) {
@@ -80,7 +77,7 @@ AA_API void somatic_d_daemonize( somatic_d_t *d ) {
 
     // check pid file lock
     d_check( pidfileno >= 0, "Bad pid file number: %d", pidfileno );
-    d_check( 0 == lockf( pidfileno, F_TEST, SOMATIC_LOCKFLEN ), "Couldn't lock `%s', daemon already running", pidnam );
+    d_check( 0 == lockf( pidfileno, F_TEST, 0 ), "Couldn't lock `%s', daemon already running", pidnam );
 
     // open new fds
     const char *outnam = aa_region_printf(&d->memreg,SOMATIC_RUNROOT"%s.out", d->ident);
@@ -99,7 +96,7 @@ AA_API void somatic_d_daemonize( somatic_d_t *d ) {
     d->pid = getpid();
 
     // lock pid file
-    d_check( 0 == lockf(pidfileno, F_TLOCK, SOMATIC_LOCKFLEN),
+    d_check( 0 == lockf(pidfileno, F_TLOCK, 0),
              "Couldn't lock `%s' in child, possible race: %s", strerror(errno));
     d->lockfile = fdopen(pidfileno, "w");
     d_check( NULL != d->lockfile, "Couldn't fdopen pidfile `%s': %s", pidnam, strerror(errno));
@@ -116,6 +113,11 @@ AA_API void somatic_d_daemonize( somatic_d_t *d ) {
     pid_t sid = setsid();
     d_check( sid > 0, "Couldn't set sesion id, pid: %d, pgrp: %d, setsid %d, getsid: %d: %s",
              d->pid, pgrp, sid, csid, strerror(errno) );
+
+    // reopen syslog, no print to stderr
+    closelog();
+    openlog(d->ident, SOMATIC_SYSLOG_OPTION & ~LOG_PERROR,
+            SOMATIC_SYSLOG_FACILITY);
 
     // dup fds
     d_check( dup2( new_out, STDOUT_FILENO ) , "dup to stdout failed: %s", strerror(errno) );
@@ -134,8 +136,8 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
 
     // open syslog
     openlog( (opts && opts->ident) ? opts->ident: "somatic",
-            SOMATIC_SYSLOG_OPTION,
-            SOMATIC_SYSLOG_FACILITY);
+             SOMATIC_SYSLOG_OPTION,
+             SOMATIC_SYSLOG_FACILITY);
 
     // early check
     if( 0 != d->is_initialized ) {
@@ -228,14 +230,16 @@ AA_API void somatic_d_destroy( somatic_d_t *d) {
     // close channels
     r = ach_close(&d->chan_event);
 
-    // free things
-    if( d->ident ) free(d->ident);
+    // free
     aa_region_destroy(&d->memreg);
     aa_region_destroy(&d->tmpreg);
 
     // close log
     syslog(LOG_NOTICE, "destroy daemon");
     closelog();
+
+    // free ident (used by syslog)
+    if( d->ident ) free(d->ident);
 }
 
 AA_API void somatic_d_state( somatic_d_t *d, int state );

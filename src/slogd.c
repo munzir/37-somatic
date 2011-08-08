@@ -62,6 +62,8 @@ typedef struct {
     somatic_d_t d;
     somatic_d_opts_t d_opts;
     ach_channel_t chan;
+    const char *opt_chan_name;
+    const char *opt_ident;
 } cx_t;
 
 /** Initialize the daemon */
@@ -78,34 +80,19 @@ static int parse_opt( int key, char *arg, struct argp_state *state);
 extern struct argp_option argp_options[];
 extern struct argp argp;
 
-
-
-/* ------- */
-/* GLOBALS */
-/* ------- */
-
-static const char *opt_channel_name = "event";
-static int opt_daemonize = 0;
-
-
-
 /* ------- */
 /* HELPERS */
 /* ------- */
 
 static void init(cx_t *cx) {
-    memset(cx, 0, sizeof(*cx)); // zero initialize
-    cx->d_opts.ident = "cslogd";
-    cx->d_opts.daemonize = opt_daemonize;
 
     somatic_d_init(&cx->d,
                    &cx->d_opts);  // init daemon variables, channels, log, etc
 
     // open channel
     somatic_d_channel_open( &cx->d, &cx->chan,
-                            opt_channel_name, NULL );
+                            cx->opt_chan_name, NULL );
 }
-
 
 
 static void update(cx_t *cx) {
@@ -144,7 +131,6 @@ static void update(cx_t *cx) {
     }
 }
 
-
 static void run(cx_t *cx) {
     somatic_d_event( &cx->d, SOMATIC__EVENT__PRIORITIES__NOTICE,
                      SOMATIC__EVENT__CODES__PROC_RUNNING,
@@ -169,27 +155,34 @@ void destroy(cx_t *cx) {
 /* MAIN */
 /* ---- */
 int main( int argc, char **argv ) {
-  argp_parse (&argp, argc, argv, 0, NULL, NULL);
-  static cx_t cx;
-  init(&cx);
-  run(&cx);
-  destroy(&cx);
+    static cx_t cx;
+    memset(&cx, 0, sizeof(cx));
+    cx.d_opts.ident = "cslogd";
+    cx.opt_chan_name = "event";
+    argp_parse (&argp, argc, argv, 0, NULL, &cx);
 
-  return 0;
+    init(&cx);
+    run(&cx);
+    destroy(&cx);
+
+    return 0;
 }
 
 
 int parse_opt( int key, char *arg, struct argp_state *state) {
-    (void)state;
+    cx_t *cx = (cx_t*)state->input;
     switch (key) {
     case 'v':
         somatic_opt_verbosity++;
         break;
     case 'c':
-        opt_channel_name = strdup(arg);
+        cx->opt_chan_name = strdup(arg);
+        break;
+    case 'I':
+        cx->d_opts.ident = strdup(arg);
         break;
     case 'd':
-        opt_daemonize = 1;
+        cx->d_opts.daemonize = 1;
         break;
     }
     return 0;
@@ -221,6 +214,13 @@ struct argp_option argp_options[] = {
         .arg = NULL,
         .flags = 0,
         .doc = "fork off daemon process"
+    },
+    {
+        .name = "ident",
+        .key = 'I',
+        .arg = "IDENT",
+        .flags = 0,
+        .doc = "identifier for this daemon"
     },
     {
         .name = NULL,
