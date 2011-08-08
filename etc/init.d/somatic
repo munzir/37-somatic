@@ -9,7 +9,7 @@ start() {
 
     # create rundir
     mkdir -p /var/run/somatic
-    chmod 777 /var/run/somatic
+    chmod 777 -f /var/run/somatic
 
     # start daemon
     /usr/bin/slogd -d -I "$SLOGD_IDENT" || (echo "Failed to start slogd" && exit 1)

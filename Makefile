@@ -5,7 +5,7 @@ VERSION := 0.0.20110719
 PROJECT := somatic
 
 SHAREDLIBS := somatic
-BINFILES := somatic_motor_plot somatic_dump somatic_live_plot somatic_test_source slogd sns
+BINFILES := somatic_motor_plot somatic_dump somatic_live_plot slogd sns
 
 
 default: all

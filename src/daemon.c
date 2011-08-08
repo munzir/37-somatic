@@ -69,14 +69,16 @@ AA_API void somatic_d_daemonize( somatic_d_t *d ) {
         syslog(LOG_NOTICE, "parent is init, odd");
         return;
     }
+
+    // file mask
+    umask(0); // always successful
+
     // open pid file
     const char *pidnam = aa_region_printf(&d->memreg, SOMATIC_RUNROOT"%s.pid", d->ident);
     int pidfileno = open( pidnam, O_RDWR| O_CREAT,0640);
     d_check( 0 < pidfileno, "Couldn't open pidfile `%s': %s", pidnam, strerror(errno));
 
-
-    // check pid file lock
-    d_check( pidfileno >= 0, "Bad pid file number: %d", pidfileno );
+    // check pid file lock before forking
     d_check( 0 == lockf( pidfileno, F_TEST, 0 ), "Couldn't lock `%s', daemon already running", pidnam );
 
     // open new fds
@@ -89,10 +91,26 @@ AA_API void somatic_d_daemonize( somatic_d_t *d ) {
     d_check( 0 == chdir(wd),  "Couldn't chdir to `%s': %s", wd, strerror(errno));
 
     // fork
-    int pid = fork();
+    int pid;
     // parent dies, now in child
-    if( 0 < pid ) exit(EXIT_SUCCESS);
-    d_check( pid == 0, "fork failed: %s", strerror(errno) );
+    d_check( (pid = fork()) >= 0, "fork failed: %s", strerror(errno) );
+    if( pid ) exit(EXIT_SUCCESS);
+
+    // set session id to lose our controlling terminal
+    d_check( setsid() > 0, "Couldn't set sesion id: %s",
+             strerror(errno) );
+
+    // refork to prevent future controlling ttys
+    struct sigaction sa;
+    sa.sa_handler = SIG_IGN;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    d_check( 0 == sigaction(SIGHUP, &sa, NULL),
+             "Couldn't ignore SIGHUP: %s", strerror(errno) );
+    d_check( (pid = fork()) >= 0, "Couldn't refork: %s", strerror(errno) );
+    if( pid ) exit(EXIT_SUCCESS);
+
+    // now in grandchild
     d->pid = getpid();
 
     // lock pid file
@@ -100,19 +118,13 @@ AA_API void somatic_d_daemonize( somatic_d_t *d ) {
              "Couldn't lock `%s' in child, possible race: %s", strerror(errno));
     d->lockfile = fdopen(pidfileno, "w");
     d_check( NULL != d->lockfile, "Couldn't fdopen pidfile `%s': %s", pidnam, strerror(errno));
+
     // write pid
     int r =  fprintf(d->lockfile, "%d", d->pid );
     d_check( 0 < r, "Couldn't write pid to `%s': printf said %d", pidnam, r);
     do{ r = fflush(d->lockfile); }
     while( 0 != r && EINTR == errno );
     d_check( 0 == r, "Couldn't flush pid to `%s':  %s", pidnam, strerror(errno));
-
-    // set session id
-    pid_t csid = getsid(0);
-    pid_t pgrp = getpgrp();
-    pid_t sid = setsid();
-    d_check( sid > 0, "Couldn't set sesion id, pid: %d, pgrp: %d, setsid %d, getsid: %d: %s",
-             d->pid, pgrp, sid, csid, strerror(errno) );
 
     // reopen syslog, no print to stderr
     closelog();
@@ -123,9 +135,8 @@ AA_API void somatic_d_daemonize( somatic_d_t *d ) {
     d_check( dup2( new_out, STDOUT_FILENO ) , "dup to stdout failed: %s", strerror(errno) );
     d_check( dup2( new_out, STDERR_FILENO ) , "dup to stderr failed: %s", strerror(errno) );
     close(new_out);
+    close(STDIN_FILENO); // daemon doesn't need to read stdin
 
-    // file mask
-    umask(0); // always successful
 }
 
 AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
