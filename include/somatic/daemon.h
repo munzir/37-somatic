@@ -131,6 +131,7 @@ typedef struct {
 
 #define SOMATIC_D_DEFAULT_REGION_SIZE    (64 * (1<<10))
 #define SOMATIC_D_DEFAULT_TMPREGION_SIZE (16 * (1<<10))
+#define SOMATIC_D_DEFAULT_CORE_SIZE (100 * (1<<20))
 
 #define SOMATIC_RUNROOT "/var/run/somatic/"
 

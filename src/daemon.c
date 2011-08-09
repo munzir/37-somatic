@@ -43,6 +43,7 @@
 #include <sys/stat.h>
 #include "somatic.h"
 #include "somatic/daemon.h"
+#include <sys/resource.h>
 
 #include <syslog.h>
 
@@ -63,35 +64,40 @@ static void d_check(int test, const char *fmt, ... ) {
 
 AA_API void somatic_d_daemonize( somatic_d_t *d ) {
     // Q: Should we do some setup work before or after the fork?
+    int r;
+    pid_t pid;
 
     // check if already daemonized
     if( 1 == getppid() ) { // getppid always successful
         syslog(LOG_NOTICE, "parent is init, odd");
         return;
     }
-
     // file mask
     umask(0); // always successful
 
-    // open pid file
-    const char *pidnam = aa_region_printf(&d->memreg, SOMATIC_RUNROOT"%s.pid", d->ident);
-    int pidfileno = open( pidnam, O_RDWR| O_CREAT,0640);
-    d_check( 0 < pidfileno, "Couldn't open pidfile `%s': %s", pidnam, strerror(errno));
-
-    // check pid file lock before forking
-    d_check( 0 == lockf( pidfileno, F_TEST, 0 ), "Couldn't lock `%s', daemon already running", pidnam );
-
-    // open new fds
-    const char *outnam = aa_region_printf(&d->memreg,SOMATIC_RUNROOT"%s.out", d->ident);
-    int new_out = open( outnam, O_APPEND|O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH );
-    d_check( new_out >= 0, "Couldn't open daemon output `%s': %s", outnam, strerror(errno));
+    // create working directory
+    const char *dirnam = aa_region_printf(&d->memreg, SOMATIC_RUNROOT"%s", d->ident);
+    r = mkdir( dirnam, 0755 );
+    d_check( 0 == r || EEXIST == errno, "Couldn't make working directory: %s (%d)", strerror(errno), errno);
 
     // chdir
-    const char *wd = "/";
+    const char *wd = aa_region_printf(&d->memreg,SOMATIC_RUNROOT"%s", d->ident);
     d_check( 0 == chdir(wd),  "Couldn't chdir to `%s': %s", wd, strerror(errno));
 
+
+    // open pid file
+    int pidfileno = open( "pid", O_RDWR| O_CREAT,0640);
+    d_check( 0 < pidfileno, "Couldn't open pidfile `%s/pid': %s", dirnam, strerror(errno));
+
+    // check pid file lock before forking
+    d_check( 0 == lockf( pidfileno, F_TEST, 0 ), "Couldn't lock `%s/pid', daemon already running", dirnam );
+
+    // open new fds
+    int new_out = open( "out", O_APPEND|O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH );
+    d_check( new_out >= 0, "Couldn't open daemon output `%s/out': %s", dirnam, strerror(errno));
+
+
     // fork
-    int pid;
     // parent dies, now in child
     d_check( (pid = fork()) >= 0, "fork failed: %s", strerror(errno) );
     if( pid ) exit(EXIT_SUCCESS);
@@ -117,14 +123,14 @@ AA_API void somatic_d_daemonize( somatic_d_t *d ) {
     d_check( 0 == lockf(pidfileno, F_TLOCK, 0),
              "Couldn't lock `%s' in child, possible race: %s", strerror(errno));
     d->lockfile = fdopen(pidfileno, "w");
-    d_check( NULL != d->lockfile, "Couldn't fdopen pidfile `%s': %s", pidnam, strerror(errno));
+    d_check( NULL != d->lockfile, "Couldn't fdopen pidfile `%s/pid': %s", dirnam, strerror(errno));
 
     // write pid
-    int r =  fprintf(d->lockfile, "%d", d->pid );
-    d_check( 0 < r, "Couldn't write pid to `%s': printf said %d", pidnam, r);
+    r =  fprintf(d->lockfile, "%d", d->pid );
+    d_check( 0 < r, "Couldn't write pid to `%s/pid': printf said %d", dirnam, r);
     do{ r = fflush(d->lockfile); }
     while( 0 != r && EINTR == errno );
-    d_check( 0 == r, "Couldn't flush pid to `%s':  %s", pidnam, strerror(errno));
+    d_check( 0 == r, "Couldn't flush pid to `%s/pid':  %s", dirnam, strerror(errno));
 
     // reopen syslog, no print to stderr
     closelog();
@@ -155,6 +161,22 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
         syslog(LOG_EMERG,
                "Tried to reinitialize somatic_d_t instance.  Quitting.");
         exit(EXIT_FAILURE);
+    }
+
+    // set limits
+    {
+        struct rlimit lim;
+        // get max core size
+        if( getrlimit( RLIMIT_CORE, &lim ) ) {
+            syslog(LOG_ERR, "Couldn't get RLIMIT_CORE: %s", strerror(errno));
+        } else {
+            // set core size
+            lim.rlim_cur = (lim.rlim_max < SOMATIC_D_DEFAULT_CORE_SIZE) ?
+                lim.rlim_max : SOMATIC_D_DEFAULT_CORE_SIZE;
+            if( setrlimit( RLIMIT_CORE, &lim ) ) {
+                syslog(LOG_ERR, "Couldn't get RLIMIT_CORE: %s", strerror(errno));
+            }
+        }
     }
 
     // set ident
@@ -227,7 +249,7 @@ AA_API void somatic_d_destroy( somatic_d_t *d) {
     // undaemonize
     if( d->opts.daemonize ) {
         // close the pid file, this clobbers our lock as well
-        char *nam = aa_region_printf(&d->memreg, SOMATIC_RUNROOT"%s.pid", d->ident);
+        char *nam = aa_region_printf(&d->memreg, SOMATIC_RUNROOT"%s/pid", d->ident);
         if( 0 != fclose(d->lockfile) ) {
             syslog(LOG_ERR, "Error closing `%s': %s", nam, strerror(errno) );
         }
@@ -388,6 +410,7 @@ AA_API void somatic_d_limit( somatic_d_t *d, int level,
                              const char *type, int quantity,
                              int idx, double actual,
                              double min, double max ) {
+    (void)quantity;
 
     Somatic__Event pb;
     memset(&pb, 0, sizeof pb);

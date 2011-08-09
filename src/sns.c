@@ -79,7 +79,7 @@ aa_region_t memreg;
 
 static int sns_kill(const char *ident) {
     // get pid
-    char *nam = aa_region_printf(&memreg, SOMATIC_RUNROOT"%s.pid", ident);
+    char *nam = aa_region_printf(&memreg, SOMATIC_RUNROOT"%s/pid", ident);
     FILE *fp = fopen(nam, "r");
     if( NULL == fp ) {
         fprintf(stderr, "Couldn't open %s: %s\n", nam, strerror(errno));
