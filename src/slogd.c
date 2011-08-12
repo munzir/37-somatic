@@ -157,8 +157,12 @@ void destroy(cx_t *cx) {
 int main( int argc, char **argv ) {
     static cx_t cx;
     memset(&cx, 0, sizeof(cx));
-    cx.d_opts.ident = "cslogd";
+
+    /* Set some options */
+    cx.d_opts.ident = "slogd";
     cx.opt_chan_name = "event";
+    cx.d_opts.sched_rt = 0; /* logger isn't realtime, other daemons may be*/
+
     argp_parse (&argp, argc, argv, 0, NULL, &cx);
 
     init(&cx);

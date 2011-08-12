@@ -101,14 +101,21 @@
  *
  */
 
+#include <stdbool.h>
 
 typedef struct {
-    const char *ident;
+    const char *ident;  ///< identifier for this daemon
     const char *prefix; ///< unused
-    size_t region_size;
-    size_t tmpregion_size;
-    int skip_sighandler;
-    int daemonize;
+    size_t region_size; ///< bytes to allocate for memory region
+    size_t tmpregion_size; ///< bytes to allocate for temp memory region
+    bool skip_sighandler;   ///< if true, don't install sighandlers
+    bool skip_mlock;        ///< if true, don't lock memory in core
+    bool daemonize;         ///< if true, fork of a daemon process
+    /** If nonzero, enable realtime scheduling for this process.  Uses
+        the SCHED_RR policy, to allow round-robin scheduling among
+        processes with equal realtime priority.
+     */
+    uint8_t sched_rt;
 } somatic_d_opts_t;
 
 /** A somatic daemon context.*/
@@ -126,6 +133,7 @@ typedef struct {
     aa_region_t tmpreg;           ///< memory region for temporaries, ie ach buffers, lapack work arrays
     somatic_pbregalloc_t pballoc; ///< protobuf-c allocator that uses memreg
     somatic_d_opts_t opts;        ///< options used for this daemon
+    int   lockfd;                 ///< lockfile fd
     FILE *lockfile;               ///< lock file
 } somatic_d_t;
 

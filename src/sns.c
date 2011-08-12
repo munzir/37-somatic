@@ -43,6 +43,7 @@
 #include <somatic.pb-c.h>
 #include <argp.h>
 #include <ach.h>
+#include <sched.h>
 #include <unistd.h>
 #include <syslog.h>
 
@@ -57,7 +58,9 @@ const char *argp_program_version = "sns 0.0";
 typedef struct {
 } cx_t;
 
-static int sns_kill(const char *ident);
+static pid_t sns_pid(const char *ident);
+static int sns_kill(const char *ident, pid_t pid);
+static int sns_get_sched(const char *ident, pid_t pid);
 
 /// argp object
 static int parse_opt( int key, char *arg, struct argp_state *state);
@@ -77,29 +80,53 @@ aa_region_t memreg;
 /* HELPERS */
 /* ------- */
 
-static int sns_kill(const char *ident) {
-    // get pid
+
+static pid_t sns_pid(const char *ident) {
     char *nam = aa_region_printf(&memreg, SOMATIC_RUNROOT"%s/pid", ident);
     FILE *fp = fopen(nam, "r");
     if( NULL == fp ) {
         fprintf(stderr, "Couldn't open %s: %s\n", nam, strerror(errno));
-        return -1;
+        exit(EXIT_FAILURE);
     }
     pid_t pid = 0;
     fscanf(fp, "%d", &pid);
     fclose(fp);
     if( !pid ) {
         fprintf(stderr, "Invalid pid\n");
-        return -1;
+        exit(EXIT_FAILURE);
     }
-    // kill pid
-    int r = kill(pid, SIGTERM);
-    if( r != 0 ) {
+    return pid;
+}
+
+static int sns_kill(const char *ident, pid_t pid) {
+    if( kill(pid, SIGTERM) ) {
         fprintf(stderr, "Couldn't kill `%s': %s\n", ident, strerror(errno));
+        exit(EXIT_FAILURE);
     }
     return 0;
 }
 
+static int sns_get_sched(const char *ident, pid_t pid) {
+    int sched = sched_getscheduler(pid);
+    if( -1 == sched ) {
+        fprintf(stderr, "Couldn't get scheduler for `%s': %s\n", ident, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    const char *schedstr;
+    switch(sched) {
+    case SCHED_FIFO: schedstr = "FIFO"; break;
+    case SCHED_RR: schedstr = "RR"; break;
+    case SCHED_OTHER: schedstr = "OTHER"; break;
+    default: schedstr = "?"; break;
+    }
+    struct sched_param param;
+    if( sched_getparam( pid, &param ) ) {
+        fprintf(stderr, "Couldn't get param for `%s': %s\n", ident, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    printf("sched: %s\t sched_priority: %d\n", schedstr, param.sched_priority );
+    return 0;
+}
 
 /* ---- */
 /* MAIN */
@@ -117,7 +144,10 @@ int parse_opt( int key, char *arg, struct argp_state *state) {
     (void)state;
     switch (key) {
     case 'k':
-        if(sns_kill(arg)) exit(EXIT_FAILURE);
+        sns_kill(arg, sns_pid(arg));
+        break;
+    case 's':
+        sns_get_sched(arg, sns_pid(arg));
         break;
     }
     return 0;
@@ -134,6 +164,13 @@ struct argp_option argp_options[] = {
         .arg = "IDENT",
         .flags = 0,
         .doc = "Kill daemon `IDENT'"
+    },
+    {
+        .name = "sched",
+        .key = 's',
+        .arg = "IDENT",
+        .flags = 0,
+        .doc = "query scheduler for `IDENT'"
     },
     {
         .name = NULL,

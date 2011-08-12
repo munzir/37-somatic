@@ -44,6 +44,7 @@
 #include "somatic.h"
 #include "somatic/daemon.h"
 #include <sys/resource.h>
+#include <sched.h>
 
 #include <syslog.h>
 
@@ -64,38 +65,19 @@ static void d_check(int test, const char *fmt, ... ) {
 
 AA_API void somatic_d_daemonize( somatic_d_t *d ) {
     // Q: Should we do some setup work before or after the fork?
-    int r;
     pid_t pid;
 
     // check if already daemonized
     if( 1 == getppid() ) { // getppid always successful
         syslog(LOG_NOTICE, "parent is init, odd");
+        d->pid = getpid();
         return;
     }
-    // file mask
-    umask(0); // always successful
 
-    // create working directory
-    const char *dirnam = aa_region_printf(&d->memreg, SOMATIC_RUNROOT"%s", d->ident);
-    r = mkdir( dirnam, 0755 );
-    d_check( 0 == r || EEXIST == errno, "Couldn't make working directory: %s (%d)", strerror(errno), errno);
-
-    // chdir
-    const char *wd = aa_region_printf(&d->memreg,SOMATIC_RUNROOT"%s", d->ident);
-    d_check( 0 == chdir(wd),  "Couldn't chdir to `%s': %s", wd, strerror(errno));
-
-
-    // open pid file
-    int pidfileno = open( "pid", O_RDWR| O_CREAT,0640);
-    d_check( 0 < pidfileno, "Couldn't open pidfile `%s/pid': %s", dirnam, strerror(errno));
-
-    // check pid file lock before forking
-    d_check( 0 == lockf( pidfileno, F_TEST, 0 ), "Couldn't lock `%s/pid', daemon already running", dirnam );
 
     // open new fds
     int new_out = open( "out", O_APPEND|O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH );
-    d_check( new_out >= 0, "Couldn't open daemon output `%s/out': %s", dirnam, strerror(errno));
-
+    d_check( new_out >= 0, "Couldn't open daemon output: %s", strerror(errno));
 
     // fork
     // parent dies, now in child
@@ -111,26 +93,13 @@ AA_API void somatic_d_daemonize( somatic_d_t *d ) {
     sa.sa_handler = SIG_IGN;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
-    d_check( 0 == sigaction(SIGHUP, &sa, NULL),
+    d_check( !sigaction(SIGHUP, &sa, NULL),
              "Couldn't ignore SIGHUP: %s", strerror(errno) );
     d_check( (pid = fork()) >= 0, "Couldn't refork: %s", strerror(errno) );
     if( pid ) exit(EXIT_SUCCESS);
 
     // now in grandchild
     d->pid = getpid();
-
-    // lock pid file
-    d_check( 0 == lockf(pidfileno, F_TLOCK, 0),
-             "Couldn't lock `%s' in child, possible race: %s", strerror(errno));
-    d->lockfile = fdopen(pidfileno, "w");
-    d_check( NULL != d->lockfile, "Couldn't fdopen pidfile `%s/pid': %s", dirnam, strerror(errno));
-
-    // write pid
-    r =  fprintf(d->lockfile, "%d", d->pid );
-    d_check( 0 < r, "Couldn't write pid to `%s/pid': printf said %d", dirnam, r);
-    do{ r = fflush(d->lockfile); }
-    while( 0 != r && EINTR == errno );
-    d_check( 0 == r, "Couldn't flush pid to `%s/pid':  %s", dirnam, strerror(errno));
 
     // reopen syslog, no print to stderr
     closelog();
@@ -142,10 +111,10 @@ AA_API void somatic_d_daemonize( somatic_d_t *d ) {
     d_check( dup2( new_out, STDERR_FILENO ) , "dup to stderr failed: %s", strerror(errno) );
     close(new_out);
     close(STDIN_FILENO); // daemon doesn't need to read stdin
-
 }
 
 AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
+    int r;
     // copy opts
     d->opts = *opts;
     d->opts.ident = NULL;
@@ -194,14 +163,46 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
 
     somatic_pbregalloc_set( &d->pballoc, &d->memreg );
 
+    // file mask
+    umask(0); // always successful
+
+    // create working directory
+    const char *dirnam = aa_region_printf(&d->memreg, SOMATIC_RUNROOT"%s", d->ident);
+    r = mkdir( dirnam, 0755 );
+    d_check( !r || EEXIST == errno, "Couldn't make working directory: %s (%d)",
+             strerror(errno), errno);
+
+    // chdir
+    const char *wd = aa_region_printf(&d->memreg,SOMATIC_RUNROOT"%s", d->ident);
+    d_check( !chdir(wd),  "Couldn't chdir to `%s': %s", wd, strerror(errno));
+
+    // open pid file
+    d->lockfd = open( "pid", O_RDWR| O_CREAT,0664);
+    d_check( 0 < d->lockfd, "Couldn't open pidfile `%s/pid': %s", dirnam, strerror(errno));
+
+    // check pid file lock before maybe forking
+    d_check( !lockf( d->lockfd, F_TEST, 0 ), "Couldn't lock `%s/pid', daemon already running", dirnam );
+
     // daemonize
     if( d->opts.daemonize ) {
         somatic_d_daemonize(d);
     } else d->pid = getpid();
 
+    // lock pid file
+    d_check( !lockf(d->lockfd, F_TLOCK, 0),
+             "Couldn't lock `%s' in child, possible race: %s", strerror(errno));
+    d->lockfile = fdopen(d->lockfd, "w");
+    d_check( NULL != d->lockfile, "Couldn't fdopen pidfile `%s/pid': %s", dirnam, strerror(errno));
+
+    // write pid
+    r =  fprintf(d->lockfile, "%d", d->pid );
+    d_check( 0 < r, "Couldn't write pid to `%s/pid': printf said %d", dirnam, r);
+    do{ r = fflush(d->lockfile); }
+    while( 0 != r && EINTR == errno );
+    d_check( !r, "Couldn't flush pid to `%s/pid':  %s", dirnam, strerror(errno));
+
     // open channels
     {
-        int r;
         if( 0 != (r = ach_open(&d->chan_event, "event", NULL)) ) {
             syslog(LOG_EMERG, "Couldn't open event channel: %s\n",
                    ach_result_to_string(r));
@@ -212,8 +213,7 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
     // set host
     {
         char buf[HOSTNAME_MAX_SIZE];
-        int r = gethostname(buf,HOSTNAME_MAX_SIZE-2);
-        if( 0 == r ) {
+        if( ! gethostname(buf,HOSTNAME_MAX_SIZE-2) ) {
             d->host = strdup(buf);
         }else{
             d->host = strdup("0.0.0.0");
@@ -223,6 +223,37 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
 
     // log direct
     syslog(LOG_NOTICE, "init daemon");
+
+    // set scheduling policy
+    {
+        int max = sched_get_priority_max( SCHED_RR );
+        int min = sched_get_priority_min( SCHED_RR );
+        if( max >= 0 && min >= 0 ) {
+            if( opts->sched_rt > 0 && opts->sched_rt >= min ) {
+                struct sched_param sp;
+                /* 32 is max portable priority*/
+                int pri = opts->sched_rt;
+                if( pri > max ) {
+                    syslog(LOG_WARNING, "Requested priority %d exceeds max %d",
+                           pri, max);
+                    pri = max;
+                }
+                sp.sched_priority = pri;
+                if( sched_setscheduler( 0, SCHED_RR, &sp) < 0 ) {
+                    syslog(LOG_ERR, "Couldn't set scheduling priority to %d: %s\n",
+                           pri, strerror(errno) );
+                }
+            }
+        } else {
+            syslog(LOG_ERR, "Couldn't get scheduling priorities: %d, %d, %s\n",
+                   max, min, strerror(errno) );
+        }
+    }
+
+    // lock memory
+    if( ! opts->skip_mlock ) {
+
+    }
 
     // install signale handler
     if( ! opts->skip_sighandler )
@@ -258,7 +289,6 @@ AA_API void somatic_d_destroy( somatic_d_t *d) {
             syslog(LOG_ERR, "Error unlinking `%s': %s", nam, strerror(errno) );
         }
     }
-
 
     // close channels
     r = ach_close(&d->chan_event);
@@ -458,7 +488,7 @@ AA_API int somatic_d_check_v( somatic_d_t *d, int priority,
                          idx, data[idx], min[idx], max[idx] );
 
     }
-    return 0 == r ? 1 : 0;
+    return !r ? 1 : 0;
 }
 
 AA_API int somatic_d_check_param( somatic_d_t *d, int test_val,
