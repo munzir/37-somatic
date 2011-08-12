@@ -63,7 +63,6 @@ typedef struct {
     somatic_d_opts_t d_opts;
     ach_channel_t chan;
     const char *opt_chan_name;
-    const char *opt_ident;
 } cx_t;
 
 /** Initialize the daemon */

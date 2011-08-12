@@ -192,7 +192,7 @@ void dump_transform( Somatic__Transform *pb ) {
 
 void dump_timespec( Somatic__Timespec *pb, const char *name ) {
     indent();
-    printf("[%s : Timespec]\t%lld.%09ds\n",
+    printf("[%s : Timespec]\t%"PRIuPTR".%09ds\n",
            name, pb->sec, pb->has_nsec ? pb->nsec : 0 );
 }
 
@@ -208,13 +208,35 @@ void dump_metadata( Somatic__Metadata *pb ) {
     }
     if( pb->has_type ) {
         indent();
-        const char *c;
+        const char *c = "unknown";
         switch( pb->type ) {
         case SOMATIC__MSG_TYPE__FORCE_MOMENT:
             c = "ForceMoment";
             break;
-        default:
-            c = "unknown";
+        case SOMATIC__MSG_TYPE__MOTOR_CMD:
+            c = "MotorCmd";
+            break;
+        case SOMATIC__MSG_TYPE__MOTOR_STATE:
+            c = "MotorState";
+            break;
+        case SOMATIC__MSG_TYPE__TRANSFORM:
+            c = "Transform";
+            break;
+        case SOMATIC__MSG_TYPE__MULTI_TRANSFORM:
+            c = "MultiTransform";
+            break;
+        case SOMATIC__MSG_TYPE__POINT_CLOUD:
+            c = "PointCloud";
+            break;
+        case SOMATIC__MSG_TYPE__JOYSTICK:
+            c = "Joystick";
+            break;
+        case SOMATIC__MSG_TYPE__TOUCH:
+            c = "Touch";
+            break;
+        case SOMATIC__MSG_TYPE__MICROPHONE:
+            c = "Microphone";
+            break;
         }
         printf("[type] %s\n", c);
     }
@@ -268,6 +290,9 @@ void dump_joystick( Somatic__Joystick *pb ) {
     printf("[buttons]\t");
     dump_ivector(pb->buttons, "%d:");
     printf("\n");
+    if( pb->meta )  {
+        dump_metadata( pb->meta );
+    }
     sd_indent--;
 }
 
