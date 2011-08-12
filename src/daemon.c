@@ -45,6 +45,7 @@
 #include "somatic/daemon.h"
 #include <sys/resource.h>
 #include <sched.h>
+#include <sys/mman.h>
 
 #include <syslog.h>
 
@@ -74,15 +75,13 @@ AA_API void somatic_d_daemonize( somatic_d_t *d ) {
         return;
     }
 
-
     // open new fds
     int new_out = open( "out", O_APPEND|O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH );
     d_check( new_out >= 0, "Couldn't open daemon output: %s", strerror(errno));
 
     // fork
-    // parent dies, now in child
     d_check( (pid = fork()) >= 0, "fork failed: %s", strerror(errno) );
-    if( pid ) exit(EXIT_SUCCESS);
+    if( pid ) exit(EXIT_SUCCESS); // parent dies, now in child
 
     // set session id to lose our controlling terminal
     d_check( setsid() > 0, "Couldn't set sesion id: %s",
@@ -96,9 +95,8 @@ AA_API void somatic_d_daemonize( somatic_d_t *d ) {
     d_check( !sigaction(SIGHUP, &sa, NULL),
              "Couldn't ignore SIGHUP: %s", strerror(errno) );
     d_check( (pid = fork()) >= 0, "Couldn't refork: %s", strerror(errno) );
-    if( pid ) exit(EXIT_SUCCESS);
+    if( pid ) exit(EXIT_SUCCESS);  // second child dies, now in grandchild
 
-    // now in grandchild
     d->pid = getpid();
 
     // reopen syslog, no print to stderr
@@ -250,9 +248,12 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
         }
     }
 
-    // lock memory
+    // lock memory, can't swap to disk
     if( ! opts->skip_mlock ) {
-
+        if( mlockall( MCL_CURRENT | MCL_FUTURE ) ) {
+            syslog( LOG_ERR, "Couldn't lock pages in memory: %s",
+                    strerror(errno) );
+        }
     }
 
     // install signale handler
@@ -352,8 +353,6 @@ AA_API void somatic_d_event( somatic_d_t *d, int level, int code,
     va_end( argp );
 
 }
-
-
 
 static int somatic_d_vcheck( somatic_d_t *d, int priority, int code,
                              int test, const char *type,

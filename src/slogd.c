@@ -161,7 +161,8 @@ int main( int argc, char **argv ) {
     /* Set some options */
     cx.d_opts.ident = "slogd";
     cx.opt_chan_name = "event";
-    cx.d_opts.sched_rt = 0; /* logger isn't realtime, other daemons may be*/
+    cx.d_opts.sched_rt = 0;   // logger not realtime, other daemons may be
+    cx.d_opts.skip_mlock = 0; // logger not realtime, other daemons may be
 
     argp_parse (&argp, argc, argv, 0, NULL, &cx);
 
