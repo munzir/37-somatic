@@ -278,15 +278,15 @@ AA_API void *somatic_d_get( somatic_d_t *d, ach_channel_t *chan, size_t *frame_s
  *  			NOT actual Somatic__Vector type)
  * \param msg: pointer to the protobuf message
  */
-#define SOMATIC_D_PUT( type, d, chan, msg )                     \
-    ({                                                          \
-        size_t _somatic_private_n =                             \
-            type ## __get_packed_size(msg);                     \
-        uint8_t *_somatic_private_buf =                         \
-            aa_region_tmpalloc(&d->tmpreg, _somatic_private_n); \
-        type ## __pack( msg, &_somatic_private_buf[0] );        \
-        ach_put( chan, _somatic_private_buf,                    \
-                 _somatic_private_n );                          \
+#define SOMATIC_D_PUT( type, d, chan, msg )                             \
+    ({                                                                  \
+        size_t _somatic_private_n =                                     \
+            type ## __get_packed_size(msg);                             \
+        uint8_t *_somatic_private_buf =                                 \
+            (uint8_t*)aa_region_tmpalloc(&(d)->tmpreg, _somatic_private_n); \
+        type ## __pack( (msg), &_somatic_private_buf[0] );              \
+        ach_put( (chan), _somatic_private_buf,                          \
+                 _somatic_private_n );                                  \
     })
 
 #endif // SOMATIC_DAEMON_H
