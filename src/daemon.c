@@ -168,7 +168,7 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
 
     // create working directory
     const char *dirnam = aa_region_printf(&d->memreg, SOMATIC_RUNROOT"%s", d->ident);
-    r = mkdir( dirnam, 0755 );
+    r = mkdir( dirnam, 0775 );
     d_check( !r || EEXIST == errno, "Couldn't make working directory: %s (%d)",
              strerror(errno), errno);
 
