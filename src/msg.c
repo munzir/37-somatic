@@ -144,6 +144,7 @@ Somatic__Transform *somatic_transform_alloc() {
     somatic__transform__init(pb);
     pb->meta = somatic_metadata_alloc();
     pb->meta->type = SOMATIC__MSG_TYPE__TRANSFORM;
+    pb->meta->has_type = 1;
     return pb;
 
 }
@@ -252,6 +253,7 @@ Somatic__MultiTransform *somatic_multi_transform_alloc(size_t n) {
     }
     pb->meta = somatic_metadata_alloc();
     pb->meta->type = SOMATIC__MSG_TYPE__MULTI_TRANSFORM;
+    pb->meta->has_type = 1;
     return pb;
 }
 void somatic_multi_transform_free(Somatic__MultiTransform *pb) {
@@ -274,6 +276,7 @@ Somatic__ForceMoment *somatic_force_moment_alloc( int alloc_force, int alloc_mom
     if( alloc_moment ) pb->moment = somatic_vector_alloc(3);
     pb->meta = somatic_metadata_alloc();
     pb->meta->type = SOMATIC__MSG_TYPE__FORCE_MOMENT;
+    pb->meta->has_type = 1;
     return pb;
 }
 
@@ -327,6 +330,7 @@ Somatic__MotorState *somatic_motor_state_alloc() {
     somatic__motor_state__init(pb);
     pb->meta = somatic_metadata_alloc();
     pb->meta->type = SOMATIC__MSG_TYPE__MOTOR_STATE;
+    pb->meta->has_type = 1;
     return pb;
 }
 void somatic_motor_state_free(Somatic__MotorState *pb) {

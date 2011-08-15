@@ -69,7 +69,7 @@ typedef struct {
 } gnuplot_live_t;
 
 typedef struct {
-    somatic_d_t d_cx;
+    somatic_d_t d;
     somatic_d_opts_t d_opts;
     ach_channel_t chan_in;
     uint8_t work[1024*64];
@@ -120,14 +120,11 @@ static size_t opt_n_indices = 0;
 /* ------- */
 
 static void init(cx_t *cx) {
-    memset(&cx->d_cx, 0, sizeof cx->d_cx); // zero initialize
-    cx->d_opts.ident = "liveplot";
-
-    somatic_d_init(&cx->d_cx,
+    somatic_d_init(&cx->d,
                    &cx->d_opts);  // init daemon variables, channels, log, etc
 
     // open channel
-    somatic_d_channel_open( &cx->d_cx, &cx->chan_in,
+    somatic_d_channel_open( &cx->d, &cx->chan_in,
                                 opt_channel_name, NULL );
 
     // open gnuplot
@@ -143,17 +140,17 @@ static void init(cx_t *cx) {
 
     // init struct
     Somatic__Event *msg = next_msg(cx);
-    if( !somatic_d_check(&cx->d_cx, SOMATIC__EVENT__PRIORITIES__EMERG,
+    if( !somatic_d_check(&cx->d, SOMATIC__EVENT__PRIORITIES__EMERG,
                          SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
                          NULL != msg, "next_msg",
                          "no initial msg") )
-    { somatic_d_die(&cx->d_cx); }
+    { somatic_d_die(&cx->d); }
     cx->plot.n_samples = opt_samples;
     cx->n_msg = msg->attr->n_data;
     cx->plot.n_each = opt_indices ? opt_n_indices : msg->attr->n_data;
     for( size_t i = 0; i < opt_n_indices; i ++ ) {
         if( opt_indices[i] >= cx->n_msg ) {
-            somatic_d_die(&cx->d_cx);
+            somatic_d_die(&cx->d);
         }
     }
     cx->plot.data = AA_NEW0_AR(double, cx->plot.n_samples*cx->plot.n_each);
@@ -163,7 +160,7 @@ static void init(cx_t *cx) {
         size_t n = strlen(opt_labels);
         for(size_t i = 0; i<n; i ++ )
             if(':' == opt_labels[i]) n_labels++;
-        somatic_d_check(&cx->d_cx, SOMATIC__EVENT__PRIORITIES__WARNING,
+        somatic_d_check(&cx->d, SOMATIC__EVENT__PRIORITIES__WARNING,
                         SOMATIC__EVENT__CODES__BAD_PARAM,
                         n_labels + 1 == cx->plot.n_each, "plot-init",
                         "wrong number of labels");
@@ -176,40 +173,30 @@ static void init(cx_t *cx) {
             }
         }
     }
-    somatic__event__free_unpacked( msg, &protobuf_c_system_allocator );
-
 }
 
 
 static Somatic__Event *next_msg(cx_t *cx) {
-    size_t nread;
-    ach_status_t r = (ach_status_t)
-        ach_wait_last( &cx->chan_in, cx->work, sizeof(cx->work),
-                       &nread, NULL );
+    int r;
+    Somatic__Event *msg = SOMATIC_D_GET( &r, somatic__event, &cx->d,
+                                         &cx->chan_in, NULL, ACH_O_WAIT | ACH_O_LAST );
+
     int recv_ok = (ACH_OK == r) || (ACH_MISSED_FRAME == r);
-    somatic_d_check(&cx->d_cx, SOMATIC__EVENT__PRIORITIES__ERR,
+    somatic_d_check(&cx->d, SOMATIC__EVENT__PRIORITIES__ERR,
                     SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
                     recv_ok, "ach_wait_last",
                     "reading `%s': %s\n",
                     opt_channel_name, ach_result_to_string(r));
-    Somatic__Event *msg = NULL;
-    if( ACH_OK == r ) {
-        msg = somatic__event__unpack( &protobuf_c_system_allocator,
-                                    nread, cx->work );
+    if( msg ) {
         // check msg
         int msg_ok =  msg->attr &&
             msg->attr->data &&
             (msg->attr->n_data == cx->n_msg
              || NULL == cx->plot.data);
-        somatic_d_check(&cx->d_cx, SOMATIC__EVENT__PRIORITIES__ERR,
+        somatic_d_check(&cx->d, SOMATIC__EVENT__PRIORITIES__ERR,
                         SOMATIC__EVENT__CODES__COMM_BAD_MSG,
                         msg_ok, "somatic_event",
                         "no data");
-        if( !msg_ok ) {
-            somatic__event__free_unpacked( msg,
-                                           &protobuf_c_system_allocator );
-            msg = NULL;
-        }
     }
     return msg;
 }
@@ -233,23 +220,24 @@ static void update(cx_t *cx) {
             aa_fcpy( cx->plot.data + (cx->plot.i*cx->plot.n_each), msg->attr->data,
                      cx->plot.n_each );
         }
+        aa_dump_vec( stdout, cx->plot.data + (cx->plot.i*cx->plot.n_each),
+                     cx->plot.n_each );
         cx->plot.i = (cx->plot.i + 1) % cx->plot.n_samples;
-        // free message
-        somatic__event__free_unpacked( msg, &protobuf_c_system_allocator );
     }
 }
 
 
 static void run(cx_t *cx) {
-    somatic_d_event( &cx->d_cx, SOMATIC__EVENT__PRIORITIES__NOTICE,
+    somatic_d_event( &cx->d, SOMATIC__EVENT__PRIORITIES__NOTICE,
                      SOMATIC__EVENT__CODES__PROC_RUNNING,
                      NULL, NULL );
     while(!somatic_sig_received) {
         update(cx);
         plot(&cx->plot);
+        aa_region_release(&cx->d.memreg);
         usleep( (int) (1e6 / opt_frequency));
     }
-    somatic_d_event( &cx->d_cx, SOMATIC__EVENT__PRIORITIES__NOTICE,
+    somatic_d_event( &cx->d, SOMATIC__EVENT__PRIORITIES__NOTICE,
                      SOMATIC__EVENT__CODES__PROC_STOPPING,
                      NULL, NULL );
 
@@ -258,16 +246,16 @@ static void run(cx_t *cx) {
 void destroy(cx_t *cx) {
     int r;
     // close channel
-    somatic_d_channel_close( &cx->d_cx, &cx->chan_in );
+    somatic_d_channel_close( &cx->d, &cx->chan_in );
     // close gnuplot
     r = fclose( cx->plot.gnuplot );
-    somatic_d_check(&cx->d_cx, SOMATIC__EVENT__PRIORITIES__ERR,
+    somatic_d_check(&cx->d, SOMATIC__EVENT__PRIORITIES__ERR,
                     SOMATIC__EVENT__CODES__UNKNOWN,
                     0 == r, "fclose",
                     "closing gnuplot: %s\n",
                     strerror(errno));
     // end daemon
-    somatic_d_destroy(&cx->d_cx);
+    somatic_d_destroy(&cx->d);
 }
 
 
@@ -311,6 +299,10 @@ int main( int argc, char **argv ) {
   (void) argc;
   (void) argv;
   static cx_t cx;
+  memset(&cx, 0, sizeof cx); // zero initialize
+  cx.d_opts.ident = "liveplot";
+  cx.d_opts.skip_mlock = 1;
+
   //somatic_verbprintf_prefix = "motor_plot";
   if( opt_indices ) {
       for(size_t i = 0; i < opt_n_indices; i++ ) {

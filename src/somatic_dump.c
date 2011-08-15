@@ -296,6 +296,34 @@ void dump_joystick( Somatic__Joystick *pb ) {
     sd_indent--;
 }
 
+void dump_motor_state( Somatic__MotorState *pb ) {
+    indent();
+    printf("[MotorState]\n");
+    sd_indent++;
+    if( pb->position ) {
+        indent();
+        printf("[position]");
+        dump_vector(pb->position, "\t%6.3f");
+        printf("\n");
+    }
+    if( pb->velocity ) {
+        indent();
+        printf("[velocity]");
+        dump_vector(pb->velocity, "\t%6.3f");
+        printf("\n");
+    }
+    if( pb->current ) {
+        indent();
+        printf("[current]");
+        dump_vector(pb->current, "\t%6.3f");
+        printf("\n");
+    }
+    if( pb->meta )  {
+        dump_metadata( pb->meta );
+    }
+    sd_indent--;
+}
+
 void dump_motor_cmd( Somatic__MotorCmd *pb ) {
     indent();
     printf("[MotorCmd]\n");
@@ -306,6 +334,7 @@ void dump_motor_cmd( Somatic__MotorCmd *pb ) {
     printf("\n");
     sd_indent--;
 }
+
 
 void run() {
     while( !somatic_sig_received ) {
@@ -350,6 +379,15 @@ void run() {
                                                sd_frame_size, sd_achbuf);
                 dump_motor_cmd(msg);
                 somatic__motor_cmd__free_unpacked( msg, &protobuf_c_system_allocator);
+                break;
+            }
+            case SOMATIC__MSG_TYPE__MOTOR_STATE:
+            {
+                Somatic__MotorState *msg =
+                    somatic__motor_state__unpack(&protobuf_c_system_allocator,
+                                               sd_frame_size, sd_achbuf);
+                dump_motor_state(msg);
+                somatic__motor_state__free_unpacked( msg, &protobuf_c_system_allocator);
                 break;
             }
             default: printf("Unknown Message: %d\n",base->meta->type);
