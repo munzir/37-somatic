@@ -211,7 +211,7 @@ void somatic_metadata_set_time( Somatic__Metadata *pb, int64_t sec, int32_t nsec
     }
     pb->time->sec = sec;
     pb->time->nsec = nsec;
-    pb->time->has_nsec = 1;
+    pb->time->has_nsec = nsec ? 1 : 0;
 }
 
 void somatic_metadata_set_time_timespec( Somatic__Metadata *pb, struct timespec ts ) {

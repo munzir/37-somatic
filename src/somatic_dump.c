@@ -192,7 +192,7 @@ void dump_transform( Somatic__Transform *pb ) {
 
 void dump_timespec( Somatic__Timespec *pb, const char *name ) {
     indent();
-    printf("[%s : Timespec]\t%"PRIuPTR".%09ds\n",
+    printf("[%s : Timespec]\t%"PRId64"s\t%09dns\n",
            name, pb->sec, pb->has_nsec ? pb->nsec : 0 );
 }
 

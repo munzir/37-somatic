@@ -159,9 +159,9 @@ int main( int argc, char **argv ) {
 
     /* Set some options */
     cx.d_opts.ident = "slogd";
-    cx.opt_chan_name = "event";
-    cx.d_opts.sched_rt = 0;   // logger not realtime, other daemons may be
+    cx.d_opts.sched_rt = SOMATIC_D_SCHED_NONE; // logger not realtime
     cx.d_opts.skip_mlock = 0; // logger not realtime, other daemons may be
+    cx.opt_chan_name = "event";
 
     argp_parse (&argp, argc, argv, 0, NULL, &cx);
 
@@ -182,13 +182,10 @@ int parse_opt( int key, char *arg, struct argp_state *state) {
     case 'c':
         cx->opt_chan_name = strdup(arg);
         break;
-    case 'I':
-        cx->d_opts.ident = strdup(arg);
-        break;
-    case 'd':
-        cx->d_opts.daemonize = 1;
-        break;
     }
+
+    somatic_d_argp_parse( key, arg, &cx->d_opts );
+
     return 0;
 }
 
@@ -212,20 +209,7 @@ struct argp_option argp_options[] = {
         .flags = 0,
         .doc = "motor state channel"
     },
-    {
-        .name = "daemonize",
-        .key = 'd',
-        .arg = NULL,
-        .flags = 0,
-        .doc = "fork off daemon process"
-    },
-    {
-        .name = "ident",
-        .key = 'I',
-        .arg = "IDENT",
-        .flags = 0,
-        .doc = "identifier for this daemon"
-    },
+    SOMATIC_D_ARGP_OPTS,
     {
         .name = NULL,
         .key = 0,

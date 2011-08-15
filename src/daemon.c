@@ -542,3 +542,14 @@ AA_API void *somatic_d_get( somatic_d_t *d, ach_channel_t *chan, size_t *frame_s
     return aa_region_ptr(&d->tmpreg);
 }
 
+
+AA_API void somatic_d_argp_parse( int key, char *arg, somatic_d_opts_t *opt ) {
+    switch(key) {
+    case 'I':
+        opt->ident = strdup(arg);
+        break;
+    case 'd':
+        opt->daemonize = 1;
+        break;
+    }
+}

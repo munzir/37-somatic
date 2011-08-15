@@ -118,6 +118,14 @@ typedef struct {
     uint8_t sched_rt;
 } somatic_d_opts_t;
 
+enum somatic_d_sched {
+    SOMATIC_D_SCHED_NONE = 0,
+    SOMATIC_D_SCHED_UI = 1,
+    SOMATIC_D_SCHED_CONTROL = 15,
+    SOMATIC_D_SCHED_MOTOR = 20,
+    SOMATIC_D_SCHED_MAX = 3
+};
+
 /** A somatic daemon context.*/
 typedef struct {
     int is_initialized;           ///< is the struct initialized
@@ -136,6 +144,25 @@ typedef struct {
     int   lockfd;                 ///< lockfile fd
     FILE *lockfile;               ///< lock file
 } somatic_d_t;
+
+
+#define SOMATIC_D_ARGP_OPTS                     \
+    {                                           \
+        .name = "daemonize",                    \
+            .key = 'd',                         \
+            .arg = NULL,                        \
+            .flags = 0,                         \
+            .doc = "fork off daemon process"    \
+            },                                  \
+    {                                           \
+        .name = "ident",                        \
+            .key = 'I',                         \
+            .arg = "IDENT",                     \
+            .flags = 0,                         \
+            .doc = "identifier for this daemon" \
+     }                                          \
+
+AA_API void somatic_d_argp_parse( int key, char *arg, somatic_d_opts_t *opt );
 
 #define SOMATIC_D_DEFAULT_REGION_SIZE    (64 * (1<<10))
 #define SOMATIC_D_DEFAULT_TMPREGION_SIZE (16 * (1<<10))
