@@ -175,8 +175,9 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
     d_check( !chdir(wd),  "Couldn't chdir to `%s': %s", wd, strerror(errno));
 
     // open pid file
-    d->lockfd = open( "pid", O_RDWR| O_CREAT,0664);
-    d_check( 0 < d->lockfd, "Couldn't open pidfile `%s/pid': %s", dirnam, strerror(errno));
+    const char *pidnam = somatic_d_pidnam( d->ident, &d->memreg );
+    d->lockfd = open( pidnam, O_RDWR| O_CREAT,0664);
+    d_check( 0 < d->lockfd, "Couldn't open pidfile `%s': %s", pidnam, strerror(errno));
 
     // check pid file lock before maybe forking
     d_check( !lockf( d->lockfd, F_TEST, 0 ), "Couldn't lock `%s/pid', daemon already running", dirnam );

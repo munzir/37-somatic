@@ -45,6 +45,7 @@
 #include <ach.h>
 #include <sched.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <syslog.h>
 
 /// argp program version
@@ -82,7 +83,7 @@ aa_region_t memreg;
 
 
 static pid_t sns_pid(const char *ident) {
-    char *nam = aa_region_printf(&memreg, SOMATIC_RUNROOT"%s/pid", ident);
+    const char *nam = somatic_d_pidnam( ident, &memreg );
     FILE *fp = fopen(nam, "r");
     if( NULL == fp ) {
         fprintf(stderr, "Couldn't open %s: %s\n", nam, strerror(errno));
@@ -128,6 +129,34 @@ static int sns_get_sched(const char *ident, pid_t pid) {
     return 0;
 }
 
+static int sns_alive(const char *ident) {
+    const char *pidnam = somatic_d_pidnam( ident, &memreg );
+    int fd = open(pidnam, O_RDWR);
+    if( fd < 0 ) {
+        if( ENOENT == errno ) {
+            exit(-1);
+        } else {
+            fprintf(stderr, "couldn't open `%s': %s",
+                    pidnam, strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+
+    }
+    int r = lockf( fd, F_TEST, 0 );
+
+    if( 0 == r ) {
+        /* unlocked */
+        exit(-1);
+    } else if( (EACCES != errno && EAGAIN != errno) ) {
+        fprintf(stderr, "couldn't testing lock `%s': %s",
+                pidnam, strerror(errno));
+        exit(EXIT_FAILURE);
+    } else  {
+        /* locked */
+        return 0;
+    }
+}
+
 /* ---- */
 /* MAIN */
 /* ---- */
@@ -148,6 +177,9 @@ int parse_opt( int key, char *arg, struct argp_state *state) {
         break;
     case 's':
         sns_get_sched(arg, sns_pid(arg));
+        break;
+    case 'a':
+        sns_alive(arg);
         break;
     }
     return 0;
@@ -171,6 +203,13 @@ struct argp_option argp_options[] = {
         .arg = "IDENT",
         .flags = 0,
         .doc = "query scheduler for `IDENT'"
+    },
+    {
+        .name = "alive",
+        .key = 'a',
+        .arg = "IDENT",
+        .flags = 0,
+        .doc = "returns success if daemon `IDENT' is alive"
     },
     {
         .name = NULL,

@@ -277,6 +277,10 @@ AA_API void somatic_d_channel_close(somatic_d_t *d, ach_channel_t *chan );
 AA_API void *somatic_d_get( somatic_d_t *d, ach_channel_t *chan, size_t *frame_size,
                             const struct timespec *ACH_RESTRICT abstime, int options, int *ret );
 
+static char *somatic_d_pidnam( const char *ident, aa_region_t *reg ) {
+    return aa_region_printf(reg, SOMATIC_RUNROOT"%s/pid", ident );
+}
+
 /**
  * \param d: somatic_daemon_t context struct
  * \param ret: ach return code
