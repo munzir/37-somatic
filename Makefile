@@ -41,9 +41,6 @@ $(call LINKBIN, somatic_exampled, somatic_exampled.o $(LIB_OBJS), ach protobuf-c
 $(call LINKBIN, slogd, slogd.o $(LIB_OBJS), ach protobuf-c amino)
 $(call LINKBIN, sns, sns.o $(LIB_OBJS), ach protobuf-c amino)
 
-
-
-
 src/somatic.pb-c.c: proto/somatic.proto
 	cd proto && \
 	  protoc-c --c_out=. somatic.proto
@@ -53,7 +50,7 @@ src/somatic.pb-c.c: proto/somatic.proto
 
 $(INCLUDEDIR)/somatic.pb-c.h: src/somatic.pb-c.c
 
-dep: $(INCLUDEDIR)/somatic.pb-c.h
+$(addprefix $(BUILDDIR)/, $(LIB_OBJS)): $(INCLUDEDIR)/somatic.pb-c.h
 
 somatic.pb-c.o: $(INCLUDEDIR)/somatic.pb-c.h
 
