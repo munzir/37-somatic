@@ -90,6 +90,9 @@ static inline void somatic_timespec_set_ns( Somatic__Timespec *pb, int32_t ns ) 
     pb->nsec = ns;
     pb->has_nsec = 1;
 }
+static inline struct timespec somatic_timespec_get( Somatic__Timespec *pb ) {
+    return aa_tm_make( (time_t) pb->sec, pb->has_nsec ? (long) pb->nsec : 0 );
+}
 
 //=== Vector ===
 Somatic__Vector *somatic_vector_alloc(size_t size);
@@ -126,10 +129,17 @@ AA_API void somatic_metadata_set_time_now( Somatic__Metadata *pb );
 AA_API void somatic_metadata_set_time_timespec( Somatic__Metadata *pb, struct timespec ts );
 /// heap allocates timespec for until field
 AA_API void somatic_metadata_set_until( Somatic__Metadata *pb, int64_t sec, int32_t nsec );
+/// heap allocates timespec for until field
+AA_API void somatic_metadata_set_until_timespec( Somatic__Metadata *pb, struct timespec ts);
 /// heap allocates timespec for until field and sets to secs offset from pb->time
 AA_API void somatic_metadata_set_until_duration( Somatic__Metadata *pb,
                                           double secs );
 
+//=== Battery ===
+/// heap allocate battery message
+Somatic__Battery *somatic_battery_alloc( size_t n );
+/// free heap allocated battery message
+void somatic_battery_free( Somatic__Battery *pb );
 
 //=== Multi Transform ===
 //AA_API Somatic__MultiTransform *somatic_multi_transform_alloc(size_t n);

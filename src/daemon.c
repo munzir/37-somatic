@@ -221,7 +221,7 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
     }
 
     // log direct
-    syslog(LOG_NOTICE, "init daemon");
+    //syslog(LOG_NOTICE, "init daemon");
 
     // set scheduling policy
     {
@@ -300,7 +300,7 @@ AA_API void somatic_d_destroy( somatic_d_t *d) {
     aa_region_destroy(&d->tmpreg);
 
     // close log
-    syslog(LOG_NOTICE, "destroy daemon");
+    //syslog(LOG_NOTICE, "destroy daemon");
     closelog();
 
     // free ident (used by syslog)
@@ -355,9 +355,9 @@ AA_API void somatic_d_event( somatic_d_t *d, int level, int code,
 
 }
 
-static int somatic_d_vcheck( somatic_d_t *d, int priority, int code,
-                             int test, const char *type,
-                             const char fmt[], va_list argp ) {
+int somatic_d_vcheck( somatic_d_t *d, int priority, int code,
+                      int test, const char *type,
+                      const char fmt[], va_list argp ) {
     if( !test ) {
         va_list argp2;
         va_copy( argp2, argp );

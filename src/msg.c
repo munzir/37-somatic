@@ -232,6 +232,9 @@ void somatic_metadata_set_until( Somatic__Metadata *pb, int64_t sec, int32_t nse
     pb->until->has_nsec = 1;
 }
 
+void somatic_metadata_set_until_timespec( Somatic__Metadata *pb, struct timespec ts ) {
+    somatic_metadata_set_until( pb, ts.tv_sec, ts.tv_nsec );
+}
 
 void somatic_metadata_set_until_duration( Somatic__Metadata *pb,
                                           double duration ) {
@@ -322,6 +325,29 @@ void somatic_motor_cmd_set( Somatic__MotorCmd *pb,
     pb->param = param;
     pb->has_param = 1;
     if( x ) somatic_vector_set_data( pb->values, x, n );
+}
+
+
+//=== Battery ===
+Somatic__Battery *somatic_battery_alloc( size_t n ) {
+    Somatic__Battery *pb = AA_NEW0(Somatic__Battery);
+    somatic__battery__init( pb );
+    pb->voltage = somatic_vector_alloc( n );
+    pb->temp = somatic_vector_alloc( n );
+
+    pb->meta = somatic_metadata_alloc();
+    pb->meta->type = SOMATIC__MSG_TYPE__BATTERY;
+    pb->meta->has_type = 1;
+
+    return pb;
+}
+void somatic_battery_free( Somatic__Battery *pb ) {
+    if( pb ) {
+        somatic_vector_free(pb->voltage);
+        somatic_vector_free(pb->temp);
+        somatic_metadata_free(pb->meta);
+        free(pb);
+    }
 }
 
 //=== Motor State ===

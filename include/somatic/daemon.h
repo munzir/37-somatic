@@ -219,6 +219,11 @@ AA_API int somatic_d_check( somatic_d_t *d, int priority, int code,
                             int test, const char *type, const char fmt[], ... );
 
 
+int somatic_d_vcheck( somatic_d_t *d, int priority, int code,
+                      int test, const char *type,
+                      const char fmt[], va_list argp );
+
+
 /** Logs an essertion error if test is false. */
 AA_API int somatic_d_assert_err( somatic_d_t *d, int test,
                                  const char fmt[], ... );

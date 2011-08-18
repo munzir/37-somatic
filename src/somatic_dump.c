@@ -237,6 +237,9 @@ void dump_metadata( Somatic__Metadata *pb ) {
         case SOMATIC__MSG_TYPE__MICROPHONE:
             c = "Microphone";
             break;
+        case SOMATIC__MSG_TYPE__BATTERY:
+            c = "Battery";
+            break;
         }
         printf("[type] %s\n", c);
     }
@@ -296,6 +299,25 @@ void dump_joystick( Somatic__Joystick *pb ) {
     sd_indent--;
 }
 
+void dump_battery( Somatic__Battery *pb ) {
+    indent();
+    printf("[Battery]\n");
+    sd_indent++;
+    indent();
+    printf("[volt]");
+    dump_vector(pb->voltage, "\t%5.3f");
+    printf("\n");
+    indent();
+    printf("[temp]");
+    dump_vector(pb->temp, "\t%5.2f");
+    printf("\n");
+    if( pb->meta )  {
+        dump_metadata( pb->meta );
+    }
+    sd_indent--;
+
+}
+
 void dump_motor_state( Somatic__MotorState *pb ) {
     indent();
     printf("[MotorState]\n");
@@ -335,67 +357,43 @@ void dump_motor_cmd( Somatic__MotorCmd *pb ) {
     sd_indent--;
 }
 
+#define UNPACK_DUMP( type, alloc, buf, size ) \
+    dump_ ## type( somatic__ ## type ## __unpack( alloc, size, buf ) );
 
 void run() {
+    somatic_pbregalloc_t alloc;
+    somatic_pbregalloc_init(&alloc, 4096);
+
     while( !somatic_sig_received ) {
         read_ach();
 
-        Somatic__BaseMsg *base = somatic__base_msg__unpack( &protobuf_c_system_allocator,
-                                                            sd_frame_size, sd_achbuf);
+        Somatic__BaseMsg *base =
+            somatic__base_msg__unpack( &alloc, sd_frame_size, sd_achbuf);
         if( base->meta && base->meta->has_type ) {
             switch ( base->meta->type ) {
             case SOMATIC__MSG_TYPE__FORCE_MOMENT:
-            {
-                Somatic__ForceMoment *msg =
-                    somatic__force_moment__unpack( &protobuf_c_system_allocator,
-                                                   sd_frame_size, sd_achbuf);
-                dump_force_moment( msg );
-                somatic__force_moment__free_unpacked( msg,  &protobuf_c_system_allocator );
+                UNPACK_DUMP( force_moment, &alloc, sd_achbuf, sd_frame_size );
                 break;
-            }
             case SOMATIC__MSG_TYPE__MULTI_TRANSFORM:
-            {
-                Somatic__MultiTransform *msg =
-                    somatic__multi_transform__unpack(&protobuf_c_system_allocator,
-                                                     sd_frame_size, sd_achbuf);
-                dump_multi_transform(msg);
-                somatic__multi_transform__free_unpacked(
-                    msg, &protobuf_c_system_allocator);
+                UNPACK_DUMP( multi_transform, &alloc, sd_achbuf, sd_frame_size );
                 break;
-            }
             case SOMATIC__MSG_TYPE__JOYSTICK:
-            {
-                Somatic__Joystick *msg =
-                    somatic__joystick__unpack(&protobuf_c_system_allocator,
-                                                     sd_frame_size, sd_achbuf);
-                dump_joystick(msg);
-                somatic__joystick__free_unpacked( msg, &protobuf_c_system_allocator);
+                UNPACK_DUMP( joystick, &alloc, sd_achbuf, sd_frame_size );
                 break;
-            }
             case SOMATIC__MSG_TYPE__MOTOR_CMD:
-            {
-                Somatic__MotorCmd *msg =
-                    somatic__motor_cmd__unpack(&protobuf_c_system_allocator,
-                                               sd_frame_size, sd_achbuf);
-                dump_motor_cmd(msg);
-                somatic__motor_cmd__free_unpacked( msg, &protobuf_c_system_allocator);
+                UNPACK_DUMP( motor_cmd, &alloc, sd_achbuf, sd_frame_size );
                 break;
-            }
             case SOMATIC__MSG_TYPE__MOTOR_STATE:
-            {
-                Somatic__MotorState *msg =
-                    somatic__motor_state__unpack(&protobuf_c_system_allocator,
-                                               sd_frame_size, sd_achbuf);
-                dump_motor_state(msg);
-                somatic__motor_state__free_unpacked( msg, &protobuf_c_system_allocator);
+                UNPACK_DUMP( motor_state, &alloc, sd_achbuf, sd_frame_size );
                 break;
-            }
+            case SOMATIC__MSG_TYPE__BATTERY:
+                UNPACK_DUMP( battery, &alloc, sd_achbuf, sd_frame_size );
+                break;
             default: printf("Unknown Message: %d\n",base->meta->type);
             }
         } else {
             printf("Unknown Message, no type info\n");
         }
-        somatic__base_msg__free_unpacked( base, &protobuf_c_system_allocator );
 
         /* if( 0 == strcasecmp( opt_msg_type, "multi_transform" ) || */
         /*     0 == strcasecmp( opt_msg_type, "multitransform" ) ) { */
@@ -405,7 +403,10 @@ void run() {
         /*     printf("Unknown Message Type\n"); */
         /* } */
         assert( 0 == sd_indent );
+        somatic_pbregalloc_release(&alloc);
     }
+
+    somatic_pbregalloc_destroy(&alloc);
 }
 
 void destroy() {

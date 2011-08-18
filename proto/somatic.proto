@@ -175,6 +175,7 @@ enum msg_type {
     JOYSTICK = 7;
     TOUCH = 8;
     MICROPHONE = 9;
+    BATTERY = 10;
 };
 
 // included in every top-level message
@@ -262,6 +263,13 @@ message force_moment {
 // Send these messages on ach channels
 //
 
+
+message battery {
+    optional bool error = 1;
+    optional vector voltage = 2;
+    optional vector temp = 3;
+    optional metadata meta = 15;
+}
 
 enum motor_param {
     MOTOR_CURRENT = 0;
