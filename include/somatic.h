@@ -166,6 +166,8 @@
     }
 
 
+int somatic_beep( int fd, double freq, double dur );
+
 /** A structure to define binary protocol data.
  */
 typedef struct {

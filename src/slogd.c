@@ -45,6 +45,7 @@
 #include <ach.h>
 #include <unistd.h>
 #include <syslog.h>
+#include <fcntl.h>
 
 /// argp program version
 const char *argp_program_version = "slogd 0.0";
@@ -62,7 +63,9 @@ typedef struct {
     somatic_d_t d;
     somatic_d_opts_t d_opts;
     ach_channel_t chan;
+    int beepfd;
     const char *opt_chan_name;
+    const char *opt_console;
 } cx_t;
 
 /** Initialize the daemon */
@@ -91,6 +94,11 @@ static void init(cx_t *cx) {
     // open channel
     somatic_d_channel_open( &cx->d, &cx->chan,
                             cx->opt_chan_name, NULL );
+    // open console
+    if( (cx->beepfd = open(cx->opt_console, O_WRONLY)) < 0 ) {
+        syslog(LOG_ERR, "couldn't open `%s' to beep: %s\n",
+               cx->opt_console, strerror(errno));
+    }
 }
 
 
@@ -128,6 +136,21 @@ static void update(cx_t *cx) {
         } else { pri = LOG_ERR; }
         syslog(pri, "%s%s%s%s", head, type, proc, comment );
     }
+    // beep
+    if( msg && msg->has_priority) {
+        switch(msg->priority) {
+        case SOMATIC__EVENT__PRIORITIES__EMERG:
+            somatic_beep(cx->beepfd, 3500, 3);
+            break;
+        case SOMATIC__EVENT__PRIORITIES__ALERT:
+            somatic_beep(cx->beepfd, 2500, 2);
+            break;
+        case SOMATIC__EVENT__PRIORITIES__CRIT:
+            somatic_beep(cx->beepfd, 1500, 1);
+            break;
+        default: ;
+        }
+    }
 }
 
 static void run(cx_t *cx) {
@@ -144,6 +167,8 @@ static void run(cx_t *cx) {
 }
 
 void destroy(cx_t *cx) {
+    // close file
+    close(cx->beepfd);
     // close channel
     somatic_d_channel_close( &cx->d, &cx->chan );
     // end daemon
@@ -162,6 +187,7 @@ int main( int argc, char **argv ) {
     cx.d_opts.sched_rt = SOMATIC_D_SCHED_NONE; // logger not realtime
     cx.d_opts.skip_mlock = 0; // logger not realtime, other daemons may be
     cx.opt_chan_name = "event";
+    cx.opt_console = "/dev/tty0";
 
     argp_parse (&argp, argc, argv, 0, NULL, &cx);
 

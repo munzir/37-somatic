@@ -38,6 +38,9 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <linux/kd.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
 #include "somatic.h"
 #include "somatic/includes.h"
 #include "somatic/util.h"
@@ -311,4 +314,17 @@ const char* somatic_prototable_value2key( const somatic_prototable_t *table,
     const somatic_prototable_t *ent = somatic_prototable_lookup_value(table, value);
     if( ent ) return ent->key;
     else return "unknown";
+}
+
+int somatic_beep( int fd, double freq, double dur ) {
+    // PC mainboard timer 8254 is clocked at 1.19 MHz
+    static const double TICK_RATE =  1193180;
+    static const double COUNT_RATE = 1000; // seems to work
+    long tone = (TICK_RATE / freq);
+    //long durticks = TICK_RATE * dur * TICK_KLUDGE;
+    long durticks = dur * COUNT_RATE;
+    long argument = tone | (durticks << (8*sizeof(long) / 2));
+    printf("0x%lx 0x%lx : 0x%lx\n", tone, durticks, argument);
+    return ioctl(fd, KDMKTONE, (long) argument);
+    //return write(fd, "\a", 1);
 }
