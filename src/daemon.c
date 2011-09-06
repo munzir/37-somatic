@@ -307,15 +307,55 @@ AA_API void somatic_d_destroy( somatic_d_t *d) {
     if( d->ident ) free(d->ident);
 }
 
-AA_API void somatic_d_state( somatic_d_t *d, int state );
+AA_API void somatic_d_state( somatic_d_t *d, int state ) {
+    somatic_d_event( d, SOMATIC__EVENT__PRIORITIES__NOTICE,
+                     state,
+                     NULL, NULL );
+}
 
+AA_API void somatic_d_require( somatic_d_t *d, int test,
+                               const char fmt[], ... ) {
+    if( ! test ) {
+        va_list arg;
+        va_start( arg, fmt );
+        somatic_d_vevent(d, SOMATIC__EVENT__PRIORITIES__EMERG,
+                         SOMATIC__EVENT__CODES__BAD_ASSERT,
+                         NULL, fmt, arg);
+        va_end( arg );
+        somatic_d_die(d);
+    }
+}
 
-AA_API void somatic_d_heartbeat( somatic_d_t *d );
+AA_API int somatic_d_vcheck_bit( somatic_d_t *d, int mask,
+                                 bool notify, int prev, int word,
+                                 int level, int code,
+                                 const char *type, const char fmt[],
+                                 va_list arg ) {
+    bool pbit = (prev & mask) ? 1 : 0;
+    bool cbit = (word & mask) ? 1 : 0;
+    if( (pbit != cbit) && (cbit == notify) ) {
+        somatic_d_vevent( d, level, code, type, fmt, arg );
+        return 1;
+    } else {
+        return 0;
+    }
+}
 
+AA_API int somatic_d_check_bit( somatic_d_t *d, int mask,
+                                bool notify, int prev, int word,
+                                int level, int code,
+                                const char *type, const char fmt[],
+                                ... ) {
+    va_list arg;
+    va_start( arg, fmt );
+    int i = somatic_d_vcheck_bit( d, mask, prev, word, notify, level, code,
+                                  type, fmt, arg);
+    va_end(arg);
+    return i;
+}
 
-
-static void somatic_d_vevent( somatic_d_t *d, int level, int code,
-                              const char *type, const char comment_fmt[], va_list argp ) {
+void somatic_d_vevent( somatic_d_t *d, int level, int code,
+                       const char *type, const char comment_fmt[], va_list argp ) {
     Somatic__Event pb;
     memset(&pb, 0, sizeof pb);
     somatic__event__init(&pb);

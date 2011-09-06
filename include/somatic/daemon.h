@@ -170,6 +170,8 @@ AA_API void somatic_d_argp_parse( int key, char *arg, somatic_d_opts_t *opt );
 
 #define SOMATIC_RUNROOT "/var/run/somatic/"
 
+/* Good Functions */
+
 /** Initialize somatic daemon context struct.
 
     Call this function before doing anything else in your daemon.
@@ -182,7 +184,6 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts );
  */
 AA_API void somatic_d_destroy( somatic_d_t *d);
 
-
 /** Sets daemon state and posts event message.
 
     \param state Defined in the event message as PROC_STARTING, PROC_RUNNING,
@@ -190,16 +191,37 @@ AA_API void somatic_d_destroy( somatic_d_t *d);
  */
 AA_API void somatic_d_state( somatic_d_t *d, int state );
 
-
-/** Sends heartbeat event.
+/** Test must be true or process exits.
  */
-AA_API void somatic_d_heartbeat( somatic_d_t *d );
+AA_API void somatic_d_require( somatic_d_t *d, int test,
+                               const char fmt[], ... );
 
+AA_API int somatic_d_vcheck_bit( somatic_d_t *d, int mask,
+                                 bool notify, int prev, int word,
+                                 int level, int code,
+                                 const char *type, const char comment_fmt[],
+                                 va_list arg );
+
+AA_API int somatic_d_check_bit( somatic_d_t *d, int mask,
+                                bool notify, int prev, int word,
+                                int level, int code,
+                                const char *type, const char comment_fmt[],
+                                ... );
+
+
+/* Difficult Functions */
 
 /** Sends an event message on the event channel.
  */
 AA_API void somatic_d_event( somatic_d_t *d, int level, int code,
                         const char *type, const char comment_fmt[], ... );
+
+/** Sends an event message on the event channel.
+ */
+AA_API void
+somatic_d_vevent( somatic_d_t *d, int level, int code,
+                  const char *type, const char comment_fmt[],
+                  va_list argp );
 
 /** Sends a limit message on the event channel.
  */
