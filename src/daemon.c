@@ -33,7 +33,6 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
 // needed for getsid
 #define _GNU_SOURCE
 

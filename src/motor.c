@@ -32,7 +32,6 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
 #include "somatic.h"
 #include "somatic.pb-c.h"
 #include "somatic/daemon.h"
