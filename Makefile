@@ -66,7 +66,7 @@ verbatim/share/somatic/somatic.protobin: proto/somatic.proto
 
 clean:
 	rm -rf .deps $(GENHEADERS) debian *.deb \
-		$(BUILDDIR)/* $(LISPDIR)/*.fasl \
+		$(BUILDDIR)/*.o $(LISPDIR)/*.fasl \
 		$(INCLUDEDIR)/somatic.pb-c* $(SRCDIR)/somatic.pb-c*  \
 		doc python/somatic_pb2.*
 
