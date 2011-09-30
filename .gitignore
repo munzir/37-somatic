@@ -1,0 +1,10 @@
+/build/sbeep
+/build/slogd
+/build/sns
+/build/somatic_dump
+/build/somatic_live_plot
+/build/somatic_motor_plot
+/include/somatic.pb-c.h
+/src/somatic.pb-c.c
+/verbatim/share/somatic/somatic.protobin
+/.deps
