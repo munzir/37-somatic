@@ -8,3 +8,5 @@
 /src/somatic.pb-c.c
 /verbatim/share/somatic/somatic.protobin
 /.deps
+/build/sjstel
+/debian
