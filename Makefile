@@ -5,7 +5,7 @@ VERSION := 0.0.20110909
 PROJECT := somatic
 
 SHAREDLIBS := somatic
-BINFILES := somatic_motor_plot somatic_dump somatic_live_plot slogd sns sbeep
+BINFILES := somatic_motor_plot somatic_dump somatic_live_plot slogd sns sbeep sjstel
 
 
 default: all
@@ -45,6 +45,7 @@ $(call LINKBIN, somatic_exampled, \
 $(call LINKBIN, slogd, slogd.o $(LIB_OBJS), ach protobuf-c amino)
 $(call LINKBIN, sns, sns.o $(LIB_OBJS), ach protobuf-c amino)
 $(call LINKBIN, sbeep, sbeep.o $(LIB_OBJS), ach protobuf-c amino)
+$(call LINKBIN, sjstel, sjstel.o $(LIB_OBJS), ach protobuf-c amino)
 
 src/somatic.pb-c.c: proto/somatic.proto
 	cd proto && \
