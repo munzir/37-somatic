@@ -48,15 +48,19 @@
 
 
 
-
-
-
-
-
-
-
-
-
+(defun motor-setpos (channel &rest x)
+  "Send motor-cmd to set joint positions"
+  (ach:put channel
+           (pb:encode
+            (make-instance
+             'somatic::motor-cmd :param :motor-position
+             :values
+             (make-instance 'somatic::vector
+                            :data (map 'vector (lambda (e)
+                                                 (coerce e 'double-float))
+                                       x))
+             :meta (make-instance 'somatic::metadata
+                                  :type :motor-cmd)))))
 
 
 
