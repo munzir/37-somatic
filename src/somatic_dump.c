@@ -162,7 +162,7 @@ void indent() {
 
 
 void dump_vector (Somatic__Vector *pb, const char *fmt) {
-    for( size_t i = 0; i < pb->n_data; i++ ) {
+    for( size_t i = 0; pb && pb->data && i < pb->n_data; i++ ) {
         printf(fmt, pb->data[i]);
     }
 }
@@ -353,9 +353,24 @@ void dump_motor_cmd( Somatic__MotorCmd *pb ) {
     printf("[MotorCmd]\n");
     sd_indent++;
     indent();
-    printf("[values]");
-    dump_vector(pb->values, "\t%6.3f");
-    printf("\n");
+    switch ( pb->param ) {
+    case SOMATIC__MOTOR_PARAM__MOTOR_CURRENT:
+        printf("[param]\tCURRENT\n");
+    case SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY:
+        printf("[param]\tVELOCITY\n");
+    case SOMATIC__MOTOR_PARAM__MOTOR_POSITION:
+        printf("[param]\tPOSITION\n");
+    case SOMATIC__MOTOR_PARAM__MOTOR_HALT:
+        printf("[param]\tHALT\n");
+    case SOMATIC__MOTOR_PARAM__MOTOR_RESET:
+        printf("[param]\tRESET\n");
+    }
+    if ( pb->values ) {
+        indent();
+        printf("[values]");
+        dump_vector(pb->values, "\t%6.3f");
+        printf("\n");
+    }
     sd_indent--;
 }
 
