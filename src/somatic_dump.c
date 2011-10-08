@@ -356,14 +356,19 @@ void dump_motor_cmd( Somatic__MotorCmd *pb ) {
     switch ( pb->param ) {
     case SOMATIC__MOTOR_PARAM__MOTOR_CURRENT:
         printf("[param]\tCURRENT\n");
+        break;
     case SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY:
         printf("[param]\tVELOCITY\n");
+        break;
     case SOMATIC__MOTOR_PARAM__MOTOR_POSITION:
         printf("[param]\tPOSITION\n");
+        break;
     case SOMATIC__MOTOR_PARAM__MOTOR_HALT:
         printf("[param]\tHALT\n");
+        break;
     case SOMATIC__MOTOR_PARAM__MOTOR_RESET:
         printf("[param]\tRESET\n");
+        break;
     }
     if ( pb->values ) {
         indent();
