@@ -191,6 +191,10 @@ int parse_opt( int key, char *arg, struct argp_state *state) {
     case 'u':
         cx->opt_cmd_name = strdup(arg);
         break;
+    case 'n':
+        cx->n = atoi(arg);
+        assert( cx->n > 0 ) ;
+        break;
     }
 
     somatic_d_argp_parse( key, arg, &cx->d_opts );
@@ -224,6 +228,13 @@ struct argp_option argp_options[] = {
         .arg = "channel-name",
         .flags = 0,
         .doc = "joystick state channel"
+    },
+    {
+        .name = "num",
+        .key = 'n',
+        .arg = "axes",
+        .flags = 0,
+        .doc = "number of motor axes"
     },
     SOMATIC_D_ARGP_OPTS,
     {
