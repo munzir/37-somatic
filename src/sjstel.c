@@ -105,7 +105,7 @@ static void init(cx_t *cx) {
 
     // msg
     cx->cmd = somatic_motor_cmd_alloc( cx->n );
-    cx->cmd->param = SOMATIC__MOTOR_PARAM__MOTOR_POSITION;
+    cx->cmd->param = SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY;
     cx->cmd->has_param = 1;
 }
 
@@ -124,14 +124,12 @@ static void update(cx_t *cx) {
         // clear
         memset(cx->cmd->values->data, 0, sizeof(double)*cx->n);
         // set values
-        for( size_t i = 0; i < msg->axes->n_data; i ++ ) {
+        for( size_t i = 0; i < msg->axes->n_data && i < cx->n; i ++ ) {
             cx->cmd->values->data[i] =  msg->axes->data[i];
         }
-        memset(cx->cmd->values->data, 0, sizeof(double)*cx->n);
-        cx->cmd->values->data[0] = .00*M_PI_2;
         // send
         SOMATIC_D_PUT(somatic__motor_cmd, &cx->d, &cx->cmd_chan, cx->cmd );
-        exit(0);
+        //exit(0);
     }
 }
 
