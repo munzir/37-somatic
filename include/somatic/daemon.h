@@ -152,21 +152,21 @@ typedef struct {
 } somatic_d_t;
 
 
-#define SOMATIC_D_ARGP_OPTS                     \
-    {                                           \
-        .name = "daemonize",                    \
-            .key = 'd',                         \
-            .arg = NULL,                        \
-            .flags = 0,                         \
-            .doc = "fork off daemon process"    \
-            },                                  \
-    {                                           \
-        .name = "ident",                        \
-            .key = 'I',                         \
-            .arg = "IDENT",                     \
-            .flags = 0,                         \
-            .doc = "identifier for this daemon" \
-     }                                          \
+#define SOMATIC_D_ARGP_OPTS                      \
+    {                                            \
+        /*name*/ "daemonize",                    \
+            /*key*/ 'd',                         \
+            /*arg*/ NULL,                        \
+            /*flags*/ 0,                         \
+            /*doc*/ "fork off daemon process"    \
+            },                                   \
+    {                                            \
+        /*name*/ "ident",                        \
+            /*key*/ 'I',                         \
+            /*arg*/ "IDENT",                     \
+            /*flags*/ 0,                         \
+            /*doc*/ "identifier for this daemon" \
+     }                                           \
 
 AA_API void somatic_d_argp_parse( int key, char *arg, somatic_d_opts_t *opt );
 
