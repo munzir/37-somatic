@@ -388,6 +388,25 @@ void somatic_motor_state_set_current( Somatic__MotorState *pb,
     VECTOR_FIELD_SET( pb, current, n, x );
 }
 
+AA_API void somatic_motor_state_alloc_position( Somatic__MotorState *pb,
+						size_t n ) {
+    pb->position = somatic_vector_alloc(n);
+}
+
+
+AA_API void somatic_motor_state_alloc_velocity( Somatic__MotorState *pb,
+                                                size_t n ) {
+    pb->velocity = somatic_vector_alloc(n);
+}
+AA_API void somatic_motor_state_alloc_acceleraton( Somatic__MotorState *pb,
+                                                   size_t n ) {
+    pb->acceleration = somatic_vector_alloc(n);
+}
+AA_API void somatic_motor_state_alloc_current( Somatic__MotorState *pb,
+                                               size_t n ) {
+    pb->current = somatic_vector_alloc(n);
+}
+
 //=== Joystick ===
 Somatic__Joystick *somatic_joystick_alloc(size_t n_axes, size_t n_buttons) {
     Somatic__Joystick *pb = AA_NEW0(Somatic__Joystick);

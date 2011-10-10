@@ -168,14 +168,21 @@ AA_API void somatic_motor_cmd_set( Somatic__MotorCmd *pb,
 AA_API Somatic__MotorState *somatic_motor_state_alloc();
 AA_API void somatic_motor_state_free(Somatic__MotorState *pb);
 AA_API void somatic_motor_state_set_position( Somatic__MotorState *pb,
-                                       const double *x, size_t n );
+                                              const double *x, size_t n );
 AA_API void somatic_motor_state_set_velocity( Somatic__MotorState *pb,
-                                       const double *x, size_t n );
+                                              const double *x, size_t n );
 AA_API void somatic_motor_state_set_acceleraton( Somatic__MotorState *pb,
-                                          const double *x, size_t n );
+                                                 const double *x, size_t n );
 AA_API void somatic_motor_state_set_current( Somatic__MotorState *pb,
-                                      const double *x, size_t n );
-
+                                             const double *x, size_t n );
+AA_API void somatic_motor_state_alloc_position( Somatic__MotorState *pb,
+						size_t n );
+AA_API void somatic_motor_state_alloc_velocity( Somatic__MotorState *pb,
+						size_t n );
+AA_API void somatic_motor_state_alloc_acceleration( Somatic__MotorState *pb,
+						    size_t n );
+AA_API void somatic_motor_state_alloc_current( Somatic__MotorState *pb,
+					       size_t n );
 
 //=== Joystick ===
 AA_API Somatic__Joystick *somatic_joystick_alloc(size_t n_axes, size_t n_buttons);
