@@ -41,14 +41,40 @@
   (:use :cl :numeri)
   (:export :ply :opine :sns-map :sns-load
            :extract-times
-           :speech-open :speech-remote :speech-close :say)
-  )
+           :speech-open :speech-remote :speech-close :say))
 
 (in-package :sns)
 
+(defun vec-msg (&rest args)
+  (make-instance 'somatic::vector
+                 :data (map 'vector (lambda (e)
+                                      (coerce e 'double-float))
+                            args)))
+
+(defun motor-cmd-msg (param &rest args)
+  (make-instance
+   'somatic::motor-cmd :param param
+   :values (when args (apply #'vec-msg args))
+   :meta (make-instance 'somatic::metadata :type :motor-cmd)))
+
+(defun setpos (channel &rest x)
+  "Send motor-cmd to set joint positions"
+  (ach:put channel
+           (pb:encode
+            (apply #'motor-cmd-msg :motor-position x))))
 
 
-(defun motor-setpos (channel &rest x)
+(defun setvel (channel timeout &rest x)
+  (ach:put channel (pb:encode
+                    (apply #'motor-cmd-msg :motor-velocity x)))
+  (sleep timeout)
+  (ach:put channel (pb:encode
+                    (apply #'motor-cmd-msg :motor-velocity
+                           (map 'list (lambda (x)
+                                        (declare (ignore x))
+                                        0) x)))))
+
+(defun setpos (channel &rest x)
   "Send motor-cmd to set joint positions"
   (ach:put channel
            (pb:encode
@@ -61,8 +87,6 @@
                                        x))
              :meta (make-instance 'somatic::metadata
                                   :type :motor-cmd)))))
-
-
 
 
 
