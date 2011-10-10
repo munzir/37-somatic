@@ -87,6 +87,25 @@ void somatic_motor_destroy(somatic_d_t *d, somatic_motor_t *m) {
     }
 }
 
+
+AA_API void somatic_motor_setvel( somatic_d_t *d, somatic_motor_t *m,
+                                  double *x, size_t n ) {
+    somatic_motor_cmd( d, m, SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY,
+                       x, n );
+}
+AA_API void somatic_motor_setpos( somatic_d_t *d, somatic_motor_t *m,
+                                  double *x, size_t n ) {
+    somatic_motor_cmd( d, m, SOMATIC__MOTOR_PARAM__MOTOR_POSITION,
+                       x, n );
+}
+AA_API void somatic_motor_halt( somatic_d_t *d, somatic_motor_t *m ) {
+    somatic_motor_cmd( d, m, SOMATIC__MOTOR_PARAM__MOTOR_HALT, NULL, 0 );
+}
+AA_API void somatic_motor_reset( somatic_d_t *d, somatic_motor_t *m ) {
+    somatic_motor_cmd( d, m, SOMATIC__MOTOR_PARAM__MOTOR_RESET, NULL, 0 );
+}
+
+
 void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
                         int cmd_type,
                         double *x, size_t n ) {

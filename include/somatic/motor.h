@@ -83,9 +83,18 @@ AA_API void somatic_motor_init(somatic_d_t *d, somatic_motor_t *m, size_t n,
 
 AA_API void somatic_motor_destroy(somatic_d_t *d, somatic_motor_t *m);
 
+
+AA_API void somatic_motor_setvel( somatic_d_t *d, somatic_motor_t *m,
+                                  double *x, size_t n );
+AA_API void somatic_motor_setpos( somatic_d_t *d, somatic_motor_t *m,
+                                  double *x, size_t n );
+AA_API void somatic_motor_halt( somatic_d_t *d, somatic_motor_t *m );
+AA_API void somatic_motor_reset( somatic_d_t *d, somatic_motor_t *m );
+
 AA_API void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
                                int cmd_type,
                                double *x, size_t n );
+
 AA_API void somatic_motor_update( somatic_d_t *d, somatic_motor_t *m );
 
 
