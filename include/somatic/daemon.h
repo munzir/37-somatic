@@ -158,14 +158,16 @@ typedef struct {
             /*key*/ 'd',                         \
             /*arg*/ NULL,                        \
             /*flags*/ 0,                         \
-            /*doc*/ "fork off daemon process"    \
+            /*doc*/ "fork off daemon process",   \
+            /*group*/ 0                          \
             },                                   \
     {                                            \
         /*name*/ "ident",                        \
             /*key*/ 'I',                         \
             /*arg*/ "IDENT",                     \
             /*flags*/ 0,                         \
-            /*doc*/ "identifier for this daemon" \
+            /*doc*/ "identifier for this daemon",\
+            /*group*/ 0                          \
      }                                           \
 
 AA_API void somatic_d_argp_parse( int key, char *arg, somatic_d_opts_t *opt );
