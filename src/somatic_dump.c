@@ -250,7 +250,7 @@ void dump_metadata( Somatic__Metadata *pb ) {
 
 void dump_multi_transform( Somatic__MultiTransform *pb ) {
     indent();
-    printf("[MultiTransform]\t");
+    printf("[MultiTransform]\n");
     sd_indent++;
     if( pb->tf ) {
         for( size_t i = 0; i < pb->n_tf; i++ )

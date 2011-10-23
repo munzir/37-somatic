@@ -149,8 +149,8 @@ Somatic__Battery *somatic_battery_alloc( size_t n );
 void somatic_battery_free( Somatic__Battery *pb );
 
 //=== Multi Transform ===
-//AA_API Somatic__MultiTransform *somatic_multi_transform_alloc(size_t n);
-//AA_API void somatic_multi_transform_free(Somatic__MultiTransform *pb);
+AA_API Somatic__MultiTransform *somatic_multi_transform_alloc(size_t n);
+AA_API void somatic_multi_transform_free(Somatic__MultiTransform *pb);
 
 //=== Force Moment ===
 AA_API Somatic__ForceMoment *somatic_force_moment_alloc( int alloc_force, int alloc_moment );
