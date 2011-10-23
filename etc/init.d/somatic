@@ -5,7 +5,7 @@ CHANFILE_EVENT=`ach -F event`
 
 start() {
     # create channel
-    ach --once --create event --mode 666 --msg-size 4096 --msg-cnt 512
+    ach -1 -C event -o 666 -m 512
 
     # create rundir
     mkdir -p /var/run/somatic
