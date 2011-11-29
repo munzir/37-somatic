@@ -29,23 +29,23 @@ all: $(LIBFILES) verbatim/share/somatic/somatic.protobin $(BINFILES)
 
 LIB_OBJS := somatic_util.o somatic.pb-c.o  msg.o daemon.o motor.o
 
-$(call LINKLIB, somatic, $(LIB_OBJS), ach protobuf-c)
+$(call LINKLIB, somatic, $(LIB_OBJS), ach protobuf-c amino blas lapack)
 
 $(call LINKBIN, somatic_dump, \
-	somatic_dump.o $(LIB_OBJS), ach protobuf-c amino stdc++)
+	somatic_dump.o $(LIB_OBJS), ach protobuf-c amino blas lapack stdc++)
 $(call LINKBIN, somatic_live_plot, \
-	somatic_live_plot.o $(LIB_OBJS), ach protobuf-c amino stdc++)
+	somatic_live_plot.o $(LIB_OBJS), ach protobuf-c amino blas lapack stdc++)
 $(call LINKBIN, somatic_test_source, \
-	somatic_test_source.o $(LIB_OBJS), ach protobuf-c amino stdc++)
+	somatic_test_source.o $(LIB_OBJS), ach protobuf-c amino blas lapack stdc++)
 $(call LINKBIN, somatic_motor_plot, \
 	somatic_motor_plot_argp.o somatic_motor_plot.o $(LIB_OBJS),\
-	ach protobuf-c amino stdc++)
+	ach protobuf-c amino blas lapack stdc++)
 $(call LINKBIN, somatic_exampled, \
-	 somatic_exampled.o $(LIB_OBJS), ach protobuf-c amino stdc++)
-$(call LINKBIN, slogd, slogd.o $(LIB_OBJS), ach protobuf-c amino)
-$(call LINKBIN, sns, sns.o $(LIB_OBJS), ach protobuf-c amino)
-$(call LINKBIN, sbeep, sbeep.o $(LIB_OBJS), ach protobuf-c amino)
-$(call LINKBIN, sjstel, sjstel.o $(LIB_OBJS), ach protobuf-c amino)
+	 somatic_exampled.o $(LIB_OBJS), ach protobuf-c amino blas lapack stdc++)
+$(call LINKBIN, slogd, slogd.o $(LIB_OBJS), ach protobuf-c blas lapack amino)
+$(call LINKBIN, sns, sns.o $(LIB_OBJS), ach protobuf-c blas lapack amino)
+$(call LINKBIN, sbeep, sbeep.o $(LIB_OBJS), ach protobuf-c blas lapack amino)
+$(call LINKBIN, sjstel, sjstel.o $(LIB_OBJS), ach protobuf-c blas lapack amino)
 
 src/somatic.pb-c.c: proto/somatic.proto
 	cd proto && \
