@@ -143,8 +143,8 @@ typedef struct {
     char *ident;                  ///< identifier for this daemon
     char *host;                   ///< hostname for this daemon
     int state;                    ///< {starting,running,stopping,halted,err}
-    aa_region_t memreg;           ///< memory region
-    aa_region_t tmpreg;           ///< memory region for temporaries, ie ach buffers, lapack work arrays
+    aa_mem_region_t memreg;           ///< memory region
+    aa_mem_region_t tmpreg;           ///< memory region for temporaries, ie ach buffers, lapack work arrays
     somatic_pbregalloc_t pballoc; ///< protobuf-c allocator that uses memreg
     somatic_d_opts_t opts;        ///< options used for this daemon
     int   lockfd;                 ///< lockfile fd
@@ -312,15 +312,15 @@ AA_API void somatic_d_channel_close(somatic_d_t *d, ach_channel_t *chan );
 AA_API void *somatic_d_get( somatic_d_t *d, ach_channel_t *chan, size_t *frame_size,
                             const struct timespec *ACH_RESTRICT abstime, int options, int *ret );
 
-static char *somatic_d_pidnam( const char *ident, aa_region_t *reg ) {
-    return aa_region_printf(reg, SOMATIC_RUNROOT"%s/pid", ident );
+static char *somatic_d_pidnam( const char *ident, aa_mem_region_t *reg ) {
+    return aa_mem_region_printf(reg, SOMATIC_RUNROOT"%s/pid", ident );
 }
 
 /**
  * \param d: somatic_daemon_t context struct
  * \param ret: ach return code
  * \param type: protobuf message type string (i.e. somatic__vector,
- *  			NOT actual Somatic__Vector type)
+ *                      NOT actual Somatic__Vector type)
  * \param alloc: protobuf allocator (ie, &protobuf_c_system_allocator)
  * \param size: size of buffer to give ach
  * \param chan: ach channel pointer
@@ -341,7 +341,7 @@ static char *somatic_d_pidnam( const char *ident, aa_region_t *reg ) {
  * \param d: daemon context
  * \param chan: ach channel to send over
  * \param type: protobuf message type string (i.e. somatic__vector,
- *  			NOT actual Somatic__Vector type)
+ *                      NOT actual Somatic__Vector type)
  * \param msg: pointer to the protobuf message
  */
 #define SOMATIC_D_PUT( type, d, chan, msg )                             \
@@ -349,10 +349,11 @@ static char *somatic_d_pidnam( const char *ident, aa_region_t *reg ) {
         size_t _somatic_private_n =                                     \
             type ## __get_packed_size(msg);                             \
         uint8_t *_somatic_private_buf =                                 \
-            (uint8_t*)aa_region_tmpalloc(&(d)->tmpreg, _somatic_private_n); \
+            (uint8_t*)aa_mem_region_tmpalloc(&(d)->tmpreg, _somatic_private_n); \
         type ## __pack( (msg), &_somatic_private_buf[0] );              \
         ach_put( (chan), _somatic_private_buf,                          \
                  _somatic_private_n );                                  \
     })
+
 
 #endif // SOMATIC_DAEMON_H

@@ -149,11 +149,11 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
     d->ident = strdup((opts && opts->ident) ? opts->ident : "somatic");
 
     // setup memory allocator
-    aa_region_init( &d->memreg,
+    aa_mem_region_init( &d->memreg,
                     opts->region_size ?
                     opts->region_size :
                     SOMATIC_D_DEFAULT_REGION_SIZE );
-    aa_region_init( &d->tmpreg,
+    aa_mem_region_init( &d->tmpreg,
                     opts->tmpregion_size ?
                     opts->tmpregion_size :
                     SOMATIC_D_DEFAULT_TMPREGION_SIZE );
@@ -164,13 +164,13 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
     umask(0); // always successful
 
     // create working directory
-    const char *dirnam = aa_region_printf(&d->memreg, SOMATIC_RUNROOT"%s", d->ident);
+    const char *dirnam = aa_mem_region_printf(&d->memreg, SOMATIC_RUNROOT"%s", d->ident);
     r = mkdir( dirnam, 0775 );
     d_check( !r || EEXIST == errno, "Couldn't make working directory: %s (%d)",
              strerror(errno), errno);
 
     // chdir
-    const char *wd = aa_region_printf(&d->memreg,SOMATIC_RUNROOT"%s", d->ident);
+    const char *wd = aa_mem_region_printf(&d->memreg,SOMATIC_RUNROOT"%s", d->ident);
     d_check( !chdir(wd),  "Couldn't chdir to `%s': %s", wd, strerror(errno));
 
     // open pid file
@@ -268,7 +268,7 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
                      SOMATIC__EVENT__CODES__PROC_STARTING,
                      NULL, NULL );
     // release regions
-    aa_region_release(&d->memreg);
+    aa_mem_region_release(&d->memreg);
 
 }
 
@@ -281,7 +281,7 @@ AA_API void somatic_d_destroy( somatic_d_t *d) {
     // undaemonize
     if( d->opts.daemonize ) {
         // close the pid file, this clobbers our lock as well
-        char *nam = aa_region_printf(&d->memreg, SOMATIC_RUNROOT"%s/pid", d->ident);
+        char *nam = aa_mem_region_printf(&d->memreg, SOMATIC_RUNROOT"%s/pid", d->ident);
         if( 0 != fclose(d->lockfile) ) {
             syslog(LOG_ERR, "Error closing `%s': %s", nam, strerror(errno) );
         }
@@ -295,8 +295,8 @@ AA_API void somatic_d_destroy( somatic_d_t *d) {
     r = ach_close(&d->chan_event);
 
     // free
-    aa_region_destroy(&d->memreg);
-    aa_region_destroy(&d->tmpreg);
+    aa_mem_region_destroy(&d->memreg);
+    aa_mem_region_destroy(&d->tmpreg);
 
     // close log
     //syslog(LOG_NOTICE, "destroy daemon");
@@ -572,14 +572,14 @@ AA_API void *somatic_d_get( somatic_d_t *d, ach_channel_t *chan, size_t *frame_s
     while(1){
         fs = 0;
         // try to get the frame
-        *ret = ach_get( chan, aa_region_ptr(&d->tmpreg), aa_region_freesize(&d->tmpreg),
+        *ret = ach_get( chan, aa_mem_region_ptr(&d->tmpreg), aa_mem_region_freesize(&d->tmpreg),
                         &fs, abstime, options );
         if( ACH_OVERFLOW != *ret ) break;
         // if region is too small, get a bigger buffer
-        aa_region_tmpalloc( &d->tmpreg, *frame_size );
+        aa_mem_region_tmpalloc( &d->tmpreg, *frame_size );
     }
     *frame_size = fs;
-    return aa_region_ptr(&d->tmpreg);
+    return aa_mem_region_ptr(&d->tmpreg);
 }
 
 

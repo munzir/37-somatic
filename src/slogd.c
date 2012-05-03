@@ -116,23 +116,23 @@ static void update(cx_t *cx) {
     // validate
     // log
     if( msg ) {
-        aa_region_t *reg = &cx->d.memreg;
-        char *head = aa_region_printf( reg,
+        aa_mem_region_t *reg = &cx->d.memreg;
+        char *head = aa_mem_region_printf( reg,
                                        "[%s].(%s)",
                                        msg->ident ? msg->ident : "",
                                        msg->has_code ? somatic_event_code2str(msg->code) : "?" );
-        const char *type = msg->type ? aa_region_printf(reg, ".(%s)", msg->type) : "";
+        const char *type = msg->type ? aa_mem_region_printf(reg, ".(%s)", msg->type) : "";
         const char *proc =
             ( msg->has_code &&
               (SOMATIC__EVENT__CODES__PROC_STARTING == msg->code ||
                SOMATIC__EVENT__CODES__PROC_RUNNING == msg->code ||
                SOMATIC__EVENT__CODES__PROC_STOPPING == msg->code ||
                SOMATIC__EVENT__CODES__PROC_HALTED == msg->code ) ) ?
-              aa_region_printf(reg, " %d@%s",
+              aa_mem_region_printf(reg, " %d@%s",
                                msg->has_pid ? msg->pid : 0,
                                msg->host ? msg->host : "?") : "";
         const char *comment =
-            msg->comment ? aa_region_printf(reg, " %s", msg->comment) : "";
+            msg->comment ? aa_mem_region_printf(reg, " %s", msg->comment) : "";
         int pri;
         if( msg->has_priority  && msg->priority <= LOG_DEBUG
             /* unsigned, always true && msg->priority >= LOG_EMERG*/ ) {
@@ -163,7 +163,7 @@ static void run(cx_t *cx) {
                      NULL, NULL );
     while(!somatic_sig_received) {
         update(cx);
-        aa_region_release( &cx->d.memreg );  // free buffers allocated during this cycle
+        aa_mem_region_release( &cx->d.memreg );  // free buffers allocated during this cycle
     }
     somatic_d_event( &cx->d, SOMATIC__EVENT__PRIORITIES__NOTICE,
                      SOMATIC__EVENT__CODES__PROC_STOPPING,

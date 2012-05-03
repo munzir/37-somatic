@@ -81,7 +81,7 @@ static void somatic_opine_timespec( Somatic__Timespec * t,
 //=== Allocator ===
 typedef ProtobufCAllocator somatic_pbregalloc_t;
 
-AA_API void somatic_pbregalloc_set( somatic_pbregalloc_t *pba, aa_region_t *reg );
+AA_API void somatic_pbregalloc_set( somatic_pbregalloc_t *pba, aa_mem_region_t *reg );
 AA_API void somatic_pbregalloc_init( somatic_pbregalloc_t *a, size_t n );
 AA_API void somatic_pbregalloc_release( somatic_pbregalloc_t *a );
 AA_API void somatic_pbregalloc_destroy( somatic_pbregalloc_t *a );
@@ -176,13 +176,13 @@ AA_API void somatic_motor_state_set_acceleraton( Somatic__MotorState *pb,
 AA_API void somatic_motor_state_set_current( Somatic__MotorState *pb,
                                              const double *x, size_t n );
 AA_API void somatic_motor_state_alloc_position( Somatic__MotorState *pb,
-						size_t n );
+                                                size_t n );
 AA_API void somatic_motor_state_alloc_velocity( Somatic__MotorState *pb,
-						size_t n );
+                                                size_t n );
 AA_API void somatic_motor_state_alloc_acceleration( Somatic__MotorState *pb,
-						    size_t n );
+                                                    size_t n );
 AA_API void somatic_motor_state_alloc_current( Somatic__MotorState *pb,
-					       size_t n );
+                                               size_t n );
 
 //=== Joystick ===
 AA_API Somatic__Joystick *somatic_joystick_alloc(size_t n_axes, size_t n_buttons);

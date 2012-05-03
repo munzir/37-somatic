@@ -140,7 +140,7 @@ static void run(cx_t *cx) {
     while(!somatic_sig_received) {
         update(cx);
         // free buffers allocated during this cycle
-        aa_region_release( &cx->d.memreg );
+        aa_mem_region_release( &cx->d.memreg );
     }
     somatic_d_event( &cx->d, SOMATIC__EVENT__PRIORITIES__NOTICE,
                      SOMATIC__EVENT__CODES__PROC_STOPPING,

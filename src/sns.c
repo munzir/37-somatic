@@ -78,7 +78,7 @@ extern struct argp argp;
 /* GLOBALS */
 /* ------- */
 
-aa_region_t memreg;
+aa_mem_region_t memreg;
 
 
 /* ------- */
@@ -165,7 +165,7 @@ static int sns_alive(const char *ident) {
 /* MAIN */
 /* ---- */
 int main( int argc, char **argv ) {
-    aa_region_init(&memreg, 4*1<<10);
+    aa_mem_region_init(&memreg, 4*1<<10);
     argp_parse (&argp, argc, argv, 0, NULL, NULL);
     //static cx_t cx;
 

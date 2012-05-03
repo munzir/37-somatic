@@ -237,7 +237,7 @@ static void run(cx_t *cx) {
     while(!somatic_sig_received) {
         update(cx);
         plot(&cx->plot);
-        aa_region_release(&cx->d.memreg);
+        aa_mem_region_release(&cx->d.memreg);
         usleep( (int) (1e6 / opt_frequency));
     }
     somatic_d_event( &cx->d, SOMATIC__EVENT__PRIORITIES__NOTICE,

@@ -45,7 +45,7 @@
 
 
 static void *pbregalloc_closure_alloc(void *cx, size_t size) {
-    return aa_region_alloc( (aa_region_t*)cx, size);
+    return aa_mem_region_alloc( (aa_mem_region_t*)cx, size);
 }
 static void pbregalloc_closure_free(void *cx, void *ptr) {
     (void)cx;
@@ -53,7 +53,7 @@ static void pbregalloc_closure_free(void *cx, void *ptr) {
 }
 
 
-AA_API void somatic_pbregalloc_set( somatic_pbregalloc_t *pba, aa_region_t *reg ) {
+AA_API void somatic_pbregalloc_set( somatic_pbregalloc_t *pba, aa_mem_region_t *reg ) {
     pba->allocator_data = reg;
     pba->alloc = pbregalloc_closure_alloc;
     pba->tmp_alloc = pbregalloc_closure_alloc;
@@ -62,16 +62,16 @@ AA_API void somatic_pbregalloc_set( somatic_pbregalloc_t *pba, aa_region_t *reg 
 
 AA_API void somatic_pbregalloc_init( somatic_pbregalloc_t *pba, size_t n ) {
     memset(pba, 0, sizeof(*pba));
-    aa_region_t *reg = AA_NEW0(aa_region_t);
-    aa_region_init(reg,n);
+    aa_mem_region_t *reg = AA_NEW0(aa_mem_region_t);
+    aa_mem_region_init(reg,n);
     somatic_pbregalloc_set(pba, reg);
 }
 AA_API void somatic_pbregalloc_destroy( somatic_pbregalloc_t *a ) {
-    aa_region_destroy( (aa_region_t*) a->allocator_data );
+    aa_mem_region_destroy( (aa_mem_region_t*) a->allocator_data );
     free( a->allocator_data );
 }
 AA_API void somatic_pbregalloc_release( somatic_pbregalloc_t *a ) {
-    aa_region_release( (aa_region_t*) a->allocator_data );
+    aa_mem_region_release( (aa_mem_region_t*) a->allocator_data );
 }
 
 #define VECTOR_FIELD_INIT( PB, FIELD, SIZE )              \
@@ -389,7 +389,7 @@ void somatic_motor_state_set_current( Somatic__MotorState *pb,
 }
 
 AA_API void somatic_motor_state_alloc_position( Somatic__MotorState *pb,
-						size_t n ) {
+                                                size_t n ) {
     pb->position = somatic_vector_alloc(n);
 }
 
