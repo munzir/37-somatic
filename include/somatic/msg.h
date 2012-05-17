@@ -66,16 +66,16 @@
 
 #endif
 
-static struct timespec somatic_ply_timespec( Somatic__Timespec * t) {
-    return aa_tm_make( (time_t) t->sec, (long) t->nsec );
-}
+/* static struct timespec somatic_ply_timespec( Somatic__Timespec * t) { */
+/*     return aa_tm_make( (time_t) t->sec, (long) t->nsec ); */
+/* } */
 
-static void somatic_opine_timespec( Somatic__Timespec * t,
-                                    struct timespec ts ) {
-    t->sec = ts.tv_sec;
-    t->nsec = ts.tv_nsec;
-    t->has_nsec = 1;
-}
+/* static void somatic_opine_timespec( Somatic__Timespec * t, */
+/*                                     struct timespec ts ) { */
+/*     t->sec = ts.tv_sec; */
+/*     t->nsec = (int32_t) ts.tv_nsec; */
+/*     t->has_nsec = 1; */
+/* } */
 
 
 //=== Allocator ===

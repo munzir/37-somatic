@@ -104,14 +104,14 @@ static void somatic_sighandler_simple (int sig, siginfo_t *siginfo, void *contex
         somatic_verbprintf(1, "setting somatic_sig_received=1\n");
         somatic_sig_received = 1;
     } else if(sig == SIGMSTART) {
-    	somatic_motor_state = 1;
+        somatic_motor_state = 1;
     } else if (sig == SIGMSTOP) {
-    	somatic_motor_state = 0;
+        somatic_motor_state = 0;
     } else if (sig == SIGMABORT) {
-    	somatic_motor_state = 0;
-    	somatic_sig_received = 1;
+        somatic_motor_state = 0;
+        somatic_sig_received = 1;
     } else {
-    	somatic_verbprintf(1, "Received a signal. No action defined.\n");
+        somatic_verbprintf(1, "Received a signal. No action defined.\n");
     }
 }
 
@@ -127,18 +127,18 @@ void somatic_sighandler_simple_install() {
     act.sa_flags = SA_SIGINFO;
 
     if (sigaction(SIGMSTART, &act, NULL) < 0) {
-    	perror ("sigaction");
-		somatic_fail( "Couldn't install handler\n");
+        perror ("sigaction");
+                somatic_fail( "Couldn't install handler\n");
     }
 
     if (sigaction(SIGMSTOP, &act, NULL) < 0) {
-    	perror ("sigaction");
-		somatic_fail( "Couldn't install handler\n");
+        perror ("sigaction");
+                somatic_fail( "Couldn't install handler\n");
     }
 
     if (sigaction(SIGMABORT, &act, NULL) < 0) {
-    	perror ("sigaction");
-		somatic_fail( "Couldn't install handler\n");
+        perror ("sigaction");
+                somatic_fail( "Couldn't install handler\n");
     }
 
     if (sigaction(SIGTERM, &act, NULL) < 0) {
@@ -154,54 +154,54 @@ void somatic_sighandler_simple_install() {
 }
 
 void somatic_sighandler_send_alive(pid_t pid, sigval_t sigval) {
-	sigqueue(pid, SIGUSR1, sigval);
+        sigqueue(pid, SIGUSR1, sigval);
 }
 
-void somatic_wait_copd() {
-	fprintf(stderr, "Finding copd\n");
-	while(!(somatic_find_copd() || somatic_sig_received)) {
-		fprintf(stderr, "Waiting for copd\n");
-		usleep(10000);
-	}
-}
+/* void somatic_wait_copd() { */
+/*      fprintf(stderr, "Finding copd\n"); */
+/*      while(!(somatic_find_copd() || somatic_sig_received)) { */
+/*              fprintf(stderr, "Waiting for copd\n"); */
+/*              usleep(10000); */
+/*      } */
+/* } */
 
-int somatic_find_copd() {
-	DIR* dir = opendir("/proc/");
-	struct dirent *ent;
-	char* name = (char*) malloc (100);
-	pid_t pid;
-	int fd, len;
-	char buffer[4096];
-	int ret = 0;
+/* int somatic_find_copd() { */
+/*      DIR* dir = opendir("/proc/"); */
+/*      struct dirent *ent; */
+/*      char* name = (char*) malloc (100); */
+/*      pid_t pid; */
+/*      int fd, len; */
+/*      char buffer[4096]; */
+/*      int ret = 0; */
 
-	while ((ent = readdir(dir)) != NULL)
-	{
-		if (!isdigit(ent->d_name[0])) continue;
+/*      while ((ent = readdir(dir)) != NULL) */
+/*      { */
+/*              if (!isdigit(ent->d_name[0])) continue; */
 
-		pid = atoi(ent->d_name);
-		sprintf(buffer, "/proc/%d/stat", pid);
-		if((fd = open(buffer, O_RDONLY)) != -1)
-		{
-			 if((len = read(fd, buffer, 1000)) > 1)
-			 {
-				 strtok(buffer, "(");
-				 name = strtok(NULL, ")");
+/*              pid = atoi(ent->d_name); */
+/*              sprintf(buffer, "/proc/%d/stat", pid); */
+/*              if((fd = open(buffer, O_RDONLY)) != -1) */
+/*              { */
+/*                       if((len = read(fd, buffer, 1000)) > 1) */
+/*                       { */
+/*                               strtok(buffer, "("); */
+/*                               name = strtok(NULL, ")"); */
 
-				 if(strcmp(name, "copd") == 0)
-				 {
-					fprintf(stderr, "%d:%s\n", pid, name);
-					spid = pid;
-					ret = 1;
-					break;
-				 }
-			 }
-		}
+/*                               if(strcmp(name, "copd") == 0) */
+/*                               { */
+/*                                      fprintf(stderr, "%d:%s\n", pid, name); */
+/*                                      spid = pid; */
+/*                                      ret = 1; */
+/*                                      break; */
+/*                               } */
+/*                       } */
+/*              } */
 
-		close(fd);
-	}
-	closedir(dir);
-	return ret;
-}
+/*              close(fd); */
+/*      } */
+/*      closedir(dir); */
+/*      return ret; */
+/* } */
 
 
 int somatic_la_invert( size_t m, size_t n, double *A ) {
@@ -260,7 +260,7 @@ int somatic_create_channel(const char *name, size_t frame_cnt, size_t frame_size
  */
 ach_channel_t* somatic_open_channel(const char *name)
 {
-	ach_channel_t *chan = SOMATIC_NEW( ach_channel_t );
+        ach_channel_t *chan = SOMATIC_NEW( ach_channel_t );
     int r = ach_open( chan, name, NULL );
     somatic_hard_assert( ACH_OK == r, "Error opening channel: %s\n",
                          ach_result_to_string( r ) );
@@ -272,7 +272,7 @@ ach_channel_t* somatic_open_channel(const char *name)
     somatic_hard_assert( ACH_OK == r, "Error flushing channel: %s\n",
                          ach_result_to_string( r ) );
 
-	return(chan);
+        return(chan);
 }
 
 /*
@@ -280,11 +280,11 @@ ach_channel_t* somatic_open_channel(const char *name)
  */
 int somatic_close_channel(ach_channel_t *chan)
 {
-	int r = ach_close( chan );
-	somatic_hard_assert( ACH_OK == r, "Error closing channel: %s\n",
-	                         ach_result_to_string( r ) );
+        int r = ach_close( chan );
+        somatic_hard_assert( ACH_OK == r, "Error closing channel: %s\n",
+                                 ach_result_to_string( r ) );
 
-	return(r);
+        return(r);
 }
 
 
@@ -327,9 +327,9 @@ int somatic_beep( int fd, double freq, double dur ) {
     // PC mainboard timer 8254 is clocked at 1.19 MHz
     static const double TICK_RATE =  1193180;
     static const double COUNT_RATE = 1000; // seems to work
-    long tone = (TICK_RATE / freq);
+    long tone = (long)(TICK_RATE / freq);
     //long durticks = TICK_RATE * dur * TICK_KLUDGE;
-    long durticks = dur * COUNT_RATE;
+    long durticks = (long)(dur * COUNT_RATE);
     long argument = tone | (durticks << (8*sizeof(long) / 2));
     printf("0x%lx 0x%lx : 0x%lx\n", tone, durticks, argument);
     return ioctl(fd, KDMKTONE, (long) argument);

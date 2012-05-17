@@ -238,7 +238,7 @@ static void run(cx_t *cx) {
         update(cx);
         plot(&cx->plot);
         aa_mem_region_release(&cx->d.memreg);
-        usleep( (int) (1e6 / opt_frequency));
+        usleep( (useconds_t) (1e6 / opt_frequency));
     }
     somatic_d_event( &cx->d, SOMATIC__EVENT__PRIORITIES__NOTICE,
                      SOMATIC__EVENT__CODES__PROC_STOPPING,
@@ -288,7 +288,7 @@ static void plot(gnuplot_live_t *pl) {
             size_t i = (k+pl->i) % pl->n_samples;
             size_t idx = j + i*pl->n_each;
             fprintf(pl->gnuplot, "%f, %f\n",
-                    k/opt_frequency, (pl->data)[idx] );
+                    ((double)k/opt_frequency), (double)(pl->data)[idx] );
         }
         fprintf(pl->gnuplot, "e\n" );
     }
@@ -336,7 +336,7 @@ int parse_opt( int key, char *arg, struct argp_state *state) {
         opt_channel_name = strdup(arg);
         break;
     case 'n':
-        opt_samples = strtol( arg, &endptr, 10 );
+        opt_samples = strtoul( arg, &endptr, 10 );
         if( NULL == endptr ) parse_error( "samples (-n)");
         break;
     case '0':
@@ -367,7 +367,7 @@ int parse_opt( int key, char *arg, struct argp_state *state) {
         for( s = strtok(str, ":"), i = 0; s;
              s = strtok(NULL, ":"), i++ ) {
             assert( i < opt_n_indices );
-            opt_indices[i] = atoi(s);
+            opt_indices[i] = strtoul(s, &endptr, 10);
         }
         free(str);
         break;

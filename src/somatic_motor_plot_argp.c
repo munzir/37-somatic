@@ -45,7 +45,6 @@
 #include <argp.h>
 
 
-static int parse_opt( int key, char *arg, struct argp_state *state);
 /// argp program version
 const char *argp_program_version = "somatic_motor_plot 0.0";
 
@@ -107,6 +106,8 @@ struct argp_option argp_options[] = {
         .doc = NULL
     }
 };
+
+extern int parse_opt( int key, char *arg, struct argp_state *state);
 
 /// argp object
 struct argp argp = { argp_options, parse_opt,

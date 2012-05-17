@@ -47,6 +47,7 @@
 
 
 int main(int argc, char **argv) {
+    (void) argc;
     int fd;
     if ((fd = open("/dev/tty1", O_WRONLY)) < 0) {
         fprintf(stderr, "Could not open /dev/console for writing.\n");

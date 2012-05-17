@@ -181,6 +181,7 @@ int main( int argc, char **argv ) {
 
 int parse_opt( int key, char *arg, struct argp_state *state) {
     cx_t *cx = (cx_t*)state->input;
+    char *endptr = 0;
     switch (key) {
     case 'v':
         somatic_opt_verbosity++;
@@ -192,7 +193,7 @@ int parse_opt( int key, char *arg, struct argp_state *state) {
         cx->opt_cmd_name = strdup(arg);
         break;
     case 'n':
-        cx->n = atoi(arg);
+        cx->n = strtoul(arg, &endptr, 10);
         assert( cx->n > 0 ) ;
         break;
     }

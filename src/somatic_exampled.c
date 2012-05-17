@@ -80,7 +80,7 @@ void init(cx_t *cx) {
 }
 
 void run(cx_t *cx) {
-
+    (void) cx; // quash warning for empty function
 }
 
 
@@ -92,6 +92,8 @@ void destroy(cx_t *cx) {
 /* MAIN */
 /*------*/
 int main(int argc, char **argv) {
+    (void) argc; (void) argv;  // quash warning for empty function
+
     static cx_t cx;            // declare context struct and zero-initialize
     memset(&cx, 0, sizeof cx); // zero initialize
     init(&cx);                 // init daemon

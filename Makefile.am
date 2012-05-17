@@ -18,6 +18,7 @@ pkginclude_HEADERS = 	                \
 
 lib_LTLIBRARIES = libsomatic.la
 
+BUILT_SOURCES = include/somatic.pb-c.h
 
 libsomatic_la_SOURCES =                 \
 	src/somatic_util.c              \

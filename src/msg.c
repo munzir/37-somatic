@@ -218,7 +218,7 @@ void somatic_metadata_set_time( Somatic__Metadata *pb, int64_t sec, int32_t nsec
 }
 
 void somatic_metadata_set_time_timespec( Somatic__Metadata *pb, struct timespec ts ) {
-    somatic_metadata_set_time( pb, ts.tv_sec, ts.tv_nsec );
+    somatic_metadata_set_time( pb, ts.tv_sec, (int32_t) ts.tv_nsec );
 }
 
 void somatic_metadata_set_time_now( Somatic__Metadata *pb ) {
@@ -235,16 +235,16 @@ void somatic_metadata_set_until( Somatic__Metadata *pb, int64_t sec, int32_t nse
 }
 
 void somatic_metadata_set_until_timespec( Somatic__Metadata *pb, struct timespec ts ) {
-    somatic_metadata_set_until( pb, ts.tv_sec, ts.tv_nsec );
+    somatic_metadata_set_until( pb, ts.tv_sec, (int32_t) ts.tv_nsec );
 }
 
 void somatic_metadata_set_until_duration( Somatic__Metadata *pb,
                                           double duration ) {
     struct timespec now;
-    now.tv_sec = pb->time->sec;
+    now.tv_sec = (time_t)pb->time->sec;
     now.tv_nsec = pb->time->has_nsec ?  pb->time->nsec : 0;
     struct timespec until = aa_tm_add(now,  aa_tm_sec2timespec( duration ) );
-    somatic_metadata_set_until( pb, until.tv_sec, until.tv_nsec );
+    somatic_metadata_set_until( pb, until.tv_sec, (int32_t) until.tv_nsec );
 }
 
 //=== Multi Transform ===
