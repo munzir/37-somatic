@@ -12,7 +12,7 @@ start() {
     chmod 777 -f /var/run/somatic
 
     # start daemon
-    /usr/bin/slogd -d -I "$SLOGD_IDENT" || (echo "Failed to start slogd" && exit 1)
+    slogd -d -I "$SLOGD_IDENT" || (echo "Failed to start slogd" && exit 1)
 }
 
 stop() {

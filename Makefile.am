@@ -1,13 +1,13 @@
 INCLUDES = -I$(top_srcdir)/include
 EXTRA_DIST = proto/somatic.proto
 
-include_HEADERS = include/somatic.h
+include_HEADERS = include/somatic.h     \
+	include/somatic.pb-c.h
 
 nodist_include_HEADERS =
 
 pkginclude_HEADERS = 	                \
 	include/somatic.h               \
-	include/somatic.pb-c.h          \
 	include/somatic/daemon.h        \
 	include/somatic/includes.h      \
 	include/somatic/lapack.h        \
@@ -18,7 +18,10 @@ pkginclude_HEADERS = 	                \
 
 lib_LTLIBRARIES = libsomatic.la
 
-BUILT_SOURCES = include/somatic.pb-c.h
+BUILT_SOURCES = src/somatic.pb-c.c include/somatic.pb-c.h
+
+init_ddir = $(sysconfdir)/init.d
+init_d_SCRIPTS = etc/init.d/somatic
 
 libsomatic_la_SOURCES =                 \
 	src/somatic_util.c              \
