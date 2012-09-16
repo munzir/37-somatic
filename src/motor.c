@@ -123,9 +123,9 @@ void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
         SOMATIC_D_CHECK_PARM(d,
                              (SOMATIC__MOTOR_PARAM__MOTOR_CURRENT == cmd_type  ||
                               SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY == cmd_type ||
-                              SOMATIC__MOTOR_PARAM__MOTOR_POSITION == cmd_type ||
-                              SOMATIC__MOTOR_PARAM__MOTOR_HALT == cmd_type ) ?
-                             x && m->n == n : 1 ) ) {
+                              SOMATIC__MOTOR_PARAM__MOTOR_POSITION == cmd_type )
+                             ? (x && m->n == n) : 1 )
+        ) {
         if( SOMATIC__MOTOR_PARAM__MOTOR_CURRENT == cmd_type  ||
             SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY == cmd_type ||
             SOMATIC__MOTOR_PARAM__MOTOR_POSITION == cmd_type ||

@@ -147,6 +147,7 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
 
     // set ident
     d->ident = strdup((opts && opts->ident) ? opts->ident : "somatic");
+    somatic_verbprintf_prefix  = d->ident;
 
     // setup memory allocator
     aa_mem_region_init( &d->memreg,
