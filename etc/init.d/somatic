@@ -1,4 +1,12 @@
 #!/bin/bash
+### BEGIN INIT INFO
+# Provides:          somatic
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Required-Start:    $local_fs
+# Required-Stop:     $local_fs
+# Short-Description: Starts somatic run directories and starts logger
+### END INIT INFO
 
 SLOGD_IDENT="slogd"
 CHANFILE_EVENT=`ach -F event`
@@ -28,6 +36,10 @@ case "$1" in
         stop
         ;;
     restart)
+        stop
+        start
+        ;;
+    force-reload)
         stop
         start
         ;;
