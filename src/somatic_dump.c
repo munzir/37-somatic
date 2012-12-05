@@ -275,7 +275,7 @@ void dump_force_moment( Somatic__ForceMoment *pb ) {
     indent();
     printf("[moment]");
     if( pb->moment )
-        dump_vector(pb->force, "\t%6.3f");
+        dump_vector(pb->moment, "\t%6.3f");
     printf("\n");
     if( pb->meta )
         dump_metadata( pb->meta );
