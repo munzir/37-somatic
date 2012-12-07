@@ -143,8 +143,8 @@ static void init() {
 static void collect() {
     size_t nread;
     ach_status_t r = (ach_status_t)
-        ach_wait_last( &global_channel, global_buf, sizeof(global_buf),
-                       &nread, NULL );
+        ach_get( &global_channel, global_buf, sizeof(global_buf),
+                       &nread, NULL, ACH_O_WAIT | ACH_O_LAST);
     aa_hard_assert( (ACH_OK == r) || (ACH_MISSED_FRAME == r), "Failed to read: %s.\n",
                     ach_result_to_string(r) );
     Somatic__MotorState *msg =

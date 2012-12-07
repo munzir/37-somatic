@@ -130,11 +130,11 @@
  * \param size: size of buffer to give ach
  * \param chan: ach channel pointer
  */
-#define SOMATIC_GET_LAST_UNPACK_BUF(ret, type, chan, buf, size, alloc) \
+#define SOMATIC_GET_LAST_UNPACK_BUF(ret, type, chan, buf, size, alloc)  \
     ({                                                                  \
         size_t _somatic_private_nread;                                  \
-        ret = ach_get_last( (chan), (buf), (size),                      \
-                            &_somatic_private_nread );                  \
+        ret = ach_get( (chan), (buf), (size),                           \
+                            &_somatic_private_nread, NULL, ACH_O_LAST); \
         ( ACH_OK == (ret) || ACH_MISSED_FRAME == (ret) ) ?              \
             type ## __unpack( (alloc), _somatic_private_nread,          \
                               (buf) ) :                                 \
@@ -153,8 +153,8 @@
     ({                                                                  \
         uint8_t _somatic_private_buf[size];                             \
         size_t _somatic_private_nread;                                  \
-        ret = ach_get_last( chan, _somatic_private_buf, size,           \
-                            &_somatic_private_nread );                  \
+        ret = ach_get( chan, _somatic_private_buf, size,                \
+                            &_somatic_private_nread, NULL, ACH_O_LAST );\
         ( ACH_OK == ret || ACH_MISSED_FRAME == ret ) ?                  \
             type ## __unpack( alloc, _somatic_private_nread,            \
                               _somatic_private_buf ) :                  \

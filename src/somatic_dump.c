@@ -125,8 +125,8 @@ static int parse_opt( int key, char *arg, struct argp_state *state) {
 }
 
 void read_ach() {
-    int r = ach_wait_next( &sd_chan, sd_achbuf, sd_n_achbuf,
-                           &sd_frame_size, NULL );
+    int r = ach_get( &sd_chan, sd_achbuf, sd_n_achbuf,
+                           &sd_frame_size, NULL, ACH_O_WAIT);
     if( ACH_OVERFLOW == r ) {
         sd_n_achbuf = AA_MAX( sd_frame_size, 2*sd_n_achbuf );
         free( sd_achbuf );
