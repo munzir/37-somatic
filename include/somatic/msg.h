@@ -190,7 +190,7 @@ AA_API void somatic_joystick_free(Somatic__Joystick *pb);
 
 
 //=== Event ===
-const char *somatic_event_code2str(Somatic__Event__Codes code);
-const char *somatic_event_pri2str(Somatic__Event__Priorities pri);
+AA_API const char *somatic_event_code2str(Somatic__Event__Codes code);
+AA_API const char *somatic_event_pri2str(Somatic__Event__Priorities pri);
 
 #endif //SOMATIC_MSG_H
