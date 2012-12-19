@@ -65,27 +65,42 @@ AX_CFLAGS_WARN_ALL
 
 dnl APPEND_FLAG( [FLAG] )
 dnl Check if FLAG is supported, and if so, add it
-AC_DEFUN([APPEND_CFLAG],
-         [AX_CHECK_COMPILER_FLAGS([$1], [CFLAGS="$1 $CFLAGS"])])
 
-AC_DEFUN([APPEND_FCFLAG],
-         [AX_CHECK_COMPILER_FLAGS([$1], [FCFLAGS="$1 $FCFLAGS"])])
+dnl The AX_CHECK_COMPILER_FLAGS maco was renamed to AX_CHECK_COMPILE_FLAG
+dnl Checking for both versions
+m4_ifdef([AX_CHECK_COMPILE_FLAG],
+         [AC_DEFUN([APPEND_CFLAG],
+                   [AX_CHECK_COMPILE_FLAG([$1], [CFLAGS="$1 $CFLAGS"])])
+          AC_DEFUN([APPEND_FCFLAG],
+                   [AX_CHECK_COMPILE_FLAG([$1], [FFLAGS="$1 $FFLAGS"])])])
 
+m4_ifdef([AX_CHECK_COMPILER_FLAGS],
+         [AC_DEFUN([APPEND_CFLAG],
+                   [AX_CHECK_COMPILER_FLAGS([$1], [CFLAGS="$1 $CFLAGS"])])
+          AC_DEFUN([APPEND_FCFLAG],
+                   [AX_CHECK_COMPILER_FLAGS([$1], [FFLAGS="$1 $FFLAGS"])])])
+
+
+
+dnl If we found the flag checking macro, check some flags
 AC_LANG([C])
-APPEND_CFLAG([-Wextra])
-APPEND_CFLAG([-Wconversion])
-APPEND_CFLAG([-Wpointer-arith])
-APPEND_CFLAG([-Wfloat-equal])
-APPEND_CFLAG([-Wshadow])
-APPEND_CFLAG([-Wwrite-strings])
-APPEND_CFLAG([-Wc++-compat])
+m4_ifdef([APPEND_CFLAG],
+         [APPEND_CFLAG([-Wextra])
+          APPEND_CFLAG([-Wconversion])
+          APPEND_CFLAG([-Wpointer-arith])
+          APPEND_CFLAG([-Wfloat-equal])
+          APPEND_CFLAG([-Wshadow])
+          APPEND_CFLAG([-Wwrite-strings])
+          APPEND_CFLAG([-Wc++-compat])])
+
 
 AC_ARG_ENABLE([debug],
         AS_HELP_STRING([--enable-debug], [Build for debugging]))
 
 AS_IF([test "x$enable_debug" = "xyes"],[
     AC_LANG([C])
-    APPEND_CFLAG([-fstack-check])
+    m4_ifdef([APPEND_CFLAG],
+             [APPEND_CFLAG([-fstack-check])])
 ])
 
 AC_CONFIG_FILES([Makefile])
