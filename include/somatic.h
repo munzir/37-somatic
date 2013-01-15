@@ -186,8 +186,8 @@
     ({                                                                  \
         uint8_t _somatic_private_buf[size];                             \
         size_t _somatic_private_nread;                                  \
-        ret = ach_wait_last( chan, _somatic_private_buf, size,          \
-                             &_somatic_private_nread,  abstime);        \
+        ret = ach_get( chan, _somatic_private_buf, size,                \
+                             &_somatic_private_nread, abstime, ACH_O_WAIT); \
         ( ACH_OK == ret || ACH_MISSED_FRAME == ret ) ?                  \
             type ## __unpack( alloc, _somatic_private_nread,            \
                               _somatic_private_buf ) :                  \
