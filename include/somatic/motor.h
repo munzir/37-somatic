@@ -93,7 +93,8 @@ AA_API void somatic_motor_reset( somatic_d_t *d, somatic_motor_t *m );
 
 AA_API void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
                                int cmd_type,
-                               double *x, size_t n );
+                               double *x, size_t n ,
+															 int64_t *ix);
 
 AA_API void somatic_motor_update( somatic_d_t *d, somatic_motor_t *m );
 

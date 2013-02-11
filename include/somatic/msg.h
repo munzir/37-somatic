@@ -162,7 +162,7 @@ AA_API void somatic_force_moment_get( const Somatic__ForceMoment *pb, double[6] 
 AA_API Somatic__MotorCmd *somatic_motor_cmd_alloc( size_t n );
 AA_API void somatic_motor_cmd_free( Somatic__MotorCmd *pb );
 AA_API void somatic_motor_cmd_set( Somatic__MotorCmd *pb,
-                            Somatic__MotorParam param, const double *x, size_t n );
+                            Somatic__MotorParam param, const double *x, size_t n, int64_t* ix);
 
 //=== Motor State ===
 AA_API Somatic__MotorState *somatic_motor_state_alloc();

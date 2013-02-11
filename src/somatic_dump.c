@@ -369,6 +369,9 @@ void dump_motor_cmd( Somatic__MotorCmd *pb ) {
     case SOMATIC__MOTOR_PARAM__MOTOR_RESET:
         printf("[param]\tRESET\n");
         break;
+		case SOMATIC__MOTOR_PARAM__MOTOR_DIGITAL_OUT:
+				printf("[param]\tDIGITAL OUT\n");
+				break;
     }
     if ( pb->values ) {
         indent();

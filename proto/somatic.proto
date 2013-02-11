@@ -319,11 +319,13 @@ enum motor_param {
     MOTOR_POSITION = 2;
     MOTOR_HALT = 3;
     MOTOR_RESET = 4;
+		MOTOR_DIGITAL_OUT = 5;
 };
 
 message motor_cmd {
     optional motor_param param = 1;
     optional vector values = 2;
+		optional ivector ivalues = 3;
     optional metadata meta = 15;
 }
 

@@ -91,24 +91,33 @@ void somatic_motor_destroy(somatic_d_t *d, somatic_motor_t *m) {
 AA_API void somatic_motor_setvel( somatic_d_t *d, somatic_motor_t *m,
                                   double *x, size_t n ) {
     somatic_motor_cmd( d, m, SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY,
-                       x, n );
+                       x, n, NULL );
 }
 AA_API void somatic_motor_setpos( somatic_d_t *d, somatic_motor_t *m,
                                   double *x, size_t n ) {
     somatic_motor_cmd( d, m, SOMATIC__MOTOR_PARAM__MOTOR_POSITION,
-                       x, n );
+                       x, n, NULL );
 }
 AA_API void somatic_motor_halt( somatic_d_t *d, somatic_motor_t *m ) {
-    somatic_motor_cmd( d, m, SOMATIC__MOTOR_PARAM__MOTOR_HALT, NULL, 0 );
+    somatic_motor_cmd( d, m, SOMATIC__MOTOR_PARAM__MOTOR_HALT, NULL, 0, NULL );
 }
 AA_API void somatic_motor_reset( somatic_d_t *d, somatic_motor_t *m ) {
-    somatic_motor_cmd( d, m, SOMATIC__MOTOR_PARAM__MOTOR_RESET, NULL, 0 );
+    somatic_motor_cmd( d, m, SOMATIC__MOTOR_PARAM__MOTOR_RESET, NULL, 0, NULL );
+}
+
+AA_API void somatic_motor_digital_out( somatic_d_t *d, somatic_motor_t *m,
+																			 size_t portNumber, bool value) {
+		int64_t x[2];
+		x[0]=(int64_t) portNumber;
+		x[1]=(int64_t) value;
+		somatic_motor_cmd( d, m, SOMATIC__MOTOR_PARAM__MOTOR_DIGITAL_OUT, NULL, 0 , x);
 }
 
 
 void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
                         int cmd_type,
-                        double *x, size_t n ) {
+                        double *x, size_t n,
+												int64_t *ix) {
     //FIXME: check limits
     if( // valid context
         SOMATIC_D_CHECK_PARM(d, NULL != m) &&
@@ -118,21 +127,29 @@ void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
                              SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY == cmd_type ||
                              SOMATIC__MOTOR_PARAM__MOTOR_POSITION == cmd_type ||
                              SOMATIC__MOTOR_PARAM__MOTOR_HALT == cmd_type  ||
-                             SOMATIC__MOTOR_PARAM__MOTOR_RESET == cmd_type ) &&
+                             SOMATIC__MOTOR_PARAM__MOTOR_RESET == cmd_type ||
+														 SOMATIC__MOTOR_PARAM__MOTOR_DIGITAL_OUT == cmd_type) &&
         // valid array
         SOMATIC_D_CHECK_PARM(d,
                              (SOMATIC__MOTOR_PARAM__MOTOR_CURRENT == cmd_type  ||
                               SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY == cmd_type ||
                               SOMATIC__MOTOR_PARAM__MOTOR_POSITION == cmd_type )
-                             ? (x && m->n == n) : 1 )
+                             ? (x && m->n == n) : 1 ) &&
+				SOMATIC_D_CHECK_PARM(d,
+														 (SOMATIC__MOTOR_PARAM__MOTOR_DIGITAL_OUT == cmd_type )
+														 ? ( ix && ix[0]>=0 && ix[0]<256 && ix[1]>=0 && ix[1]<2) : 1 )
         ) {
         if( SOMATIC__MOTOR_PARAM__MOTOR_CURRENT == cmd_type  ||
             SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY == cmd_type ||
             SOMATIC__MOTOR_PARAM__MOTOR_POSITION == cmd_type ||
             SOMATIC__MOTOR_PARAM__MOTOR_HALT == cmd_type ) {
             // value message
-            somatic_motor_cmd_set(m->cmd_msg, cmd_type, x, n);
-        } else {
+            somatic_motor_cmd_set(m->cmd_msg, cmd_type, x, n, NULL);
+        } 
+				else if(SOMATIC__MOTOR_PARAM__MOTOR_DIGITAL_OUT == cmd_type ) {
+						somatic_motor_cmd_set(m->cmd_msg, cmd_type, NULL, 0, ix);
+				}
+				else {
             // halt/reset message
             Somatic__Vector *vals = m->cmd_msg->values;
             m->cmd_msg->values = NULL;

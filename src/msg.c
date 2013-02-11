@@ -320,13 +320,17 @@ void somatic_motor_cmd_free( Somatic__MotorCmd *pb ) {
     }
 }
 void somatic_motor_cmd_set( Somatic__MotorCmd *pb,
-                            Somatic__MotorParam param, const double *x, size_t n ) {
+                            Somatic__MotorParam param, const double *x, size_t n, int64_t *ix ) {
     if( NULL == pb->values ) {
         pb->values = somatic_vector_alloc( n );
     }
+		if( pb->ivalues == NULL && ix != NULL ) {
+				pb->ivalues = somatic_ivector_alloc( 2 );
+		}
     pb->param = param;
     pb->has_param = 1;
     if( x ) somatic_vector_set_data( pb->values, x, n );
+		if( ix ) { pb->ivalues->data[0] = ix[0]; pb->ivalues->data[1] = ix[1]; }
 }
 
 
