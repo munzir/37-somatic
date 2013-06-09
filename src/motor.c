@@ -105,6 +105,15 @@ AA_API void somatic_motor_reset( somatic_d_t *d, somatic_motor_t *m ) {
     somatic_motor_cmd( d, m, SOMATIC__MOTOR_PARAM__MOTOR_RESET, NULL, 0, NULL );
 }
 
+/*
+ * Function to be called for toggling auxillary digital outputs on AMC drives
+ * \pre The port number on the device. For AMC Left: use 0-15. For Right: 16-31
+ * \pre The value to be set. 1 for ACTIVE and 0 for INACTIVE.
+ * Note that for AMC drives, these values go to virtual ports. And virtual ports 
+ * ports have to be mapped to one of the available digital output ports on 
+ * hardware, using windows software.
+ */
+
 AA_API void somatic_motor_digital_out( somatic_d_t *d, somatic_motor_t *m,
 																			 size_t portNumber, bool value) {
 		int64_t x[2];
@@ -135,6 +144,7 @@ void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
                               SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY == cmd_type ||
                               SOMATIC__MOTOR_PARAM__MOTOR_POSITION == cmd_type )
                              ? (x && m->n == n) : 1 ) &&
+				// validate the digital output command data values. ix[0] is port number, ix[1] is value
 				SOMATIC_D_CHECK_PARM(d,
 														 (SOMATIC__MOTOR_PARAM__MOTOR_DIGITAL_OUT == cmd_type )
 														 ? ( ix && ix[0]>=0 && ix[0]<256 && ix[1]>=0 && ix[1]<2) : 1 )
@@ -146,6 +156,7 @@ void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
             // value message
             somatic_motor_cmd_set(m->cmd_msg, cmd_type, x, n, NULL);
         } 
+				// If the command is a digital output ctrl then send the ix values
 				else if(SOMATIC__MOTOR_PARAM__MOTOR_DIGITAL_OUT == cmd_type ) {
 						somatic_motor_cmd_set(m->cmd_msg, cmd_type, NULL, 0, ix);
 				}
@@ -215,6 +226,17 @@ void somatic_motor_update( somatic_d_t *d, somatic_motor_t *m ) {
                 ) {
                 aa_fcpy( m->vel, state->velocity->data, m->n );
             }
+            if( state->current &&
+                somatic_d_check_msg( d, NULL != state->current->data,
+                                     "motor_state", "no velocity->data" ) &&
+                somatic_d_check_msg( d, state->current->n_data == m->n,
+                                     "motor_state-cur",
+                                     "cure len, got %d, wanted %d",
+                                     state->velocity->n_data, m->n) 
+                ) {
+                aa_fcpy( m->cur, state->current->data, m->n );
+            }
+
 
             somatic__motor_state__free_unpacked(state,
                                                 &protobuf_c_system_allocator);

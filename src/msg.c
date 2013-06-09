@@ -324,12 +324,16 @@ void somatic_motor_cmd_set( Somatic__MotorCmd *pb,
     if( NULL == pb->values ) {
         pb->values = somatic_vector_alloc( n );
     }
+
+		// If ivalues are being set the first time, allocate 2 locations for ivalues. One for port number
+		// and one for the value to be sent
 		if( pb->ivalues == NULL && ix != NULL ) {
 				pb->ivalues = somatic_ivector_alloc( 2 );
 		}
     pb->param = param;
     pb->has_param = 1;
     if( x ) somatic_vector_set_data( pb->values, x, n );
+		// If ix values are being sent, copy ix to pb->ivalues
 		if( ix ) { pb->ivalues->data[0] = ix[0]; pb->ivalues->data[1] = ix[1]; }
 }
 

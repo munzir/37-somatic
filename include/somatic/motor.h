@@ -97,6 +97,9 @@ AA_API void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
 															 int64_t *ix);
 
 AA_API void somatic_motor_update( somatic_d_t *d, somatic_motor_t *m );
+AA_API void somatic_motor_digital_out( somatic_d_t *d, somatic_motor_t *m,
+															 size_t portNumber, bool value );
+
 
 
 
