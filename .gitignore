@@ -1,3 +1,4 @@
+*.o
 /build/sbeep
 /build/slogd
 /build/sns
