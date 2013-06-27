@@ -309,6 +309,7 @@ Somatic__WaistCmd *somatic_waist_cmd_alloc() {
 		pb->meta = somatic_metadata_alloc();
 		pb->meta->type = SOMATIC__MSG_TYPE__WAIST_CMD;
 		pb->meta->has_type = 1;
+		return pb;
 }
 
 void somatic_waist_cmd_free( Somatic__WaistCmd *pb ) {
@@ -319,6 +320,7 @@ void somatic_waist_cmd_free( Somatic__WaistCmd *pb ) {
 
 void somatic_waist_cmd_set( Somatic__WaistCmd *pb , const Somatic__WaistMode mode ) {
 	pb->mode = mode;
+	pb->has_mode = 1;
 }
 
 void somatic_waist_cmd_get( const Somatic__WaistCmd *pb, Somatic__WaistMode *mode ) {
