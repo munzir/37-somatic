@@ -3,3 +3,6 @@ README FOR SOMATIC
 somatic is a package that integrates ach (byte-oriented IPC) and protocol
 buffers (marshalling) with specific application to robotics.  It also include a
 number of useful utility routines.
+
+The init script that should be symbolically linked to /etc/init.d folder is
+under etc folder.

@@ -16,7 +16,6 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include "somatic.h"
-#include "somatic/includes.h"
 #include "somatic/util.h"
 #include "somatic/lapack.h"
 

@@ -36,5 +36,19 @@ foreach(script_src_file ${scripts_source})
 	add_executable(${script_base} ${script_src_file})
 	target_link_libraries(${script_base} Main) 
 	add_custom_target(${script_base}.run ${script_base} ${ARGN})
+	install(TARGETS ${script_base} DESTINATION /usr/local/bin)
 endforeach(script_src_file)
 message(STATUS " ")
+
+# Install the files
+FILE(GLOB files "include/somatic/*.h")
+install(FILES include/somatic.pb-c.h DESTINATION /usr/local/include)
+install(FILES include/somatic.h DESTINATION /usr/local/include)
+install(FILES ${files} DESTINATION 	/usr/local/include/somatic)
+
+# Setup a debian package with cpack
+include(cmake/cpack.cmake)
+set(CPACK_PACKAGE_VERSION 0.0.0)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libach-dev, libamino-dev, libprotobuf-c")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Somatic is a communication library that wraps ach with
+	protobuf-c structure and message types for convenience")

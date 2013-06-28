@@ -46,10 +46,15 @@
 #include <amino.h>
 #include <cblas.h>
 #include <signal.h>
-/** \file somatic/util.h
- *  \author Neil T. Dantam
- */
-#include "includes.h"
+#include <sys/stat.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+#include <stdarg.h>
+#include <time.h>
+#include <string.h>
+#include <ach.h>
 
 #ifdef __cplusplus
 extern "C" {
