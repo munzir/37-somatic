@@ -194,37 +194,11 @@ int parse_opt( int key, char *arg, struct argp_state *state) {
 /* ---------- */
 
 struct argp_option argp_options[] = {
-    {
-        .name = "kill",
-        .key = 'k',
-        .arg = "IDENT",
-        .flags = 0,
-        .doc = "Kill daemon `IDENT'"
-    },
-    {
-        .name = "sched",
-        .key = 's',
-        .arg = "IDENT",
-        .flags = 0,
-        .doc = "query scheduler for `IDENT'"
-    },
-    {
-        .name = "alive",
-        .key = 'a',
-        .arg = "IDENT",
-        .flags = 0,
-        .doc = "returns success if daemon `IDENT' is alive"
-    },
-    {
-        .name = NULL,
-        .key = 0,
-        .arg = NULL,
-        .flags = 0,
-        .doc = NULL
-    }
+    {"kill", 'k', "IDENT", 0, "Kill daemon 'IDENT'"},
+    {"sched", 's', "IDENT", 0, "query scheduler for 'IDENT'"},
+    {"alive", 'a', "IDENT", 0, "returns success if daemon 'IDENT' is alive"},
+    {NULL, 0, NULL, 0, NULL}
 };
 
 /// argp object
-struct argp argp = { argp_options, parse_opt,
-                     "args", ARGP_DESC,
-                     NULL, NULL, NULL };
+struct argp argp = { argp_options, parse_opt, "args", ARGP_DESC, NULL, NULL, NULL };

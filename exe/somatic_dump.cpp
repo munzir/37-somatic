@@ -59,34 +59,10 @@ size_t sd_indent = 0;
 /* ---------- */
 
 static struct argp_option options[] = {
-    {
-        .name = "verbose",
-        .key = 'v',
-        .arg = NULL,
-        .flags = 0,
-        .doc = "Causes verbose output"
-    },
-    {
-        .name = "chan",
-        .key = 'c',
-        .arg = "ach channel",
-        .flags = 0,
-        .doc = "ach channel to send data to"
-    },
-    {
-        .name = "protobuf",
-        .key = 'p',
-        .arg = "protobuf-msg",
-        .flags = 0,
-        .doc = "name of protobuf message"
-    },
-    {
-        .name = NULL,
-        .key = 0,
-        .arg = NULL,
-        .flags = 0,
-        .doc = NULL
-    }
+    { "verbose", 'v', NULL, 0, "Causes verbose output" },
+    { "chan", 'c', "ach channel", 0, "ach channel to send data to" },
+    { "protobuf", 'p', "protobuf-msg", 0, "name of protobuf message" },
+    { NULL, 0, NULL, 0, NULL }
 };
 
 
@@ -125,7 +101,7 @@ static int parse_opt( int key, char *arg, struct argp_state *state) {
 }
 
 void read_ach() {
-    int r = ach_get( &sd_chan, sd_achbuf, sd_n_achbuf,
+    ach_status_t r = ach_get( &sd_chan, sd_achbuf, sd_n_achbuf,
                            &sd_frame_size, NULL, ACH_O_WAIT);
     if( ACH_OVERFLOW == r ) {
         sd_n_achbuf = AA_MAX( sd_frame_size, 2*sd_n_achbuf );
@@ -194,7 +170,7 @@ void dump_transform( Somatic__Transform *pb ) {
 
 void dump_timespec( Somatic__Timespec *pb, const char *name ) {
     indent();
-    printf("[%s : Timespec]\t%"PRId64"s\t%09dns\n",
+    printf("[%s : Timespec]\t%lus\t%09dns\n",
            name, pb->sec, pb->has_nsec ? pb->nsec : 0 );
 }
 

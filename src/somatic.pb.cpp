@@ -181,7 +181,7 @@ void   somatic__timespec__free_unpacked
 void   somatic__metadata__init
                      (Somatic__Metadata         *message)
 {
-  static Somatic__Metadata init_value = SOMATIC__METADATA__INIT;
+  static Somatic__Metadata init_value = {PROTOBUF_C_MESSAGE_INIT(&somatic__metadata__descriptor),  0, 0, 0, 0, 0}; //SOMATIC__METADATA__INIT;
   *message = init_value;
 }
 size_t somatic__metadata__get_packed_size

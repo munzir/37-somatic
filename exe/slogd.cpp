@@ -225,28 +225,10 @@ int parse_opt( int key, char *arg, struct argp_state *state) {
 
 
 struct argp_option argp_options[] = {
-    {
-        .name = "verbose",
-        .key = 'v',
-        .arg = NULL,
-        .flags = 0,
-        .doc = "Causes verbose output"
-    },
-    {
-        .name = "channel",
-        .key = 'c',
-        .arg = "channel-name",
-        .flags = 0,
-        .doc = "motor state channel"
-    },
+    {"verbose", 'v', NULL, 0, "Causes verbose output"}, 
+    {"channel", 'c', "channel-name", 0, "motor state channel"},
     SOMATIC_D_ARGP_OPTS,
-    {
-        .name = NULL,
-        .key = 0,
-        .arg = NULL,
-        .flags = 0,
-        .doc = NULL
-    }
+    {NULL, 0, NULL, 0, NULL}
 };
 
 /// argp object

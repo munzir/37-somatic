@@ -69,133 +69,6 @@ extern pid_t spid;
 /// macro to squash compiler warning about unused argument to function
 #define SOMATIC_UNUSED_ARG(expr) do { (void)(expr); } while (0)
 
-/*------*/
-/* MISC */
-/*------*/
-
-/* /// Fortran modulo, Ada mod */
-/* static inline int64_t somatic_modulo( int a, int b ) AA_DEPRECATED; */
-/* static inline int64_t somatic_modulo( int a, int b ) { */
-/*     return ((a % b) + b) % b; */
-/* } */
-
-/* /// Fortran mod, Ada rem */
-/* static inline int64_t somatic_remainder( int a, int b ) AA_DEPRECATED ; */
-/* static inline int64_t somatic_remainder( int a, int b ) { */
-/*     return a % b; */
-/* } */
-
-/*----------------*/
-/* Time Functions */
-/*----------------*/
-
-/* /// create a struct timespec with given elements */
-/* static struct timespec somatic_make_timespec( time_t sec, long nsec ) AA_DEPRECATED ; */
-/* static struct timespec somatic_make_timespec( time_t sec, long nsec ) { */
-/*     struct timespec t; */
-/*     t.tv_sec = sec; */
-/*     t.tv_nsec = nsec; */
-/*     return t; */
-/* } */
-
-
-/* /// create a struct timespec with given elements, fixing things up of */
-/* /// nsec is negative of more than a billion */
-/* static struct timespec somatic_make_timespec_norm( time_t sec, long nsec ) AA_DEPRECATED ; */
-/* static struct timespec somatic_make_timespec_norm( time_t sec, long nsec ) { */
-/*     // FIXME: this is crap */
-/*     int32_t billion = 1e9; */
-/*     if( nsec > billion ){ */
-/*         sec += nsec/billion; */
-/*         nsec %= billion; */
-/*     }else if (nsec < -billion) { */
-/*         sec += (nsec/billion - 1); */
-/*         nsec = (long) somatic_modulo( nsec, billion ); */
-/*     } */
-
-
-/*     return somatic_make_timespec( sec, nsec ); */
-/* } */
-
-/* /\* */
-/* static struct timespec somatic_timespec_delta( struct timespec t1, */
-/*                                                struct timespec t0 ) { */
-/*     return somatic_make_timespec( t1.tv_sec - t0.tv_sec, */
-/*                                   t1.tv_nsec - t0.tv_nsec ); */
-/* } */
-/* *\/ */
-
-/* /// add two times: a + b */
-/* static struct timespec somatic_timespec_add( struct timespec t1, */
-/*                                              struct timespec t0 ) AA_DEPRECATED; */
-/* static struct timespec somatic_timespec_add( struct timespec t1, */
-/*                                              struct timespec t0 ) { */
-/*     return somatic_make_timespec_norm( t1.tv_sec + t0.tv_sec, */
-/*                                        t1.tv_nsec + t0.tv_nsec ); */
-/* } */
-
-/* /// subtract two times: a - b */
-/* static struct timespec somatic_timespec_sub( const struct timespec a, */
-/*                                              const struct timespec b ) { */
-/*     return somatic_make_timespec_norm( a.tv_sec - b.tv_sec, */
-/*                                        a.tv_nsec - b.tv_nsec ); */
-/* } */
-
-
-/* /// gets current time via CLOCK_REALTIME */
-
-/* static struct timespec somatic_timespec_now() AA_DEPRECATED; */
-/* static struct timespec somatic_timespec_now() { */
-/*     struct timespec t; */
-/*     clock_gettime( CLOCK_REALTIME, &t ); */
-/*     return t; */
-/* } */
-
-/* /\** returns reltime + now *\/ */
-/* static struct timespec somatic_timespec_future( const struct timespec reltime ) AA_DEPRECATED; */
-/* static struct timespec somatic_timespec_future( const struct timespec reltime ) { */
-/*     return somatic_timespec_add( reltime, somatic_timespec_now() ); */
-/* } */
-
-/* /\** t1 < t2: negative; t1 == t2: 0; t1 > t2: positive *\/ */
-/* static int somatic_timespec_cmp( const struct timespec t1, const struct timespec t2 ) AA_DEPRECATED; */
-/* static int somatic_timespec_cmp( const struct timespec t1, const struct timespec t2 ) { */
-/*     return ( t1.tv_sec != t2.tv_sec ) ? */
-/*         (t1.tv_sec - t2.tv_sec) : */
-/*         (t1.tv_nsec - t2.tv_nsec); */
-/* } */
-
-/* /// is the current time later than abstime? */
-/* static int somatic_timespec_after( const struct timespec abstime ) AA_DEPRECATED; */
-/* static int somatic_timespec_after( const struct timespec abstime ) { */
-/*     return somatic_timespec_cmp(somatic_timespec_now(), abstime) > 0; */
-/* } */
-
-/* /// convert timespec t to microseconds */
-/* static int64_t somatic_timespec2us( const struct timespec t ) AA_DEPRECATED; */
-/* static int64_t somatic_timespec2us( const struct timespec t ) { */
-/*     return t.tv_sec*1000000 + t.tv_nsec/1000; */
-/* } */
-
-/* /// convert timespec t to seconds */
-/* static double somatic_timespec2s( const struct timespec t ) AA_DEPRECATED; */
-/* static double somatic_timespec2s( const struct timespec t ) { */
-/*     return t.tv_sec+ t.tv_nsec/1e9; */
-/* } */
-/* /// convert seconds t to timespec */
-/* static struct timespec somatic_s2timespec( double t ) AA_DEPRECATED; */
-/* static struct timespec somatic_s2timespec( double t ) { */
-/*     time_t sec = (time_t) t; */
-/*     long nsec = (long) ((t-sec)*1e9); */
-/*     return somatic_make_timespec_norm( sec, nsec ); */
-/* } */
-/* /// print a timespec on stderr */
-/* static void somatic_timespec_dump( const struct timespec t ) AA_DEPRECATED; */
-/* static void somatic_timespec_dump( const struct timespec t ) { */
-/*     fprintf( stderr, "{.tv_sec = %ld, .tv_nsec = %ld}\n", */
-/*              t.tv_sec, t.tv_nsec ); */
-/* } */
-
 /*----------------*/
 /* Printing/Error */
 
@@ -218,7 +91,9 @@ void somatic_hard_assert( int test, const char fmt[], ... );
 /*------------*/
 
 /// malloc n bytes and zero initialize.  Terminates on error.
-static inline void *somatic_xmalloc( size_t n ) AA_DEPRECATED;
+/// C.E. Removed the deprecated flag here. I am not sure why it was deprecated
+/// in the first place and what was supposed to be used instead.
+static inline void *somatic_xmalloc( size_t n );
 static inline void *somatic_xmalloc( size_t n ) {
     void *p = malloc(n);
     somatic_hard_assert( NULL != p, "Failed to allocate %d bytes.\n", n );

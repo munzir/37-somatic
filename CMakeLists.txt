@@ -14,10 +14,11 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 endif()
 
 # Link to somatic, amino and ach
-link_libraries(amino protobuf-c ach ntcan pcio stdc++)
+link_libraries(amino protobuf-c ach ntcan stdc++)
 
 # Include the project files and the common helpers for all the experiments
-include_directories(src)
+include_directories(include)
+include_directories(include/somatic)
 
 # Collect the source, script and fortran files
 file(GLOB main_source "src/*.cpp" "src/*.c")

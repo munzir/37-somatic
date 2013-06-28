@@ -184,12 +184,11 @@ static Somatic__Event *next_msg(cx_t *cx) {
     Somatic__Event *msg = SOMATIC_D_GET( &r, somatic__event, &cx->d,
                                          &cx->chan_in, NULL, ACH_O_WAIT | ACH_O_LAST );
 
-    int recv_ok = (ACH_OK == r) || (ACH_MISSED_FRAME == r);
     somatic_d_check(&cx->d, SOMATIC__EVENT__PRIORITIES__ERR,
                     SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
-                    recv_ok, "ach_wait_last",
+                    r, "ach_wait_last",
                     "reading `%s': %s\n",
-                    opt_channel_name, ach_result_to_string(r));
+                    opt_channel_name, ach_result_to_string((ach_status_t) r));
     if( msg ) {
         // check msg
         int msg_ok =  msg->attr &&
@@ -276,7 +275,7 @@ static void plot(gnuplot_live_t *pl) {
                 fprintf(pl->gnuplot, ", '-' with points title '%s'",
                     pl->labels[j]);
             else
-                fprintf(pl->gnuplot, ", '-' with points title '%"PRIuPTR"'", j);
+                fprintf(pl->gnuplot, ", '-' with points title '%lu'", j);
         }
         fprintf(pl->gnuplot, "\n");
     } else {
@@ -309,7 +308,7 @@ int main( int argc, char **argv ) {
   //somatic_verbprintf_prefix = "motor_plot";
   if( opt_indices ) {
       for(size_t i = 0; i < opt_n_indices; i++ ) {
-          fprintf(stderr, "index: %"PRIuPTR"\n", opt_indices[i]);
+          fprintf(stderr, "index: %lu\n", opt_indices[i]);
       }
   }
   argp_parse (&argp, argc, argv, 0, NULL, NULL);
@@ -382,69 +381,15 @@ int parse_opt( int key, char *arg, struct argp_state *state) {
 
 
 struct argp_option argp_options[] = {
-    {
-        .name = "verbose",
-        .key = 'v',
-        .arg = NULL,
-        .flags = 0,
-        .doc = "Causes verbose output"
-    },
-    {
-        .name = "channel",
-        .key = 'c',
-        .arg = "channel-name",
-        .flags = 0,
-        .doc = "motor state channel"
-    },
-    {
-        .name = "labels",
-        .key = 'L',
-        .arg = "label-list",
-        .flags = 0,
-        .doc = "colon-seprated list of data labels"
-    },
-    {
-        .name = "indices",
-        .key = 'I',
-        .arg = "index-list",
-        .flags = 0,
-        .doc = "colon-seprated list of data indices"
-    },
-    {
-        .name = "samples",
-        .key = 'n',
-        .arg = "count",
-        .flags = 0,
-        .doc = "number of samples to plot"
-    },
-    {
-        .name = "min",
-        .key = '0',
-        .arg = "min-value",
-        .flags = 0,
-        .doc = "minimum range value"
-    },
-    {
-        .name = "max",
-        .key = '1',
-        .arg = "max-value",
-        .flags = 0,
-        .doc = "maximum range value"
-    },
-    {
-        .name = "frequency",
-        .key = 'f',
-        .arg = "hertz",
-        .flags = 0,
-        .doc = "Frequency to plot"
-    },
-    {
-        .name = NULL,
-        .key = 0,
-        .arg = NULL,
-        .flags = 0,
-        .doc = NULL
-    }
+    { "verbose", 'v', NULL, 0, "Causes verbose output" },
+    { "channel", 'c', "channel-name", 0, "motor state channel" },
+    { "labels", 'L', "label-list", 0, "colon-seprated list of data labels" },
+    { "indices", 'I', "index-list", 0, "colon-seprated list of data indices" },
+    { "samples", 'n', "count", 0, "number of samples to plot" },
+    { "min", '0', "min-value", 0, "minimum range value" },
+    { "max", '1', "max-value", 0, "maximum range value" },
+    { "frequency", 'f', "hertz", 0, "Frequency to plot" },
+    { NULL, 0, NULL, 0, NULL }
 };
 
 /// argp object
