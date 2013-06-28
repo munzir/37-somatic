@@ -18,6 +18,7 @@ typedef struct _Somatic__Transform Somatic__Transform;
 typedef struct _Somatic__MultiTransform Somatic__MultiTransform;
 typedef struct _Somatic__PointCloud Somatic__PointCloud;
 typedef struct _Somatic__ForceMoment Somatic__ForceMoment;
+typedef struct _Somatic__WaistCmd Somatic__WaistCmd;
 typedef struct _Somatic__Battery Somatic__Battery;
 typedef struct _Somatic__MotorCmd Somatic__MotorCmd;
 typedef struct _Somatic__MotorState Somatic__MotorState;
@@ -175,8 +176,15 @@ typedef enum _Somatic__MsgType {
   SOMATIC__MSG_TYPE__JOYSTICK = 7,
   SOMATIC__MSG_TYPE__TOUCH = 8,
   SOMATIC__MSG_TYPE__MICROPHONE = 9,
-  SOMATIC__MSG_TYPE__BATTERY = 10
+  SOMATIC__MSG_TYPE__BATTERY = 10,
+  SOMATIC__MSG_TYPE__WAIST_CMD = 11
 } Somatic__MsgType;
+typedef enum _Somatic__WaistMode {
+  SOMATIC__WAIST_MODE__MOVE_FWD = 0,
+  SOMATIC__WAIST_MODE__MOVE_REV = 1,
+  SOMATIC__WAIST_MODE__STOP = 2,
+  SOMATIC__WAIST_MODE__CURRENT_MODE = 3
+} Somatic__WaistMode;
 typedef enum _Somatic__MotorParam {
   SOMATIC__MOTOR_PARAM__MOTOR_CURRENT = 0,
   SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY = 1,
@@ -322,6 +330,18 @@ struct  _Somatic__ForceMoment
 #define SOMATIC__FORCE_MOMENT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&somatic__force_moment__descriptor) \
     , NULL, NULL, NULL }
+
+
+struct  _Somatic__WaistCmd
+{
+  ProtobufCMessage base;
+  protobuf_c_boolean has_mode;
+  Somatic__WaistMode mode;
+  Somatic__Metadata *meta;
+};
+#define SOMATIC__WAIST_CMD__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&somatic__waist_cmd__descriptor) \
+    , 0,0, NULL }
 
 
 struct  _Somatic__Battery
@@ -747,6 +767,25 @@ Somatic__ForceMoment *
 void   somatic__force_moment__free_unpacked
                      (Somatic__ForceMoment *message,
                       ProtobufCAllocator *allocator);
+/* Somatic__WaistCmd methods */
+void   somatic__waist_cmd__init
+                     (Somatic__WaistCmd         *message);
+size_t somatic__waist_cmd__get_packed_size
+                     (const Somatic__WaistCmd   *message);
+size_t somatic__waist_cmd__pack
+                     (const Somatic__WaistCmd   *message,
+                      uint8_t             *out);
+size_t somatic__waist_cmd__pack_to_buffer
+                     (const Somatic__WaistCmd   *message,
+                      ProtobufCBuffer     *buffer);
+Somatic__WaistCmd *
+       somatic__waist_cmd__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   somatic__waist_cmd__free_unpacked
+                     (Somatic__WaistCmd *message,
+                      ProtobufCAllocator *allocator);
 /* Somatic__Battery methods */
 void   somatic__battery__init
                      (Somatic__Battery         *message);
@@ -1083,6 +1122,9 @@ typedef void (*Somatic__PointCloud_Closure)
 typedef void (*Somatic__ForceMoment_Closure)
                  (const Somatic__ForceMoment *message,
                   void *closure_data);
+typedef void (*Somatic__WaistCmd_Closure)
+                 (const Somatic__WaistCmd *message,
+                  void *closure_data);
 typedef void (*Somatic__Battery_Closure)
                  (const Somatic__Battery *message,
                   void *closure_data);
@@ -1140,6 +1182,7 @@ typedef void (*Somatic__MonitorResp_Closure)
 extern const ProtobufCEnumDescriptor    somatic__unit__descriptor;
 extern const ProtobufCEnumDescriptor    somatic__quantity__descriptor;
 extern const ProtobufCEnumDescriptor    somatic__msg_type__descriptor;
+extern const ProtobufCEnumDescriptor    somatic__waist_mode__descriptor;
 extern const ProtobufCEnumDescriptor    somatic__motor_param__descriptor;
 extern const ProtobufCEnumDescriptor    somatic__motor_status__descriptor;
 extern const ProtobufCMessageDescriptor somatic__vector__descriptor;
@@ -1152,6 +1195,7 @@ extern const ProtobufCMessageDescriptor somatic__transform__descriptor;
 extern const ProtobufCMessageDescriptor somatic__multi_transform__descriptor;
 extern const ProtobufCMessageDescriptor somatic__point_cloud__descriptor;
 extern const ProtobufCMessageDescriptor somatic__force_moment__descriptor;
+extern const ProtobufCMessageDescriptor somatic__waist_cmd__descriptor;
 extern const ProtobufCMessageDescriptor somatic__battery__descriptor;
 extern const ProtobufCMessageDescriptor somatic__motor_cmd__descriptor;
 extern const ProtobufCMessageDescriptor somatic__motor_state__descriptor;

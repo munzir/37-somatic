@@ -218,6 +218,7 @@ enum msg_type {
     TOUCH = 8;
     MICROPHONE = 9;
     BATTERY = 10;
+		WAIST_CMD = 11;
 };
 
 // included in every top-level message
@@ -305,6 +306,17 @@ message force_moment {
 // Send these messages on ach channels
 //
 
+enum waist_mode {
+		MOVE_FWD = 0;
+		MOVE_REV = 1;
+		STOP = 2;
+		CURRENT_MODE = 3;
+};
+
+message waist_cmd {
+		optional waist_mode mode = 1;
+		optional metadata meta = 15;
+}
 
 message battery {
     optional bool error = 1;

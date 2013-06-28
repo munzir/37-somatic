@@ -302,6 +302,34 @@ void somatic_force_moment_get( const Somatic__ForceMoment *pb, double v[6] ) {
     aa_fcpy( v+3, pb->moment->data, 3 );
 }
 
+//=== Waist Cmd ===
+Somatic__WaistCmd *somatic_waist_cmd_alloc( ) {
+    Somatic__WaistCmd *pb = AA_NEW0(Somatic__WaistCmd);
+    somatic__waist_cmd__init( pb );
+    pb->meta = somatic_metadata_alloc();
+    pb->meta->type = SOMATIC__MSG_TYPE__WAIST_CMD;
+    pb->meta->has_type = 1;
+    return pb;
+}
+
+void somatic_waist_cmd_free( Somatic__WaistCmd *pb ) {
+    if( pb ) {
+        somatic_metadata_free( pb->meta );
+        free(pb);
+    }
+}
+
+void somatic_waist_cmd_set( Somatic__WaistCmd *pb,
+                            const Somatic__WaistMode mode ) {
+    pb->mode = mode;
+}
+
+void somatic_waist_cmd_get( const Somatic__WaistCmd *pb,
+                            Somatic__WaistMode* mode ) {
+    *mode = pb->mode;
+}
+
+
 //=== Motor Cmd ===
 Somatic__MotorCmd *somatic_motor_cmd_alloc( size_t n ) {
     Somatic__MotorCmd *pb = AA_NEW0(Somatic__MotorCmd);

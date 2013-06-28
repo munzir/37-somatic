@@ -181,7 +181,7 @@ void   somatic__timespec__free_unpacked
 void   somatic__metadata__init
                      (Somatic__Metadata         *message)
 {
-  static Somatic__Metadata init_value = {PROTOBUF_C_MESSAGE_INIT(&somatic__metadata__descriptor),  0, 0, 0, 0, 0}; //SOMATIC__METADATA__INIT;
+  static Somatic__Metadata init_value = SOMATIC__METADATA__INIT;
   *message = init_value;
 }
 size_t somatic__metadata__get_packed_size
@@ -434,6 +434,49 @@ void   somatic__force_moment__free_unpacked
                       ProtobufCAllocator *allocator)
 {
   PROTOBUF_C_ASSERT (message->base.descriptor == &somatic__force_moment__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   somatic__waist_cmd__init
+                     (Somatic__WaistCmd         *message)
+{
+  static Somatic__WaistCmd init_value = SOMATIC__WAIST_CMD__INIT;
+  *message = init_value;
+}
+size_t somatic__waist_cmd__get_packed_size
+                     (const Somatic__WaistCmd *message)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &somatic__waist_cmd__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t somatic__waist_cmd__pack
+                     (const Somatic__WaistCmd *message,
+                      uint8_t       *out)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &somatic__waist_cmd__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t somatic__waist_cmd__pack_to_buffer
+                     (const Somatic__WaistCmd *message,
+                      ProtobufCBuffer *buffer)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &somatic__waist_cmd__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+Somatic__WaistCmd *
+       somatic__waist_cmd__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (Somatic__WaistCmd *)
+     protobuf_c_message_unpack (&somatic__waist_cmd__descriptor,
+                                allocator, len, data);
+}
+void   somatic__waist_cmd__free_unpacked
+                     (Somatic__WaistCmd *message,
+                      ProtobufCAllocator *allocator)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &somatic__waist_cmd__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 void   somatic__battery__init
@@ -1755,6 +1798,58 @@ const ProtobufCMessageDescriptor somatic__force_moment__descriptor =
   somatic__force_moment__field_indices_by_name,
   2,  somatic__force_moment__number_ranges,
   (ProtobufCMessageInit) somatic__force_moment__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor somatic__waist_cmd__field_descriptors[2] =
+{
+  {
+    "mode",
+    1,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_ENUM,
+    PROTOBUF_C_OFFSETOF(Somatic__WaistCmd, has_mode),
+    PROTOBUF_C_OFFSETOF(Somatic__WaistCmd, mode),
+    &somatic__waist_mode__descriptor,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "meta",
+    15,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(Somatic__WaistCmd, meta),
+    &somatic__metadata__descriptor,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned somatic__waist_cmd__field_indices_by_name[] = {
+  1,   /* field[1] = meta */
+  0,   /* field[0] = mode */
+};
+static const ProtobufCIntRange somatic__waist_cmd__number_ranges[2 + 1] =
+{
+  { 1, 0 },
+  { 15, 1 },
+  { 0, 2 }
+};
+const ProtobufCMessageDescriptor somatic__waist_cmd__descriptor =
+{
+  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
+  "somatic.waist_cmd",
+  "WaistCmd",
+  "Somatic__WaistCmd",
+  "somatic",
+  sizeof(Somatic__WaistCmd),
+  2,
+  somatic__waist_cmd__field_descriptors,
+  somatic__waist_cmd__field_indices_by_name,
+  2,  somatic__waist_cmd__number_ranges,
+  (ProtobufCMessageInit) somatic__waist_cmd__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
 static const ProtobufCFieldDescriptor somatic__battery__field_descriptors[4] =
@@ -3425,7 +3520,7 @@ const ProtobufCEnumDescriptor somatic__quantity__descriptor =
   somatic__quantity__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-const ProtobufCEnumValue somatic__msg_type__enum_values_by_number[10] =
+const ProtobufCEnumValue somatic__msg_type__enum_values_by_number[11] =
 {
   { "MOTOR_CMD", "SOMATIC__MSG_TYPE__MOTOR_CMD", 1 },
   { "MOTOR_STATE", "SOMATIC__MSG_TYPE__MOTOR_STATE", 2 },
@@ -3437,11 +3532,12 @@ const ProtobufCEnumValue somatic__msg_type__enum_values_by_number[10] =
   { "TOUCH", "SOMATIC__MSG_TYPE__TOUCH", 8 },
   { "MICROPHONE", "SOMATIC__MSG_TYPE__MICROPHONE", 9 },
   { "BATTERY", "SOMATIC__MSG_TYPE__BATTERY", 10 },
+  { "WAIST_CMD", "SOMATIC__MSG_TYPE__WAIST_CMD", 11 },
 };
 static const ProtobufCIntRange somatic__msg_type__value_ranges[] = {
-{1, 0},{0, 10}
+{1, 0},{0, 11}
 };
-const ProtobufCEnumValueIndex somatic__msg_type__enum_values_by_name[10] =
+const ProtobufCEnumValueIndex somatic__msg_type__enum_values_by_name[11] =
 {
   { "BATTERY", 9 },
   { "FORCE_MOMENT", 4 },
@@ -3453,6 +3549,7 @@ const ProtobufCEnumValueIndex somatic__msg_type__enum_values_by_name[10] =
   { "POINT_CLOUD", 5 },
   { "TOUCH", 7 },
   { "TRANSFORM", 2 },
+  { "WAIST_CMD", 10 },
 };
 const ProtobufCEnumDescriptor somatic__msg_type__descriptor =
 {
@@ -3461,12 +3558,44 @@ const ProtobufCEnumDescriptor somatic__msg_type__descriptor =
   "msg_type",
   "Somatic__MsgType",
   "somatic",
-  10,
+  11,
   somatic__msg_type__enum_values_by_number,
-  10,
+  11,
   somatic__msg_type__enum_values_by_name,
   1,
   somatic__msg_type__value_ranges,
+  NULL,NULL,NULL,NULL   /* reserved[1234] */
+};
+const ProtobufCEnumValue somatic__waist_mode__enum_values_by_number[4] =
+{
+  { "MOVE_FWD", "SOMATIC__WAIST_MODE__MOVE_FWD", 0 },
+  { "MOVE_REV", "SOMATIC__WAIST_MODE__MOVE_REV", 1 },
+  { "STOP", "SOMATIC__WAIST_MODE__STOP", 2 },
+  { "CURRENT_MODE", "SOMATIC__WAIST_MODE__CURRENT_MODE", 3 },
+};
+static const ProtobufCIntRange somatic__waist_mode__value_ranges[] = {
+{0, 0},{0, 4}
+};
+const ProtobufCEnumValueIndex somatic__waist_mode__enum_values_by_name[4] =
+{
+  { "CURRENT_MODE", 3 },
+  { "MOVE_FWD", 0 },
+  { "MOVE_REV", 1 },
+  { "STOP", 2 },
+};
+const ProtobufCEnumDescriptor somatic__waist_mode__descriptor =
+{
+  PROTOBUF_C_ENUM_DESCRIPTOR_MAGIC,
+  "somatic.waist_mode",
+  "waist_mode",
+  "Somatic__WaistMode",
+  "somatic",
+  4,
+  somatic__waist_mode__enum_values_by_number,
+  4,
+  somatic__waist_mode__enum_values_by_name,
+  1,
+  somatic__waist_mode__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
 const ProtobufCEnumValue somatic__motor_param__enum_values_by_number[6] =

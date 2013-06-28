@@ -158,6 +158,12 @@ AA_API void somatic_force_moment_free( Somatic__ForceMoment *pb );
 AA_API void somatic_force_moment_set( Somatic__ForceMoment *pb, const double[6] );
 AA_API void somatic_force_moment_get( const Somatic__ForceMoment *pb, double[6] );
 
+//=== Waist Cmd ===
+AA_API Somatic__WaistCmd *somatic_waist_cmd_alloc( );
+AA_API void somatic_waist_cmd_free( Somatic__WaistCmd *pb );
+AA_API void somatic_waist_cmd_set( Somatic__WaistCmd *pb, const Somatic__WaistMode );
+AA_API void somatic_waist_cmd_get( const Somatic__WaistCmd *pb, Somatic__WaistMode* );
+
 //=== Motor Cmd ===
 AA_API Somatic__MotorCmd *somatic_motor_cmd_alloc( size_t n );
 AA_API void somatic_motor_cmd_free( Somatic__MotorCmd *pb );

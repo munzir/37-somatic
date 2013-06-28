@@ -26,7 +26,7 @@ file(GLOB scripts_source "exe/*.cpp" " exe/*.c")
 LIST(SORT scripts_source)
 
 # Build the library and set the executables that use it (have to hardcode for now)
-add_library(Main SHARED ${main_source})
+add_library(somatic SHARED ${main_source})
 
 # Build scripts
 message(STATUS "\n-- SCRIPTS: ")
@@ -34,7 +34,7 @@ foreach(script_src_file ${scripts_source})
 	get_filename_component(script_base ${script_src_file} NAME_WE)
 	message(STATUS "Adding script ${script_src_file} with base name ${script_base}" )
 	add_executable(${script_base} ${script_src_file})
-	target_link_libraries(${script_base} Main) 
+	target_link_libraries(${script_base} somatic) 
 	add_custom_target(${script_base}.run ${script_base} ${ARGN})
 	install(TARGETS ${script_base} DESTINATION /usr/local/bin)
 endforeach(script_src_file)
@@ -42,6 +42,7 @@ message(STATUS " ")
 
 # Install the files
 FILE(GLOB files "include/somatic/*.h")
+install(TARGETS somatic DESTINATION /usr/local/lib)
 install(FILES include/somatic.pb-c.h DESTINATION /usr/local/include)
 install(FILES include/somatic.h DESTINATION /usr/local/include)
 install(FILES ${files} DESTINATION 	/usr/local/include/somatic)
