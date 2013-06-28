@@ -170,6 +170,7 @@ void dump_metadata( Somatic__Metadata *pb ) {
 			case SOMATIC__MSG_TYPE__TOUCH: c = "Touch"; break;
 			case SOMATIC__MSG_TYPE__MICROPHONE: c = "Microphone"; break;
 			case SOMATIC__MSG_TYPE__BATTERY: c = "Battery"; break;
+			case SOMATIC__MSG_TYPE__WAIST_CMD: c = "WaistCmd"; break;
 		}
 		printf("[type] %s\n", c);
 	}
@@ -331,6 +332,28 @@ void dump_motor_cmd( Somatic__MotorCmd *pb ) {
 }
 
 /* ******************************************************************************************** */
+/// Dumps the waist command values which are 4 enumerations: go fwd, go rev, stop, current
+void dump_waist_cmd (Somatic__WaistCmd* pb) {
+
+	// Print the title and the parameter name
+	indent();
+	printf("[WaistCmd]\n");
+	sd_indent++;
+	indent();
+	switch ( pb->mode ) {
+		case SOMATIC__WAIST_MODE__MOVE_FWD: printf("[mode]\tMove forward\n"); break;
+		case SOMATIC__WAIST_MODE__MOVE_REV: printf("[mode]\tMove reverse\n"); break;
+		case SOMATIC__WAIST_MODE__STOP: printf("[mode]\tStop\n"); break;
+		case SOMATIC__WAIST_MODE__CURRENT_MODE: printf("[mode]\tCurrent mode\n"); break;
+		default: printf("[mode]\tUNKNOWN!\n");
+	}
+
+	// Print the metadata
+	if(pb->meta) dump_metadata( pb->meta );
+	sd_indent--;
+}
+
+/* ******************************************************************************************** */
 /// Dumps the imu value after processing it with ssdmu library
 void dump_imu (Somatic__Vector* vec) {
 
@@ -383,6 +406,8 @@ void run() {
 					UNPACK_DUMP( motor_state, &alloc, sd_achbuf, sd_frame_size ); break;
 				case SOMATIC__MSG_TYPE__BATTERY:
 					UNPACK_DUMP( battery, &alloc, sd_achbuf, sd_frame_size ); break;
+				case SOMATIC__MSG_TYPE__WAIST_CMD:
+					UNPACK_DUMP( waist_cmd, &alloc, sd_achbuf, sd_frame_size ); break;
 				default: printf("Unknown Message: %d\n",base->meta->type);
 			}
 		} 
