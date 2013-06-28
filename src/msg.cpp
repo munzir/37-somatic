@@ -322,6 +322,7 @@ void somatic_waist_cmd_free( Somatic__WaistCmd *pb ) {
 void somatic_waist_cmd_set( Somatic__WaistCmd *pb,
                             const Somatic__WaistMode mode ) {
     pb->mode = mode;
+		pb->has_mode = 1;
 }
 
 void somatic_waist_cmd_get( const Somatic__WaistCmd *pb,
