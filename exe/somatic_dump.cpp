@@ -8,6 +8,8 @@
 #include <amino.h>
 #include <argp.h>
 #include "somatic.h"
+#include <imud.h>
+#include <unistd.h>
 
 /* ******************************************************************************************** */
 // Channel vairables
@@ -19,12 +21,14 @@ size_t sd_indent = 0;
 
 /* ******************************************************************************************** */
 // Option Vars
-const char *opt_chan_name = NULL;
+const char *opt_chan_name = NULL;	///< The ach channel to get data from
+const char *opt_msg_type = NULL; 	///< Message type to be used if the message does not have a type
 
 /* ******************************************************************************************** */
 static struct argp_option options[] = {
 	{ "verbose", 'v', NULL, 0, "Causes verbose output" },
 	{ "chan", 'c', "ach channel", 0, "ach channel to send data to" },
+	{ "protobuf", 'p', "protobuf-msg", 0, "name of protobuf message [imu]" }, 
 	{ NULL, 0, NULL, 0, NULL }
 };
 
@@ -34,6 +38,7 @@ static int parse_opt( int key, char *arg, struct argp_state *state) {
 	switch(key) {
 		case 'v': somatic_opt_verbosity++; break;
 		case 'c': opt_chan_name = strdup( arg ); break;
+		case 'p': opt_msg_type = strdup( arg ); break;
 		case 0: break;
 	}
 	return 0;
@@ -326,6 +331,23 @@ void dump_motor_cmd( Somatic__MotorCmd *pb ) {
 }
 
 /* ******************************************************************************************** */
+/// Dumps the imu value after processing it with ssdmu library
+void dump_imu (Somatic__Vector* vec) {
+
+	// Compute the pitch from the value (as done in ssdmu_pitch function)
+	static const double csr = -.7853981634;
+	double newX = vec->data[0]*cos(csr) - vec->data[1]*sin(csr);
+	double imu = atan2(newX, vec->data[2]);
+
+	// Print it
+	indent();
+	printf("[Imu]\n");
+	sd_indent++;
+	printf("\t%6.3lf (rad) \t %6.3lf (deg)\n", imu, (imu / M_PI) * 180.0);
+	sd_indent--;
+}
+
+/* ******************************************************************************************** */
 /// Calls the dump function for a given message type
 #define UNPACK_DUMP( type, alloc, buf, size ) \
 	dump_ ## type( somatic__ ## type ## __unpack( alloc, size, buf ) );
@@ -346,7 +368,7 @@ void run() {
 		Somatic__BaseMsg *base =
 			somatic__base_msg__unpack( &alloc, sd_frame_size, sd_achbuf);
 
-		// Convert the message to the proper type
+		// Convert the message to the proper type if it has one
 		if( base->meta && base->meta->has_type ) {
 			switch ( base->meta->type ) {
 				case SOMATIC__MSG_TYPE__FORCE_MOMENT:
@@ -363,13 +385,28 @@ void run() {
 					UNPACK_DUMP( battery, &alloc, sd_achbuf, sd_frame_size ); break;
 				default: printf("Unknown Message: %d\n",base->meta->type);
 			}
-		} else {
-			printf("Unknown Message, no type info\n");
+		} 
+
+		// If not, if a type is provided use it (such as vector for imu values)
+		else if(opt_msg_type != NULL) {
+
+			// If it is a vector, dump it as a vector
+			if(strcmp(opt_msg_type, "imu") == 0.0) {
+				dump_imu(somatic__vector__unpack(&alloc, sd_frame_size, sd_achbuf));
+			}
+		
 		}
 
+		// If no information is available, just give up
+		else 
+			printf("Unknown Message, no type info\n");
+		
 		// Free the message memory
 		assert( 0 == sd_indent );
 		somatic_pbregalloc_release(&alloc);
+
+		// Sleep a bit
+		usleep(1e4);
 	}
 
 	// Free the daemon memory (?)
@@ -396,6 +433,7 @@ int main( int argc, char **argv ) {
 
 	// Print 
 	somatic_verbprintf( 1, "Channel %s\n", opt_chan_name );
+	somatic_verbprintf( 1, "Protobuf %s\n", opt_msg_type );
 
 	// Continuously check for new messages
 	run();
