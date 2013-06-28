@@ -6,3 +6,10 @@ number of useful utility routines.
 
 The init script that should be symbolically linked to /etc/init.d folder is
 under etc folder.
+
+The proto folder contains the descriptions of structures in protobuf-c.pb.h 
+folder. At some point, I think, it was me and Munzir, we did not know
+how to use this and we started hardcoding the descriptions in the .h file
+directly. 
+
+- Can Erdogan
