@@ -167,6 +167,7 @@ void dump_metadata( Somatic__Metadata *pb ) {
 			case SOMATIC__MSG_TYPE__MULTI_TRANSFORM: c = "MultiTransform"; break;
 			case SOMATIC__MSG_TYPE__POINT_CLOUD: c = "PointCloud"; break;
 			case SOMATIC__MSG_TYPE__JOYSTICK: c = "Joystick"; break;
+			case SOMATIC__MSG_TYPE__LIBERTY: c = "Liberty"; break;
 			case SOMATIC__MSG_TYPE__TOUCH: c = "Touch"; break;
 			case SOMATIC__MSG_TYPE__MICROPHONE: c = "Microphone"; break;
 			case SOMATIC__MSG_TYPE__BATTERY: c = "Battery"; break;
@@ -241,6 +242,25 @@ void dump_joystick( Somatic__Joystick *pb ) {
 	// Print the metadata
 	if(pb->meta) dump_metadata( pb->meta );
 	sd_indent--;
+}
+
+/* ******************************************************************************************** */
+/// Prints the liberty data
+void dump_liberty( Somatic__Liberty *pb ) {
+  indent();
+  printf("[Liberty]\n");
+  dump_vector(pb->sensor1, "\t%6.3f"); printf("\n");
+  dump_vector(pb->sensor2, "\t%6.3f"); printf("\n");
+  dump_vector(pb->sensor3, "\t%6.3f"); printf("\n");
+  dump_vector(pb->sensor4, "\t%6.3f"); printf("\n");
+  dump_vector(pb->sensor5, "\t%6.3f"); printf("\n");
+  dump_vector(pb->sensor6, "\t%6.3f"); printf("\n");
+  dump_vector(pb->sensor7, "\t%6.3f"); printf("\n");
+  dump_vector(pb->sensor8, "\t%6.3f"); printf("\n");
+  
+  // Print the metadata
+  if(pb->meta) dump_metadata( pb->meta );
+  //sd_indent--;
 }
 
 /* ******************************************************************************************** */
@@ -400,6 +420,8 @@ void run() {
 					UNPACK_DUMP( multi_transform, &alloc, sd_achbuf, sd_frame_size ); break;
 				case SOMATIC__MSG_TYPE__JOYSTICK:
 					UNPACK_DUMP( joystick, &alloc, sd_achbuf, sd_frame_size ); break;
+				case SOMATIC__MSG_TYPE__LIBERTY:
+					UNPACK_DUMP( liberty, &alloc, sd_achbuf, sd_frame_size ); break;
 				case SOMATIC__MSG_TYPE__MOTOR_CMD:
 					UNPACK_DUMP( motor_cmd, &alloc, sd_achbuf, sd_frame_size ); break;
 				case SOMATIC__MSG_TYPE__MOTOR_STATE:
