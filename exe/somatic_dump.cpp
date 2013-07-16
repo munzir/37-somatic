@@ -362,11 +362,15 @@ void dump_imu (Somatic__Vector* vec) {
 	double newX = vec->data[0]*cos(csr) - vec->data[1]*sin(csr);
 	double imu = atan2(newX, vec->data[2]);
 
+	// Compute the pitch velocity from the value (as done in ssdmu_d_pitch function)
+	double imu_d = vec->data[3] * sin(csr) + vec->data[4] * cos(csr);
+
 	// Print it
 	indent();
 	printf("[Imu]\n");
 	sd_indent++;
-	printf("\t%6.3lf (rad) \t %6.3lf (deg)\n", imu, (imu / M_PI) * 180.0);
+	printf("\tpos: %6.3lf (rad) \t %6.3lf (deg)\n", imu, (imu / M_PI) * 180.0);
+	printf("\tvel: %6.3lf (rad) \t %6.3lf (deg)\n", imu_d, (imu_d / M_PI) * 180.0);
 	sd_indent--;
 }
 
