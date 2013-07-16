@@ -194,6 +194,9 @@ AA_API void somatic_motor_state_alloc_current( Somatic__MotorState *pb,
 AA_API Somatic__Joystick *somatic_joystick_alloc(size_t n_axes, size_t n_buttons);
 AA_API void somatic_joystick_free(Somatic__Joystick *pb);
 
+//=== Liberty ===
+AA_API Somatic__Liberty *somatic_liberty_alloc(); //size_t n_sensors
+AA_API void somatic_liberty_free(Somatic__Liberty *pb);
 
 //=== Event ===
 AA_API const char *somatic_event_code2str(Somatic__Event__Codes code);

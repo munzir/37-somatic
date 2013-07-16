@@ -464,6 +464,37 @@ void somatic_joystick_free(Somatic__Joystick *pb) {
     }
 }
 
+//=== Liberty ===
+Somatic__Liberty *somatic_liberty_alloc() { // size_t n_sensors
+    Somatic__Liberty *pb = AA_NEW0(Somatic__Liberty);
+    somatic__liberty__init(pb);
+    pb->meta = somatic_metadata_alloc();
+    pb->meta->type = SOMATIC__MSG_TYPE__LIBERTY;
+    pb->meta->has_type = 1;
+    pb->sensor1 = somatic_vector_alloc(7);
+    pb->sensor2 = somatic_vector_alloc(7);
+    pb->sensor3 = somatic_vector_alloc(7);
+    pb->sensor4 = somatic_vector_alloc(7);
+    pb->sensor5 = somatic_vector_alloc(7);
+    pb->sensor6 = somatic_vector_alloc(7);
+    pb->sensor7 = somatic_vector_alloc(7);
+    pb->sensor8 = somatic_vector_alloc(7);
+    return pb;
+}
+void somatic_liberty_free(Somatic__Liberty *pb) {
+    if(pb) {
+        somatic_vector_free(pb->sensor1);
+	somatic_vector_free(pb->sensor2);
+	somatic_vector_free(pb->sensor3);
+	somatic_vector_free(pb->sensor4);
+	somatic_vector_free(pb->sensor5);
+	somatic_vector_free(pb->sensor6);
+	somatic_vector_free(pb->sensor7);
+	somatic_vector_free(pb->sensor8);
+        somatic_metadata_free(pb->meta);
+        free(pb);
+    }
+}
 
 //=== Event ===
 
