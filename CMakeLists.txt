@@ -2,7 +2,7 @@
 # @date Jan 15, 2012
 
 cmake_minimum_required(VERSION 2.6)
-project(forwardKinematics)
+project(somatic)
 
 # Set the C99 standard for the C files
 set(CMAKE_INSTALL_PREFIX /usr)
@@ -36,20 +36,34 @@ foreach(script_src_file ${scripts_source})
 	add_executable(${script_base} ${script_src_file})
 	target_link_libraries(${script_base} somatic) 
 	add_custom_target(${script_base}.run ${script_base} ${ARGN})
-	install(TARGETS ${script_base} DESTINATION /usr/local/bin)
+	install(TARGETS ${script_base} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 endforeach(script_src_file)
 message(STATUS " ")
 
 # Install the files
 FILE(GLOB files "include/somatic/*.h")
-install(TARGETS somatic DESTINATION /usr/local/lib)
-install(FILES include/somatic.pb-c.h DESTINATION /usr/local/include)
-install(FILES include/somatic.h DESTINATION /usr/local/include)
-install(FILES ${files} DESTINATION 	/usr/local/include/somatic)
+install(TARGETS somatic DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(FILES include/somatic.pb-c.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+install(FILES include/somatic.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+install(FILES ${files} DESTINATION 	${CMAKE_INSTALL_PREFIX}/include/somatic)
+install(PROGRAMS etc/init.d/somatic DESTINATION /etc/init.d)
 
 # Setup a debian package with cpack
-include(cmake/cpack.cmake)
-set(CPACK_PACKAGE_VERSION 0.0.0)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libach-dev, libamino-dev, libprotobuf-c")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Somatic is a communication library that wraps ach with
-	protobuf-c structure and message types for convenience")
+set(CPACK_PACKAGE_NAME "somatic")
+set(CPACK_SYSTEM_NAME "i386")
+if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+    set(CPACK_SYSTEM_NAME "amd64")    
+endif()
+set(CPACK_PACKAGE_VERSION_MAJOR 0)
+set(CPACK_PACKAGE_VERSION_MINOR 0)
+set(CPACK_PACKAGE_VERSION_PATCH 0)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libach-dev, libamino-dev, libprotobuf-c0")
+
+set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CPACK_SYSTEM_NAME}")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Saul Reynolds-Haertle <saulrh@gatech.edu>")
+
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Somatic is a communication library that wraps ach with protobuf-c structure and message types for convenience")
+set(CPACK_PACKAGE_VENDOR "Georgia Tech Humanoids Lab")
+
+include(CPack)
