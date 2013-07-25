@@ -5,7 +5,6 @@ cmake_minimum_required(VERSION 2.6)
 project(somatic)
 
 # Set the C99 standard for the C files
-set(CMAKE_INSTALL_PREFIX /usr)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fpermissive")
 
 # Guard against in-source builds
