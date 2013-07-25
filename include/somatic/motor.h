@@ -74,6 +74,7 @@ typedef struct {
     Somatic__MotorCmd *cmd_msg;
     ach_channel_t state_chan;
     ach_channel_t cmd_chan;
+		bool noCommands;
 
 } somatic_motor_t;
 

@@ -39,8 +39,9 @@
 
 void somatic_motor_init(somatic_d_t *d, somatic_motor_t *m, size_t n,
                         const char *chan_cmd_name, const char *chan_state_name ) {
-    if( SOMATIC_D_CHECK_PARM(d,  d && m && chan_cmd_name && chan_state_name ) &&
+    if( SOMATIC_D_CHECK_PARM(d,  d && m && chan_state_name ) &&
         SOMATIC_D_CHECK_PARM(d,  n > 0 && n < SOMATIC_MOTOR_N_MAX ) ) {
+
         // allocate
         m->n = n;
         m->pos = AA_NEW0_AR( double, n );
@@ -58,9 +59,14 @@ void somatic_motor_init(somatic_d_t *d, somatic_motor_t *m, size_t n,
         m->vel_valid_max = AA_NEW0_AR( double, n );
         m->vel_valid_min = AA_NEW0_AR( double, n );
         m->cmd_msg = somatic_motor_cmd_alloc( n );
-        // open channels
+
+        // Open the state channel
         somatic_d_channel_open( d, &m->state_chan, chan_state_name, NULL );
-        somatic_d_channel_open( d, &m->cmd_chan, chan_cmd_name, NULL );
+
+				// Open the command channel if one is provided (may not be for waist)
+				m->noCommands = (chan_cmd_name == NULL);
+				if(!&m->noCommands) somatic_d_channel_open(d, &m->cmd_chan, chan_cmd_name, NULL);
+				
     } else {  // bad params
         somatic_d_die(d);
     }
@@ -127,6 +133,10 @@ void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
                         int cmd_type,
                         double *x, size_t n,
 												int64_t *ix) {
+
+		// Check if this somatic motor group allows commands to be sent
+		if(m->noCommands) return;
+
     //FIXME: check limits
     if( // valid context
         SOMATIC_D_CHECK_PARM(d, NULL != m) &&
