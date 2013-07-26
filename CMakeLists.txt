@@ -5,7 +5,6 @@ cmake_minimum_required(VERSION 2.6)
 project(somatic)
 
 # Set the C99 standard for the C files
-set(CMAKE_INSTALL_PREFIX /usr)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fpermissive")
 
 # Guard against in-source builds
@@ -56,7 +55,7 @@ if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
 endif()
 set(CPACK_PACKAGE_VERSION_MAJOR 0)
 set(CPACK_PACKAGE_VERSION_MINOR 0)
-set(CPACK_PACKAGE_VERSION_PATCH 0)
+set(CPACK_PACKAGE_VERSION_PATCH 1)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libach-dev, libamino-dev, libprotobuf-c0")
 
 set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
