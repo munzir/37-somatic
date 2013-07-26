@@ -65,7 +65,7 @@ void somatic_motor_init(somatic_d_t *d, somatic_motor_t *m, size_t n,
 
 				// Open the command channel if one is provided (may not be for waist)
 				m->noCommands = (chan_cmd_name == NULL);
-				if(!&m->noCommands) somatic_d_channel_open(d, &m->cmd_chan, chan_cmd_name, NULL);
+				if(!m->noCommands) somatic_d_channel_open(d, &m->cmd_chan, chan_cmd_name, NULL);
 				
     } else {  // bad params
         somatic_d_die(d);
