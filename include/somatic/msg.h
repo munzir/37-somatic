@@ -159,7 +159,7 @@ AA_API void somatic_force_moment_set( Somatic__ForceMoment *pb, const double[6] 
 AA_API void somatic_force_moment_get( const Somatic__ForceMoment *pb, double[6] );
 
 //=== Waist Cmd ===
-AA_API Somatic__WaistCmd *somatic_waist_cmd_alloc();
+AA_API Somatic__WaistCmd *somatic_waist_cmd_alloc( );
 AA_API void somatic_waist_cmd_free( Somatic__WaistCmd *pb );
 AA_API void somatic_waist_cmd_set( Somatic__WaistCmd *pb, const Somatic__WaistMode );
 AA_API void somatic_waist_cmd_get( const Somatic__WaistCmd *pb, Somatic__WaistMode* );
@@ -194,6 +194,9 @@ AA_API void somatic_motor_state_alloc_current( Somatic__MotorState *pb,
 AA_API Somatic__Joystick *somatic_joystick_alloc(size_t n_axes, size_t n_buttons);
 AA_API void somatic_joystick_free(Somatic__Joystick *pb);
 
+//=== Liberty ===
+AA_API Somatic__Liberty *somatic_liberty_alloc(); //size_t n_sensors
+AA_API void somatic_liberty_free(Somatic__Liberty *pb);
 
 //=== Event ===
 AA_API const char *somatic_event_code2str(Somatic__Event__Codes code);

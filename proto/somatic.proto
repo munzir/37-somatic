@@ -218,7 +218,8 @@ enum msg_type {
     TOUCH = 8;
     MICROPHONE = 9;
     BATTERY = 10;
-		WAIST_CMD = 11;
+    WAIST_CMD = 11;
+    LIBERTY = 12;
 };
 
 // included in every top-level message
@@ -307,10 +308,10 @@ message force_moment {
 //
 
 enum waist_mode {
-	MOVE_FWD = 0;
-	MOVE_REV = 1;
-	STOP = 2;
-	CURRENT_MODE = 3;
+		MOVE_FWD = 0;
+		MOVE_REV = 1;
+		STOP = 2;
+		CURRENT_MODE = 3;
 };
 
 message waist_cmd {
@@ -331,13 +332,13 @@ enum motor_param {
     MOTOR_POSITION = 2;
     MOTOR_HALT = 3;
     MOTOR_RESET = 4;
-		MOTOR_DIGITAL_OUT = 5;			// Command Parameter to be used to toggle auxillary digital outputs provided with AMC drives
+    MOTOR_DIGITAL_OUT = 5; // Command Parameter to be used to toggle auxillary digital outputs provided with AMC drives
 };
 
 message motor_cmd {
     optional motor_param param = 1;
     optional vector values = 2;
-		optional ivector ivalues = 3;		// Used only in case of AMC drives for toggling auxillary digital outputs
+    optional ivector ivalues = 3; // Used only in case of AMC drives for toggling auxillary digital outputs
     optional metadata meta = 15;
 }
 
@@ -360,6 +361,23 @@ message motor_state {
 message joystick {
     optional ivector buttons = 1;
     optional vector axes = 2;
+    optional metadata meta = 15;
+}
+
+message liberty {
+// up to 8 sensors, with 7 doubles each
+    optional vector sensor1 = 1;
+    optional vector sensor2 = 2;
+    optional vector sensor3 = 3;
+    optional vector sensor4 = 4;
+    optional vector sensor5 = 5;
+    optional vector sensor6 = 6;
+    optional vector sensor7 = 7;
+    optional vector sensor8 = 8;
+/*
+    optional ivector sensors = 1;
+    optional matrix data = 2; 
+*/
     optional metadata meta = 15;
 }
 
