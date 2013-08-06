@@ -25,6 +25,13 @@
  *
  */
 
+/**
+ * @date Aug 06, 2013
+ * @author Saul Reynolds-Haertle
+ * @file somatic_motor_cmd.cpp
+ * @brief Sends motor commands to the given motor group.
+ */
+
 #include <somatic.h>
 #include <somatic/daemon.h>
 #include <somatic.pb-c.h>
@@ -36,11 +43,8 @@
 
 #include <argp.h>
 
-/* ##########################################################################
-   ##########################################################################
-   #### options and variables
-   ##########################################################################
-   ########################################################################## */
+/* ******************************************************************************************** */
+// Options and variables
 
 somatic_d_t daemon_cx;
 
@@ -51,38 +55,38 @@ static int cmd_type = SOMATIC__MOTOR_PARAM__MOTOR_POSITION;
 static double cmd_values[32];
 static int motor_size;
 
-/* ##########################################################################
-   ##########################################################################
-   #### main
-   ##########################################################################
-   ########################################################################## */
-
+/* ******************************************************************************************** */
+/// The main thread
 int main(int argc, char* argv[]) {
-    somatic_motor_t motor;
 
-    // parse options
-    memset(cmd_chan_name, 0, 1024);
-    memset(state_chan_name, 0, 1024);
-    sprintf(cmd_chan_name, "%s-cmd", argv[1]);
-    sprintf(state_chan_name, "%s-state", argv[1]);
+	somatic_motor_t motor;
 
-    if (strcmp("pos", argv[2]) == 0) cmd_type = SOMATIC__MOTOR_PARAM__MOTOR_POSITION;
-    else if (strcmp("vel", argv[2]) == 0) cmd_type = SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY;
-    else if (strcmp("cur", argv[2]) == 0) cmd_type = SOMATIC__MOTOR_PARAM__MOTOR_CURRENT;
-    else if (strcmp("halt", argv[2]) == 0) cmd_type = SOMATIC__MOTOR_PARAM__MOTOR_HALT;
-    else if (strcmp("reset", argv[2]) == 0) cmd_type = SOMATIC__MOTOR_PARAM__MOTOR_RESET;
-    else {
-	    fprintf(stderr, "Must specify a valid command type: 'pos', 'vel', 'cur', 'halt', or 'reset'\n");
-	    exit(EXIT_FAILURE);
-    }
+	// parse options
+	memset(cmd_chan_name, 0, 1024);
+	memset(state_chan_name, 0, 1024);
+	sprintf(cmd_chan_name, "%s-cmd", argv[1]);
+	sprintf(state_chan_name, "%s-state", argv[1]);
 
-    // init daemon
-    somatic_d_opts_t daemon_opt;
-    memset(&daemon_opt, 0, sizeof(daemon_opt)); // zero initialize
-    daemon_opt.ident = "somatic_motor_cmd";
-    somatic_d_init(&daemon_cx, &daemon_opt);
+	if (strcmp("pos", argv[2]) == 0) cmd_type = SOMATIC__MOTOR_PARAM__MOTOR_POSITION;
+	else if (strcmp("vel", argv[2]) == 0) cmd_type = SOMATIC__MOTOR_PARAM__MOTOR_VELOCITY;
+	else if (strcmp("cur", argv[2]) == 0) cmd_type = SOMATIC__MOTOR_PARAM__MOTOR_CURRENT;
+	else if (strcmp("halt", argv[2]) == 0) cmd_type = SOMATIC__MOTOR_PARAM__MOTOR_HALT;
+	else if (strcmp("reset", argv[2]) == 0) cmd_type = SOMATIC__MOTOR_PARAM__MOTOR_RESET;
+	else {
+		fprintf(stderr, "Must specify a valid command type: 'pos', 'vel', 'cur', 'halt', or 'reset'\n");
+		exit(EXIT_FAILURE);
+	}
 
-	// read values out of standard input
+	// init daemon
+	somatic_d_opts_t daemon_opt;
+	memset(&daemon_opt, 0, sizeof(daemon_opt)); // zero initialize
+	daemon_opt.ident = "somatic_motor_cmd";
+	somatic_d_init(&daemon_cx, &daemon_opt);
+
+	// ==================================================================================
+	// Process the input 
+
+	// Read values out of standard input
 	motor_size = 0;
 	double tempd;
 	int tempi;
@@ -116,45 +120,51 @@ int main(int argc, char* argv[]) {
 		case SOMATIC__MOTOR_PARAM__MOTOR_RESET: std::cout << "reset "; break;
 	}
 	std::cout << "message to " << motor_size << " motors using channels "
-	          << cmd_chan_name << " and " << state_chan_name << std::endl;
-	for(int i = 0; i < motor_size; i++) std::cout << std::setw(12) << std::right << std::fixed << cmd_values[i];
+			  << cmd_chan_name << " and " << state_chan_name << std::endl;
+	for(int i = 0; i < motor_size; i++) 
+		std::cout << std::setw(12) << std::right << std::fixed << cmd_values[i];
 	std::cout << std::endl;
 
-    // init motor
-    somatic_motor_init(&daemon_cx, &motor, motor_size, cmd_chan_name, state_chan_name);
-    
-    // open the motor up
-    somatic_motor_reset(&daemon_cx, &motor);
-    
-    // set the joint limits to $bignum
-    double** motor_minimum_values[] = { &motor.pos_valid_min, &motor.vel_valid_min,
-                                       &motor.pos_limit_min, &motor.vel_limit_min };
-    double** motor_maximum_values[] = { &motor.pos_valid_max, &motor.vel_valid_max,
-                                       &motor.pos_limit_max, &motor.vel_limit_max };
-    for(size_t i = 0; i < 4; i++) aa_fset(*motor_minimum_values[i], -1024.1, motor_size);
-    for(size_t i = 0; i < 4; i++) aa_fset(*motor_maximum_values[i], 1024.1, motor_size);
+	// ==================================================================================
+	// Initialize the motor group
 
-    // start our daemon running
-    somatic_d_event(&daemon_cx, SOMATIC__EVENT__PRIORITIES__NOTICE, SOMATIC__EVENT__CODES__PROC_RUNNING, NULL, NULL);
+	// Initialize the motor and reset it
+	somatic_motor_init(&daemon_cx, &motor, motor_size, cmd_chan_name, state_chan_name);
+	somatic_motor_reset(&daemon_cx, &motor);
+	
+	// Set the joint limits
+	double** motor_minimum_values[] = { &motor.pos_valid_min, &motor.vel_valid_min,
+									   &motor.pos_limit_min, &motor.vel_limit_min };
+	double** motor_maximum_values[] = { &motor.pos_valid_max, &motor.vel_valid_max,
+									   &motor.pos_limit_max, &motor.vel_limit_max };
+	for(size_t i = 0; i < 4; i++) aa_fset(*motor_minimum_values[i], -1024.1, motor_size);
+	for(size_t i = 0; i < 4; i++) aa_fset(*motor_maximum_values[i], 1024.1, motor_size);
 
-    // update the motor
-    somatic_motor_update(&daemon_cx, &motor);
-    
-    // wait a bit
-    usleep(1e5);
+	// Inform slogd of the group starting
+	somatic_d_event(&daemon_cx, SOMATIC__EVENT__PRIORITIES__NOTICE, 
+		SOMATIC__EVENT__CODES__PROC_RUNNING, NULL, NULL);
 
-    // construct the command and send it
-    somatic_motor_cmd(&daemon_cx, &motor, cmd_type, cmd_values, motor_size, NULL);
-    
-    // Send stopping event
-    somatic_d_event(&daemon_cx, SOMATIC__EVENT__PRIORITIES__NOTICE, SOMATIC__EVENT__CODES__PROC_STOPPING, NULL, NULL);
+	// ==================================================================================
+	// Send the requested command to the group
 
-    // close the motor
-    somatic_motor_destroy(&daemon_cx, &motor);
+	// Update the motor
+	somatic_motor_update(&daemon_cx, &motor);
+	usleep(1e5);
 
-    // Destroy daemon resources
-    somatic_d_destroy(&daemon_cx);
+	// Construct the command and send it
+	somatic_motor_cmd(&daemon_cx, &motor, cmd_type, cmd_values, motor_size, NULL);
+	
+	// ==================================================================================
+	// Clean up
 
-    // and we're done
-    exit(0);
+	// Send stopping event
+	somatic_d_event(&daemon_cx, SOMATIC__EVENT__PRIORITIES__NOTICE, 
+		SOMATIC__EVENT__CODES__PROC_STOPPING, NULL, NULL);
+
+	// Close the motor
+	somatic_motor_destroy(&daemon_cx, &motor);
+
+	// Destroy daemon resources
+	somatic_d_destroy(&daemon_cx);
+	exit(0);
 }
