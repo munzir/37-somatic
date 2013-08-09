@@ -61,6 +61,35 @@ int main(int argc, char* argv[]) {
 
 	somatic_motor_t motor;
 
+	for(int i = 1; i < argc; i++) {
+		if (argc != 3 || (strcmp("--help", argv[i]) == 0)) {
+			std::cout
+				<< "Usage: " << argv[0] << " CHANNELBASE CMDTYPE" << std::endl
+				<< "Reads motor commands from standard input and sends them to the specified" << std::endl
+				<< "somatic motor daemon. Determines the motor size from the input and the" << std::endl
+				<< "ach channels and command type from arguments." << std::endl
+				<< "" << std::endl
+				<< "  CHANNELBASE         Used to determine ach channel names. Uses" << std::endl
+				<< "                      CHANNELBASE-cmd as the motor's command channel and" << std::endl
+				<< "                      CHANNELBASE-state as the motor's state channel." << std::endl
+				<< "  CMDTYPE             One of pos, vel, cur, halt, or reset. Functions" << std::endl
+				<< "                      should be pretty clear." << std::endl
+				<< "" << std::endl
+				<< "Examples:" << std::endl
+				<< "  echo 0 0 0 128 | " << argv[0] << "rgripper pos" << std::endl
+				<< "  Assuming the normal channels are running, sets the right robotiq" << std::endl
+				<< "  hand to be fully open in roughly the basic grasp position." << std::endl
+				<< "" << std::endl
+				<< "  echo 0 0 0 0 0 0 0 | " << argv[0] << "rlwa vel" << std::endl
+				<< "  Sends a zero-velocity message to seven modeles owned by the daemon on" << std::endl
+				<< "  ach channels rlwa-cmd and rlwa-state, probably the right arm." << std::endl
+				<< "" << std::endl
+				<< "  echo 0 0 0 0 0 0 0 | " << argv[0] << "rlwa halt" << std::endl
+				<< "  Assuming normal channels and daemons, halts the right arm." << std::endl;
+		}
+		exit(EXIT_SUCCESS);
+	}
+
 	// parse options
 	memset(cmd_chan_name, 0, 1024);
 	memset(state_chan_name, 0, 1024);
