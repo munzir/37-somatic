@@ -536,7 +536,6 @@ message monitor_resp {
 }
 
 message visualize_data {
-	optional int32 n_vec = 3;
 	repeated vector vecs = 4;
 	optional ivector bools = 5;
 	optional string msg = 7;

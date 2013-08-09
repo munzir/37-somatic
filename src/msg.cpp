@@ -502,11 +502,11 @@ Somatic__VisualizeData* somatic__visualize_data__alloc(size_t nvecs,
 	Somatic__VisualizeData* pb = AA_NEW0(Somatic__VisualizeData);
 	somatic__visualize_data__init(pb);
 	pb->vecs = AA_NEW_AR(Somatic__Vector*, nvecs);
-	pb->n_vec = nvecs;
-	for(size_t i = 0; i < pb->n_vec; i++) {
+	pb->n_vecs = nvecs;
+	for(size_t i = 0; i < pb->n_vecs; i++) {
 		pb->vecs[i] = somatic_vector_alloc(vecsizes[i]);
 	}
-	somatic_ivector_alloc(ivecsize);
+	pb->bools = somatic_ivector_alloc(ivecsize);
 	pb->meta = somatic_metadata_alloc();
 	pb->meta->type = SOMATIC__MSG_TYPE__VISUALIZE_DATA;
 	pb->meta->has_type = 1;
@@ -515,7 +515,7 @@ Somatic__VisualizeData* somatic__visualize_data__alloc(size_t nvecs,
 
 void somatic__visualize_data__free(Somatic__VisualizeData* pb) {
 	if(pb) {
-		for(size_t i = 0; i < pb->n_vec; i++)
+		for(size_t i = 0; i < pb->n_vecs; i++)
 			somatic_vector_free(pb->vecs[i]);
 		somatic_ivector_free(pb->bools);
 		somatic_metadata_free(pb->meta);
