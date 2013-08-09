@@ -1,2 +1,4 @@
 build
 install_manifest.txt
+/include/somatic.pb-c.h
+/src/somatic.pb-c.c
