@@ -19,6 +19,9 @@ link_libraries(amino protobuf-c ach ntcan stdc++)
 include_directories(include)
 include_directories(include/somatic)
 
+# Run the commands to generate c code for our protobuf definitions
+execute_process(COMMAND "./proto_gen.sh" WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
 # Collect the source, script and fortran files
 file(GLOB main_source "src/*.cpp" "src/*.c")
 file(GLOB scripts_source "exe/*.cpp" " exe/*.c")
