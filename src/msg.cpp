@@ -496,6 +496,33 @@ void somatic_liberty_free(Somatic__Liberty *pb) {
     }
 }
 
+Somatic__VisualizeData* somatic__visualize_data__alloc(size_t nvecs,
+                                                       const size_t* vecsizes,
+                                                       size_t ivecsize) {
+	Somatic__VisualizeData* pb = AA_NEW0(Somatic__VisualizeData);
+	somatic__visualize_data__init(pb);
+	pb->vecs = AA_NEW_AR(Somatic__Vector*, nvecs);
+	pb->n_vec = nvecs;
+	for(size_t i = 0; i < pb->n_vec; i++) {
+		pb->vecs[i] = somatic_vector_alloc(vecsizes[i]);
+	}
+	somatic_ivector_alloc(ivecsize);
+	pb->meta = somatic_metadata_alloc();
+	pb->meta->type = SOMATIC__MSG_TYPE__VISUALIZE_DATA;
+	pb->meta->has_type = 1;
+	return pb;
+}
+
+void somatic__visualize_data__free(Somatic__VisualizeData* pb) {
+	if(pb) {
+		for(size_t i = 0; i < pb->n_vec; i++)
+			somatic_vector_free(pb->vecs[i]);
+		somatic_ivector_free(pb->bools);
+		somatic_metadata_free(pb->meta);
+		free(pb);
+	}
+}
+
 //=== Event ===
 
 const char *somatic_event_pri2str(Somatic__Event__Priorities pri) {

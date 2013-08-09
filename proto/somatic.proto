@@ -220,6 +220,7 @@ enum msg_type {
     BATTERY = 10;
     WAIST_CMD = 11;
     LIBERTY = 12;
+    VISUALIZE_DATA = 13;
 };
 
 // included in every top-level message
@@ -532,4 +533,13 @@ message monitor_resp {
     repeated string sattrs = 7;
 
     optional metadata meta = 15;
+}
+
+message visualize_data {
+	optional int32 n_vec = 3;
+	repeated vector vecs = 4;
+	optional ivector bools = 5;
+	optional string msg = 7;
+	
+	optional metadata meta = 15;
 }
