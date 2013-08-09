@@ -211,6 +211,7 @@ void dump_metadata( Somatic__Metadata *pb ) {
 			case SOMATIC__MSG_TYPE__MICROPHONE: c = "Microphone"; break;
 			case SOMATIC__MSG_TYPE__BATTERY: c = "Battery"; break;
 			case SOMATIC__MSG_TYPE__WAIST_CMD: c = "WaistCmd"; break;
+			case SOMATIC__MSG_TYPE__VISUALIZE_DATA: c = "VisData"; break;
 		}
 		printf("[type] %s\n", c);
 	}
@@ -434,6 +435,31 @@ void dump_imu (Somatic__Vector* vec) {
 }
 
 /* ******************************************************************************************** */
+/// Dumps visualization data as a list of vectors
+void dump_visualize_data(Somatic__VisualizeData* vd) {
+	indent();
+	printf("[VisData]\n");
+	sd_indent++;
+	indent();
+	printf("[Message]\t%s\n", vd->msg);
+	indent();
+	printf("[Bools]\t");
+	dump_ivector(vd->bools, "%d:");
+	printf("\n");
+	indent();
+	printf("[Vectors]:\t%zu\n", vd->n_vecs);
+	sd_indent++;
+	for(size_t vec = 0; vec < vd->n_vecs; vec++) {
+		indent();
+		printf("[Vec %zu]", vec);
+		dump_vector(vd->vecs[vec], "\t%6.3f");
+		printf("\n");
+	}
+	sd_indent--;
+	sd_indent--;
+}
+
+/* ******************************************************************************************** */
 /// Calls the dump function for a given message type
 #define UNPACK_DUMP( type, alloc, buf, size ) \
 	dump_ ## type( somatic__ ## type ## __unpack( alloc, size, buf ) );
@@ -473,6 +499,8 @@ void run() {
 					UNPACK_DUMP( battery, &alloc, sd_achbuf, sd_frame_size ); break;
 				case SOMATIC__MSG_TYPE__WAIST_CMD:
 					UNPACK_DUMP( waist_cmd, &alloc, sd_achbuf, sd_frame_size ); break;
+				case SOMATIC__MSG_TYPE__VISUALIZE_DATA:
+					UNPACK_DUMP( visualize_data, &alloc, sd_achbuf, sd_frame_size ); break;
 				default: printf("Unknown Message: %d\n",base->meta->type);
 			}
 		} 
