@@ -198,6 +198,12 @@ AA_API void somatic_joystick_free(Somatic__Joystick *pb);
 AA_API Somatic__Liberty *somatic_liberty_alloc(); //size_t n_sensors
 AA_API void somatic_liberty_free(Somatic__Liberty *pb);
 
+//=== VisualizeData ===
+AA_API Somatic__VisualizeData* somatic__visualize_data__alloc(size_t nvecs,
+                                                              const size_t* vecsizes,
+                                                              size_t ivecsize);
+AA_API void somatic__visualize_data__free(Somatic__VisualizeData* pb);
+
 //=== Event ===
 AA_API const char *somatic_event_code2str(Somatic__Event__Codes code);
 AA_API const char *somatic_event_pri2str(Somatic__Event__Priorities pri);
