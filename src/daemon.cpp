@@ -34,7 +34,9 @@
  *
  */
 // needed for getsid
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 
 #include <amino.h>
 #include <unistd.h>
@@ -111,7 +113,8 @@ AA_API void somatic_d_daemonize( somatic_d_t *d ) {
 }
 
 AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
-    int r;
+    int rint;
+    ach_status_t rach;
     // copy opts
     d->opts = *opts;
     d->opts.ident = NULL;
@@ -167,8 +170,8 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
     // create working directory
     const char *dirnam = aa_mem_region_printf(&d->memreg, SOMATIC_RUNROOT"%s", d->ident);
 		// printf("Attempting to make dir: '%s'\n", dirnam); fflush(stdout);
-    r = mkdir( dirnam, 0775 );
-    d_check( !r || EEXIST == errno, "Couldn't make working directory: %s (%d)",
+    rint = mkdir( dirnam, 0775 );
+    d_check( !rint || EEXIST == errno, "Couldn't make working directory: %s (%d)",
              strerror(errno), errno);
 
     // chdir
@@ -195,17 +198,17 @@ AA_API void somatic_d_init( somatic_d_t *d, somatic_d_opts_t *opts ) {
     d_check( NULL != d->lockfile, "Couldn't fdopen pidfile `%s/pid': %s", dirnam, strerror(errno));
 
     // write pid
-    r =  fprintf(d->lockfile, "%d", d->pid );
-    d_check( 0 < r, "Couldn't write pid to `%s/pid': printf said %d", dirnam, r);
-    do{ r = fflush(d->lockfile); }
-    while( 0 != r && EINTR == errno );
-    d_check( !r, "Couldn't flush pid to `%s/pid':  %s", dirnam, strerror(errno));
+    rint = fprintf(d->lockfile, "%d", d->pid );
+    d_check( 0 < rint, "Couldn't write pid to `%s/pid': printf said %d", dirnam, rint);
+    do{ rint = fflush(d->lockfile); }
+    while( 0 != rint && EINTR == errno );
+    d_check( !rint, "Couldn't flush pid to `%s/pid':  %s", dirnam, strerror(errno));
 
     // open channels
     {
-        if( 0 != (r = ach_open(&d->chan_event, "event", NULL)) ) {
+        if( 0 != (rach = ach_open(&d->chan_event, "event", NULL)) ) {
             syslog(LOG_EMERG, "Couldn't open event channel: %s\n",
-                   ach_result_to_string(r));
+                   ach_result_to_string(rach));
             exit(EXIT_FAILURE);
         }
     }
@@ -355,7 +358,7 @@ AA_API int somatic_d_check_bit( somatic_d_t *d, int mask,
     return i;
 }
 
-void somatic_d_vevent( somatic_d_t *d, int level, int code,
+void somatic_d_vevent( somatic_d_t *d, Somatic__Event__Priorities level, Somatic__Event__Codes code,
                        const char *type, const char comment_fmt[], va_list argp ) {
     Somatic__Event pb;
     memset(&pb, 0, sizeof pb);
@@ -380,10 +383,10 @@ void somatic_d_vevent( somatic_d_t *d, int level, int code,
         pb.comment =  fmt_buf;
     }
 
-    int r = SOMATIC_PACK_SEND( &d->chan_event, somatic__event, &pb );
-    if( ACH_OK != r ) {
+    ach_status_t rach = SOMATIC_PACK_SEND( &d->chan_event, somatic__event, &pb );
+    if( ACH_OK != rach ) {
         syslog( LOG_ERR, "couldn't send event: %s",
-                ach_result_to_string(r));
+                ach_result_to_string(rach));
     }
 }
 
@@ -451,36 +454,36 @@ AA_API void somatic_d_die(somatic_d_t *d) {
 void somatic_d_channel_open(somatic_d_t *d,
                                    ach_channel_t *chan, const char *name,
                                    ach_attr_t *attr) {
-    int r =  ach_open( chan, name, attr );
+	ach_status_t rach =  ach_open( chan, name, attr );
     somatic_d_check(d, SOMATIC__EVENT__PRIORITIES__EMERG,
                     SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
-                    ACH_OK == r, "ach_open",
+                    ACH_OK == rach, "ach_open",
                     "opening channel `%s': %s\n",
-                    name, ach_result_to_string(r));
-    if( ACH_OK != r ) somatic_d_die(d);
-    r =  ach_flush( chan );
+                    name, ach_result_to_string(rach));
+    if( ACH_OK != rach ) somatic_d_die(d);
+    rach =  ach_flush( chan );
     somatic_d_check(d, SOMATIC__EVENT__PRIORITIES__EMERG,
                     SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
-                    ACH_OK == r, "fflush",
+                    ACH_OK == rach, "fflush",
                     "flushing channel `%s': %s\n",
-                    name, ach_result_to_string(r));
-    if( ACH_OK != r ) somatic_d_die(d);
+                    name, ach_result_to_string(rach));
+    if( ACH_OK != rach ) somatic_d_die(d);
 }
 
 void somatic_d_channel_close(somatic_d_t *d, ach_channel_t *chan ) {
-    int r =  ach_close( chan );
+	ach_status_t rach =  ach_close( chan );
     // not much to do if it fails, just log it
     somatic_d_check(d, SOMATIC__EVENT__PRIORITIES__ERR,
                     SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
-                    ACH_OK == r, "ach_close",
+                    ACH_OK == rach, "ach_close",
                     "closing channel: %s\n",
                     ach_result_to_string(r));
 }
 
-AA_API void somatic_d_limit( somatic_d_t *d, int level,
+AA_API void somatic_d_limit( somatic_d_t *d, Somatic__Event__Priorities level,
                              const char *type, int quantity,
                              int idx, double actual,
-                             double min, double max ) {
+                             double min, double max) {
     (void)quantity;
 
     Somatic__Event pb;
@@ -501,10 +504,10 @@ AA_API void somatic_d_limit( somatic_d_t *d, int level,
     }
     // FIXME: add limit stuff
 
-    int r = SOMATIC_PACK_SEND( &d->chan_event, somatic__event, &pb );
-    if( ACH_OK != r ) {
+    ach_status_t rach = SOMATIC_PACK_SEND( &d->chan_event, somatic__event, &pb );
+    if( ACH_OK != rach ) {
         syslog( LOG_ERR, "couldn't send event: %s",
-                ach_result_to_string(r));
+                ach_result_to_string(rach));
     }
 
     fprintf(stderr, "[%s]:%d (%d).(%s) LIMIT i: %d, val: %f, min: %f, max: %f\n",
@@ -514,7 +517,7 @@ AA_API void somatic_d_limit( somatic_d_t *d, int level,
 
  };
 
-AA_API int somatic_d_check_v( somatic_d_t *d, int priority,
+AA_API int somatic_d_check_v( somatic_d_t *d, Somatic__Event__Priorities priority,
                               int code,
                               const char *type,
                               double *data, size_t n,

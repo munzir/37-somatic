@@ -50,7 +50,7 @@ somatic_d_t daemon_cx;
 
 static char cmd_chan_name[1024];
 static char state_chan_name[1024];
-static int cmd_type = SOMATIC__MOTOR_PARAM__MOTOR_POSITION;
+static Somatic__MotorParam cmd_type = SOMATIC__MOTOR_PARAM__MOTOR_POSITION;
 
 static double cmd_values[32];
 static int motor_size;

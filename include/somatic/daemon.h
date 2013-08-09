@@ -206,7 +206,7 @@ AA_API void somatic_d_require( somatic_d_t *d, int test,
 
 AA_API int somatic_d_vcheck_bit( somatic_d_t *d, int mask,
                                  bool notify, int prev, int word,
-                                 int level, int code,
+                                 Somatic__Event__Priorities level, Somatic__Event__Codes code,
                                  const char *type, const char comment_fmt[],
                                  va_list arg );
 
@@ -233,7 +233,7 @@ somatic_d_vevent( somatic_d_t *d, int level, int code,
 
 /** Sends a limit message on the event channel.
  */
-AA_API void somatic_d_limit( somatic_d_t *d, int level,
+AA_API void somatic_d_limit( somatic_d_t *d, Somatic__Event__Priorities level,
                              const char *type, int quantity,
                              int index, double actual,
                              double min, double max );
@@ -262,7 +262,7 @@ AA_API int somatic_d_assert_err( somatic_d_t *d, int test,
 /** Checks if data is outside of limits.
  * \return 1 if within limits, zero otherwise
  */
-AA_API int somatic_d_check_v( somatic_d_t *d, int priority, int code,
+AA_API int somatic_d_check_v( somatic_d_t *d, Somatic__Event__Priorities priority, int code,
                               const char *type,
                               double *data, size_t n,
                               double *min, double *max, size_t n_desired );

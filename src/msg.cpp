@@ -112,7 +112,7 @@ void somatic_vector_free(Somatic__Vector *pb) {
         free( pb );
     }
 }
-void somatic_vector_set_unit(Somatic__Vector *pb, int unit) {
+void somatic_vector_set_unit(Somatic__Vector *pb, Somatic__Unit unit) {
     pb->units = AA_NEW( Somatic__Unit );
     pb->units[0] = unit;
     pb->n_units = 1;

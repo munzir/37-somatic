@@ -130,7 +130,7 @@ AA_API void somatic_motor_digital_out( somatic_d_t *d, somatic_motor_t *m,
 
 
 void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
-                        int cmd_type,
+                        Somatic__MotorParam cmd_type,
                         double *x, size_t n,
 												int64_t *ix) {
 
@@ -178,33 +178,33 @@ void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
             m->cmd_msg->has_param = 1;
             m->cmd_msg->values = vals;
         }
-        int r = SOMATIC_PACK_SEND( &m->cmd_chan, somatic__motor_cmd, m->cmd_msg );
+        ach_status_t rach = SOMATIC_PACK_SEND( &m->cmd_chan, somatic__motor_cmd, m->cmd_msg );
         somatic_d_check( d, SOMATIC__EVENT__PRIORITIES__CRIT,
                          SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
-                         ACH_OK == r, "somatic_motor_cmd",
-                         "ach result: %s", ach_result_to_string(r) );
+                         ACH_OK == rach, "somatic_motor_cmd",
+                         "ach result: %s", ach_result_to_string(rach) );
     }
 }
 
 void somatic_motor_update( somatic_d_t *d, somatic_motor_t *m ) {
     /// FIXME: store timestamps
-    int r = 0;
+	ach_status_t rach;
     if( SOMATIC_D_CHECK_PARM(d, NULL != m) &&
         SOMATIC_D_CHECK_PARM(d, m->pos && m->vel && m->cur) ) {
 
         Somatic__MotorState *state =
-            SOMATIC_GET_LAST_UNPACK( r, somatic__motor_state,
+            SOMATIC_GET_LAST_UNPACK( rach, somatic__motor_state,
                                      &protobuf_c_system_allocator,
                                      1024 + 8*m->n, &m->state_chan );
 
         somatic_d_check( d, SOMATIC__EVENT__PRIORITIES__CRIT,
                          SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
-                         ACH_OK == r || ACH_MISSED_FRAME == r ||
-                         ACH_STALE_FRAMES == r,
+                         ACH_OK == rach || ACH_MISSED_FRAME == rach ||
+                         ACH_STALE_FRAMES == rach,
                          "somatic_motor_update",
-                         "ach result: %s", ach_result_to_string(r) );
+                         "ach result: %s", ach_result_to_string(rach) );
 
-        if( (ACH_OK == r || ACH_MISSED_FRAME == r)  && state) {
+        if( (ACH_OK == rach || ACH_MISSED_FRAME == rach)  && state) {
             if( state->position &&
                 somatic_d_check_msg( d, NULL != state->position->data,
                                      "motor_state", "no position->data" ) &&
