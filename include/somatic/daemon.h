@@ -197,7 +197,7 @@ AA_API void somatic_d_destroy( somatic_d_t *d);
     \param state Defined in the event message as PROC_STARTING, PROC_RUNNING,
     PROC_STOPPING, PROC_HALTED, PROC_ERR.
  */
-AA_API void somatic_d_state( somatic_d_t *d, int state );
+AA_API void somatic_d_state( somatic_d_t *d, Somatic__Event__Codes state );
 
 /** Test must be true or process exits.
  */
@@ -212,7 +212,7 @@ AA_API int somatic_d_vcheck_bit( somatic_d_t *d, int mask,
 
 AA_API int somatic_d_check_bit( somatic_d_t *d, int mask,
                                 bool notify, int prev, int word,
-                                int level, int code,
+                                Somatic__Event__Priorities level, Somatic__Event__Codes code,
                                 const char *type, const char comment_fmt[],
                                 ... );
 
@@ -221,13 +221,13 @@ AA_API int somatic_d_check_bit( somatic_d_t *d, int mask,
 
 /** Sends an event message on the event channel.
  */
-AA_API void somatic_d_event( somatic_d_t *d, int level, int code,
+AA_API void somatic_d_event( somatic_d_t *d, Somatic__Event__Priorities level, Somatic__Event__Codes code,
                         const char *type, const char comment_fmt[], ... );
 
 /** Sends an event message on the event channel.
  */
 AA_API void
-somatic_d_vevent( somatic_d_t *d, int level, int code,
+somatic_d_vevent( somatic_d_t *d, Somatic__Event__Priorities level, Somatic__Event__Codes code,
                   const char *type, const char comment_fmt[],
                   va_list argp );
 
@@ -245,11 +245,11 @@ AA_API void somatic_d_limit( somatic_d_t *d, Somatic__Event__Priorities level,
  * \param fmt A format string for the log message.
  * \return The test parameter.
  */
-AA_API int somatic_d_check( somatic_d_t *d, int priority, int code,
+AA_API int somatic_d_check( somatic_d_t *d, Somatic__Event__Priorities priority, Somatic__Event__Codes code,
                             int test, const char *type, const char fmt[], ... );
 
 
-int somatic_d_vcheck( somatic_d_t *d, int priority, int code,
+int somatic_d_vcheck( somatic_d_t *d, Somatic__Event__Priorities priority, Somatic__Event__Codes code,
                       int test, const char *type,
                       const char fmt[], va_list argp );
 
@@ -262,7 +262,7 @@ AA_API int somatic_d_assert_err( somatic_d_t *d, int test,
 /** Checks if data is outside of limits.
  * \return 1 if within limits, zero otherwise
  */
-AA_API int somatic_d_check_v( somatic_d_t *d, Somatic__Event__Priorities priority, int code,
+AA_API int somatic_d_check_v( somatic_d_t *d, Somatic__Event__Priorities priority, Somatic__Event__Codes code,
                               const char *type,
                               double *data, size_t n,
                               double *min, double *max, size_t n_desired );

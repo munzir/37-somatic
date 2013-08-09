@@ -311,7 +311,7 @@ AA_API void somatic_d_destroy( somatic_d_t *d) {
     if( d->ident ) free(d->ident);
 }
 
-AA_API void somatic_d_state( somatic_d_t *d, int state ) {
+AA_API void somatic_d_state( somatic_d_t *d, Somatic__Event__Codes state ) {
     somatic_d_event( d, SOMATIC__EVENT__PRIORITIES__NOTICE,
                      state,
                      NULL, NULL );
@@ -332,7 +332,7 @@ AA_API void somatic_d_require( somatic_d_t *d, int test,
 
 AA_API int somatic_d_vcheck_bit( somatic_d_t *d, int mask,
                                  bool notify, int prev, int word,
-                                 int level, int code,
+                                 Somatic__Event__Priorities level, Somatic__Event__Codes code,
                                  const char *type, const char fmt[],
                                  va_list arg ) {
     bool pbit = (prev & mask) ? 1 : 0;
@@ -347,7 +347,7 @@ AA_API int somatic_d_vcheck_bit( somatic_d_t *d, int mask,
 
 AA_API int somatic_d_check_bit( somatic_d_t *d, int mask,
                                 bool notify, int prev, int word,
-                                int level, int code,
+                                Somatic__Event__Priorities level, Somatic__Event__Codes code,
                                 const char *type, const char fmt[],
                                 ... ) {
     va_list arg;
@@ -390,7 +390,7 @@ void somatic_d_vevent( somatic_d_t *d, Somatic__Event__Priorities level, Somatic
     }
 }
 
-AA_API void somatic_d_event( somatic_d_t *d, int level, int code,
+AA_API void somatic_d_event( somatic_d_t *d, Somatic__Event__Priorities level, Somatic__Event__Codes code,
                              const char *type, const char comment_fmt[], ... ) {
     va_list argp;
     va_start( argp, comment_fmt );
@@ -399,7 +399,7 @@ AA_API void somatic_d_event( somatic_d_t *d, int level, int code,
 
 }
 
-int somatic_d_vcheck( somatic_d_t *d, int priority, int code,
+int somatic_d_vcheck( somatic_d_t *d, Somatic__Event__Priorities priority, Somatic__Event__Codes code,
                       int test, const char *type,
                       const char fmt[], va_list argp ) {
     if( !test ) {
@@ -421,7 +421,7 @@ int somatic_d_vcheck( somatic_d_t *d, int priority, int code,
     return test;
 }
 
-AA_API int somatic_d_check( somatic_d_t *d, int priority, int code,
+AA_API int somatic_d_check( somatic_d_t *d, Somatic__Event__Priorities priority, Somatic__Event__Codes code,
                             int test, const char *type, const char fmt[], ... ) {
     if( !test ) {
         va_list argp;
@@ -477,7 +477,7 @@ void somatic_d_channel_close(somatic_d_t *d, ach_channel_t *chan ) {
                     SOMATIC__EVENT__CODES__COMM_FAILED_TRANSPORT,
                     ACH_OK == rach, "ach_close",
                     "closing channel: %s\n",
-                    ach_result_to_string(r));
+                    ach_result_to_string(rach));
 }
 
 AA_API void somatic_d_limit( somatic_d_t *d, Somatic__Event__Priorities level,
@@ -518,7 +518,7 @@ AA_API void somatic_d_limit( somatic_d_t *d, Somatic__Event__Priorities level,
  };
 
 AA_API int somatic_d_check_v( somatic_d_t *d, Somatic__Event__Priorities priority,
-                              int code,
+                              Somatic__Event__Codes code,
                               const char *type,
                               double *data, size_t n,
                               double *min, double *max, size_t n_desired ) {
