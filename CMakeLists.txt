@@ -5,7 +5,8 @@ cmake_minimum_required(VERSION 2.6)
 project(somatic)
 
 # Set the C99 standard for the C files
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fpermissive")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -msse2")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -msse2")
 
 # Guard against in-source builds
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
@@ -24,7 +25,7 @@ execute_process(COMMAND "./proto_gen.sh" WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 # Collect the source, script and fortran files
 file(GLOB main_source "src/*.cpp" "src/*.c")
-file(GLOB scripts_source "exe/*.cpp" " exe/*.c")
+file(GLOB scripts_source "exe/*.cpp" "exe/*.c")
 LIST(SORT scripts_source)
 
 # Build the library and set the executables that use it (have to hardcode for now)
