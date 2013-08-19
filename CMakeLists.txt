@@ -38,16 +38,16 @@ foreach(script_src_file ${scripts_source})
 	add_executable(${script_base} ${script_src_file})
 	target_link_libraries(${script_base} somatic) 
 	add_custom_target(${script_base}.run ${script_base} ${ARGN})
-	install(TARGETS ${script_base} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+	install(TARGETS ${script_base} DESTINATION bin)
 endforeach(script_src_file)
 message(STATUS " ")
 
 # Install the files
 FILE(GLOB files "include/somatic/*.h")
-install(TARGETS somatic DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-install(FILES include/somatic.pb-c.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
-install(FILES include/somatic.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
-install(FILES ${files} DESTINATION 	${CMAKE_INSTALL_PREFIX}/include/somatic)
+install(TARGETS somatic DESTINATION lib)
+install(FILES include/somatic.pb-c.h DESTINATION include)
+install(FILES include/somatic.h DESTINATION include)
+install(FILES ${files} DESTINATION 	include/somatic)
 install(PROGRAMS etc/init.d/somatic DESTINATION /etc/init.d)
 
 # Setup a debian package with cpack
