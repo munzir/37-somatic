@@ -104,7 +104,7 @@ static inline struct timespec somatic_timespec_get( Somatic__Timespec *pb ) {
 //=== Vector ===
 Somatic__Vector *somatic_vector_alloc(size_t size);
 void somatic_vector_free(Somatic__Vector *pb);
-void somatic_vector_set_unit(Somatic__Vector *pb, int unit);
+void somatic_vector_set_unit(Somatic__Vector *pb, Somatic__Unit unit);
 void somatic_vector_set_data(Somatic__Vector *pb, const double *x, size_t n);
 
 //=== IVector ===
