@@ -49,6 +49,10 @@
 #include "somatic/msg.h"
 #include "somatic/util.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //#include <genmsg.h>
 
 /** \file somatic.h
@@ -228,5 +232,9 @@ int somatic_prototable_key2value( const somatic_prototable_t *table,
 const char* somatic_prototable_value2key( const somatic_prototable_t *table,
                                           uint32_t value);
 
+
+#ifdef __cplusplus
+} // extern C
+#endif
 
 #endif

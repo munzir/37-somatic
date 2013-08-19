@@ -44,6 +44,10 @@
 #ifndef SOMATIC_MOTOR_H
 #define SOMATIC_MOTOR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ///< max number of joints,
 #define SOMATIC_MOTOR_N_MAX 1024
 
@@ -104,5 +108,9 @@ AA_API void somatic_motor_digital_out( somatic_d_t *d, somatic_motor_t *m,
 
 
 
+
+#ifdef __cplusplus
+} // extern C
+#endif
 #endif //SOMATIC_MOTOR_H
 

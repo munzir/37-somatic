@@ -43,6 +43,9 @@
 #ifndef SOMATIC_DAEMON_H
 #define SOMATIC_DAEMON_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**  \file daemon.h
  *   \page daemon Daemons
@@ -355,5 +358,10 @@ static char *somatic_d_pidnam( const char *ident, aa_mem_region_t *reg ) {
                  _somatic_private_n );                                  \
     })
 
+
+
+#ifdef __cplusplus
+} // extern C
+#endif
 
 #endif // SOMATIC_DAEMON_H

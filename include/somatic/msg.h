@@ -43,40 +43,18 @@
 #ifndef SOMATIC_MSG_H
 #define SOMATIC_MSG_H
 
-// transform
-#ifdef __cplusplus
-
 #include "somatic.pb-c.h"
-//#include <bullet/LinearMath/btTransform.h>
 #include "util.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // naming convention
 // somatic_MSGNAME_alloc
 // somatic_MSGNAME_free
 // somatic_MSGNAME_set_FIELD
 // somatic_MSGNAME_get_FIELD
-
-//btTransform somatic_ply_transform( Somatic__Transform * );
-//btTransform somatic_ply_transform( const double *x, size_t n );
-
-//void somatic_opine_quaternion( double *x, size_t n, const btQuaternion &q );
-//void somatic_opine_vector3( double *x, size_t n, const btVector3 &v );
-//void somatic_opine_transform( double *x, size_t n, const btTransform &T );
-
-#endif
-
-/* static struct timespec somatic_ply_timespec( Somatic__Timespec * t) { */
-/*     return aa_tm_make( (time_t) t->sec, (long) t->nsec ); */
-/* } */
-
-/* static void somatic_opine_timespec( Somatic__Timespec * t, */
-/*                                     struct timespec ts ) { */
-/*     t->sec = ts.tv_sec; */
-/*     t->nsec = (int32_t) ts.tv_nsec; */
-/*     t->has_nsec = 1; */
-/* } */
-
 
 //=== Allocator ===
 typedef ProtobufCAllocator somatic_pbregalloc_t;
@@ -207,5 +185,9 @@ AA_API void somatic__visualize_data__free(Somatic__VisualizeData* pb);
 //=== Event ===
 AA_API const char *somatic_event_code2str(Somatic__Event__Codes code);
 AA_API const char *somatic_event_pri2str(Somatic__Event__Priorities pri);
+
+#ifdef __cplusplus
+} // extern C
+#endif
 
 #endif //SOMATIC_MSG_H
