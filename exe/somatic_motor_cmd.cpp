@@ -60,6 +60,7 @@ static int motor_size;
 int main(int argc, char* argv[]) {
 
 	somatic_motor_t motor;
+	std::cout << argc << std::endl;
 
 	for(int i = 1; i < argc; i++) {
 		if (argc != 3 || (strcmp("--help", argv[i]) == 0)) {
@@ -86,8 +87,8 @@ int main(int argc, char* argv[]) {
 				<< "" << std::endl
 				<< "  echo 0 0 0 0 0 0 0 | " << argv[0] << "rlwa halt" << std::endl
 				<< "  Assuming normal channels and daemons, halts the right arm." << std::endl;
+			exit(EXIT_FAILURE);
 		}
-		exit(EXIT_SUCCESS);
 	}
 
 	// parse options
