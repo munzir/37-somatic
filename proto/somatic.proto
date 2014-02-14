@@ -319,6 +319,7 @@ enum waist_mode {
 
 message waist_cmd {
 		optional waist_mode mode = 1;
+    optional vector data = 2;
 		optional metadata meta = 15;
 }
 
