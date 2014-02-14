@@ -306,6 +306,7 @@ void somatic_force_moment_get( const Somatic__ForceMoment *pb, double v[6] ) {
 Somatic__WaistCmd *somatic_waist_cmd_alloc( ) {
     Somatic__WaistCmd *pb = AA_NEW0(Somatic__WaistCmd);
     somatic__waist_cmd__init( pb );
+    pb->data = somatic_vector_alloc ( 1 );
     pb->meta = somatic_metadata_alloc();
     pb->meta->type = SOMATIC__MSG_TYPE__WAIST_CMD;
     pb->meta->has_type = 1;
@@ -314,6 +315,7 @@ Somatic__WaistCmd *somatic_waist_cmd_alloc( ) {
 
 void somatic_waist_cmd_free( Somatic__WaistCmd *pb ) {
     if( pb ) {
+        somatic_vector_free( pb->data );
         somatic_metadata_free( pb->meta );
         free(pb);
     }
