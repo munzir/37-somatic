@@ -496,6 +496,26 @@ void somatic_liberty_free(Somatic__Liberty *pb) {
     }
 }
 
+//=== Cinder ===
+Somatic__Cinder *somatic_cinder_alloc() { 
+    Somatic__Cinder *pb = AA_NEW0(Somatic__Cinder);
+    somatic__cinder__init(pb);
+    pb->meta = somatic_metadata_alloc();
+    pb->meta->type = SOMATIC__MSG_TYPE__CINDER;
+    pb->meta->has_type = 1;
+    pb->hole = somatic_vector_alloc(3);
+    pb->normal = somatic_vector_alloc(3);
+    return pb;
+}
+void somatic_cinder_free(Somatic__Cinder *pb) {
+    if(pb) {
+        somatic_vector_free(pb->hole);
+        somatic_vector_free(pb->normal);
+        somatic_metadata_free(pb->meta);
+        free(pb);
+    }
+}
+
 Somatic__VisualizeData* somatic__visualize_data__alloc(size_t nvecs,
                                                        const size_t* vecsizes,
                                                        size_t ivecsize) {

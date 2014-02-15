@@ -445,6 +445,23 @@ void dump_imu (Somatic__Vector* vec) {
 }
 
 /* ******************************************************************************************** */
+/// Dumps data about location of a cinder block wrt robot frame
+void dump_cinder(Somatic__Cinder* vd) {
+	indent();
+	printf("[Cinder]\n");
+	sd_indent++;
+	indent();
+	printf("[Hole]:\t");
+	dump_vector(vd->hole, "\t%6.3f");
+	printf("\n");
+	indent();
+	printf("[Normal]:\t");
+	dump_vector(vd->normal, "\t%6.3f");
+	printf("\n");
+	sd_indent--;
+}
+
+/* ******************************************************************************************** */
 /// Dumps visualization data as a list of vectors
 void dump_visualize_data(Somatic__VisualizeData* vd) {
 	indent();
@@ -509,6 +526,8 @@ void run() {
 					UNPACK_DUMP( battery, &alloc, sd_achbuf, sd_frame_size ); break;
 				case SOMATIC__MSG_TYPE__WAIST_CMD:
 					UNPACK_DUMP( waist_cmd, &alloc, sd_achbuf, sd_frame_size ); break;
+				case SOMATIC__MSG_TYPE__CINDER:
+					UNPACK_DUMP( cinder, &alloc, sd_achbuf, sd_frame_size ); break;
 				case SOMATIC__MSG_TYPE__VISUALIZE_DATA:
 					UNPACK_DUMP( visualize_data, &alloc, sd_achbuf, sd_frame_size ); break;
 				default: printf("Unknown Message: %d\n",base->meta->type);

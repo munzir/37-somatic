@@ -176,6 +176,10 @@ AA_API void somatic_joystick_free(Somatic__Joystick *pb);
 AA_API Somatic__Liberty *somatic_liberty_alloc(); //size_t n_sensors
 AA_API void somatic_liberty_free(Somatic__Liberty *pb);
 
+//=== Cinder ===
+AA_API Somatic__Cinder *somatic_cinder_alloc(); //size_t n_sensors
+AA_API void somatic_cinder_free(Somatic__Cinder *pb);
+
 //=== VisualizeData ===
 AA_API Somatic__VisualizeData* somatic__visualize_data__alloc(size_t nvecs,
                                                               const size_t* vecsizes,

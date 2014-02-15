@@ -221,6 +221,7 @@ enum msg_type {
     WAIST_CMD = 11;
     LIBERTY = 12;
     VISUALIZE_DATA = 13;
+		CINDER = 14;
 };
 
 // included in every top-level message
@@ -379,6 +380,12 @@ message liberty {
     optional ivector sensors = 1;
     optional matrix data = 2; 
 */
+    optional metadata meta = 15;
+}
+
+message cinder {
+		optional vector hole = 1;
+		optional vector normal = 2;
     optional metadata meta = 15;
 }
 
