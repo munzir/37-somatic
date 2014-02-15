@@ -357,6 +357,17 @@ void dump_motor_state( Somatic__MotorState *pb ) {
 		printf("\n");
 	}
 
+	// Print the motor status
+	if( pb->has_status ) {
+		indent();
+		printf("[status]");
+		if( pb->status == SOMATIC__MOTOR_STATUS__MOTOR_OK ) printf("\tMOTOR_OK\n");
+		else if( pb->status == SOMATIC__MOTOR_STATUS__MOTOR_FAIL ) printf("\tMOTOR_FAIL\n");
+		else if( pb->status == SOMATIC__MOTOR_STATUS__MOTOR_COMM_FAIL ) printf("\tMOTOR_COMM_FAIL\n");
+		else if( pb->status == SOMATIC__MOTOR_STATUS__MOTOR_HW_FAIL ) printf("\tMOTOR_HW_FAIL\n");
+		else printf("\tUNKNOWN\n");
+	}
+
 	// Print the metadata
 	if( pb->meta ) dump_metadata( pb->meta );
 	sd_indent--;
