@@ -542,6 +542,14 @@ void run() {
 				dump_imu(somatic__vector__unpack(&alloc, sd_frame_size, sd_achbuf));
 			}
 		
+			// If it is a vector, dump it as a vector
+			if(strcmp(opt_msg_type, "vec") == 0.0) {
+				Somatic__Vector* vec = somatic__vector__unpack(&alloc, sd_frame_size, sd_achbuf);
+				printf("[%s]:\t", opt_chan_name);
+				dump_vector(vec, "\t%6.3f");
+				printf("\n");
+			}
+		
 		}
 
 		// If no information is available, just give up
