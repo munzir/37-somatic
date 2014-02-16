@@ -314,10 +314,12 @@ enum waist_mode {
 		MOVE_REV = 1;
 		STOP = 2;
 		CURRENT_MODE = 3;
+		REAL_CURRENT_MODE = 4;
 };
 
 message waist_cmd {
 		optional waist_mode mode = 1;
+    optional vector data = 2;
 		optional metadata meta = 15;
 }
 
