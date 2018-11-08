@@ -193,8 +193,9 @@ void somatic_motor_update( somatic_d_t *d, somatic_motor_t *m ) {
         SOMATIC_D_CHECK_PARM(d, m->pos && m->vel && m->cur) ) {
 
         Somatic__MotorState *state =
-            SOMATIC_GET_LAST_UNPACK( rach, somatic__motor_state,
-                                     &protobuf_c_system_allocator,
+             SOMATIC_GET_LAST_UNPACK( rach, somatic__motor_state,
+                                     //&protobuf_c_system_allocator,
+																		NULL,
                                      1024 + 8*m->n, &m->state_chan );
 
         somatic_d_check( d, SOMATIC__EVENT__PRIORITIES__CRIT,
@@ -249,7 +250,8 @@ void somatic_motor_update( somatic_d_t *d, somatic_motor_t *m ) {
 
 
             somatic__motor_state__free_unpacked(state,
-                                                &protobuf_c_system_allocator);
+                                                //&protobuf_c_system_allocator);
+																								NULL);
         }
     }
 }

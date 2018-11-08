@@ -166,7 +166,8 @@ static void collect() {
     aa_hard_assert( (ACH_OK == r) || (ACH_MISSED_FRAME == r), "Failed to read: %s.\n",
                     ach_result_to_string(r) );
     Somatic__MotorState *msg =
-        somatic__motor_state__unpack( &protobuf_c_system_allocator, nread, global_buf );
+        //somatic__motor_state__unpack( &protobuf_c_system_allocator, nread, global_buf );
+        somatic__motor_state__unpack( NULL,  nread, global_buf );
 
     Somatic__Vector *vec = NULL;
     if( 0 == strcmp("position", opt_quantity ) )
@@ -178,7 +179,8 @@ static void collect() {
     else if( 0 == strcmp("current", opt_quantity ) )
         vec = msg->current;
 
-    somatic__motor_state__free_unpacked( msg, &protobuf_c_system_allocator );
+    //somatic__motor_state__free_unpacked( msg, &protobuf_c_system_allocator );
+    somatic__motor_state__free_unpacked( msg, NULL);
 
     if( global_samples.size() > opt_samples )
         global_samples.pop_front();

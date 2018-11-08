@@ -56,7 +56,7 @@ static void pbregalloc_closure_free(void *cx, void *ptr) {
 AA_API void somatic_pbregalloc_set( somatic_pbregalloc_t *pba, aa_mem_region_t *reg ) {
     pba->allocator_data = reg;
     pba->alloc = pbregalloc_closure_alloc;
-    pba->tmp_alloc = pbregalloc_closure_alloc;
+    //pba->tmp_alloc = pbregalloc_closure_alloc;
     pba->free = pbregalloc_closure_free;
 }
 
