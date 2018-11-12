@@ -14,7 +14,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 endif()
 
 # Link to somatic, amino and ach
-link_libraries(amino protobuf-c ach ntcan stdc++ lapack)
+link_libraries(amino protobuf-c ach stdc++ lapack)
 
 # Include the project files and the common helpers for all the experiments
 include_directories(include)
