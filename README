@@ -1,3 +1,35 @@
+# 37-somatic
+
+Somatic is a package that integrates ach (byte-oriented IPC) and protocol
+buffers (marshalling) with specific application to robotics.  It also include a
+number of useful utility routines.
+
+## Dependencies
+
+- protobuf-c-compiler
+
+    sudo apt install protobuf-c-compiler
+
+- libprotobuf-c-dev
+
+    sudo apt install libprotobuf-c-dev
+
+- [38-amino](https://github.gatech.edu/WholeBodyControlAttempt1/38-amino) - Follow installation instructions in the git readme.
+- [39-ach](https://github.gatech.edu/WholeBodyControlAttempt1/39-ach) - Follow installation instructions in the git readme.
+
+## Installation
+
+    git clone https://github.gatech.edu/WholeBodyControlAttempt1/37-somatic
+    cd 37-somatic
+    sudo rm -r build
+    mkdir build
+    cd build
+    cmake ..
+    make
+    sudo make install
+
+## Old Readme
+
 README FOR SOMATIC
 
 ----------------------------------------------------------------------------
