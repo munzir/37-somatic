@@ -8,11 +8,11 @@ number of useful utility routines.
 
 - protobuf-c-compiler
 
-    sudo apt install protobuf-c-compiler
+      sudo apt install protobuf-c-compiler
 
 - libprotobuf-c-dev
 
-    sudo apt install libprotobuf-c-dev
+      sudo apt install libprotobuf-c-dev
 
 - [38-amino](https://github.gatech.edu/WholeBodyControlAttempt1/38-amino) - Follow installation instructions in the git readme.
 - [39-ach](https://github.gatech.edu/WholeBodyControlAttempt1/39-ach) - Follow installation instructions in the git readme.
