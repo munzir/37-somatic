@@ -222,6 +222,7 @@ enum msg_type {
     LIBERTY = 12;
     VISUALIZE_DATA = 13;
 		CINDER = 14;
+    SIM_CMD = 15;
 };
 
 // included in every top-level message
@@ -380,7 +381,7 @@ message liberty {
     optional vector sensor8 = 8;
 /*
     optional ivector sensors = 1;
-    optional matrix data = 2; 
+    optional matrix data = 2;
 */
     optional metadata meta = 15;
 }
@@ -548,6 +549,25 @@ message visualize_data {
 	repeated vector vecs = 4;
 	optional ivector bools = 5;
 	optional string msg = 7;
-	
+
 	optional metadata meta = 15;
+}
+
+message sim_cmd {
+    enum code {
+        STEP = 1;
+        RESET = 2;
+    };
+    required code cmd = 1;
+    optional double heading = 2;
+    optional double q_base = 3;
+    optional vector xyz = 4;
+    optional double q_lwheel = 5;
+    optional double q_rwheel = 6;
+    optional double q_waist = 7;
+    optional double q_torso = 8;
+    optional vector q_left_arm = 9;
+    optional vector q_right_arm = 10;
+    optional vector q_camera = 11;
+    optional metadata meta = 15;
 }

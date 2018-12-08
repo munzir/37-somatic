@@ -499,7 +499,7 @@ void somatic_liberty_free(Somatic__Liberty *pb) {
 }
 
 //=== Cinder ===
-Somatic__Cinder *somatic_cinder_alloc() { 
+Somatic__Cinder *somatic_cinder_alloc() {
     Somatic__Cinder *pb = AA_NEW0(Somatic__Cinder);
     somatic__cinder__init(pb);
     pb->meta = somatic_metadata_alloc();
@@ -585,4 +585,71 @@ const char *somatic_event_code2str(Somatic__Event__Codes code) {
     case SOMATIC__EVENT__CODES__INSANE: return "INSANE";
     }
     return "unknown";
+}
+
+//=== Simulation Cmd ===
+Somatic__SimCmd *somatic_sim_cmd_alloc() {
+    Somatic__SimCmd *pb = AA_NEW0(Somatic__SimCmd);
+    somatic__sim_cmd__init( pb );
+    pb->xyz = somatic_vector_alloc( 3 );
+    pb->q_left_arm = somatic_vector_alloc( 7 );
+    pb->q_right_arm = somatic_vector_alloc( 7 );
+    pb->q_camera = somatic_vector_alloc( 2 );
+    pb->meta = somatic_metadata_alloc();
+    pb->meta->type = SOMATIC__MSG_TYPE__SIM_CMD;
+    pb->meta->has_type = 1;
+    return pb;
+}
+void somatic_sim_cmd_free( Somatic__SimCmd *pb ) {
+    if( pb ) {
+        somatic_vector_free( pb->xyz );
+        somatic_vector_free( pb->q_left_arm );
+        somatic_vector_free( pb->q_right_arm );
+        somatic_vector_free( pb->q_camera );
+        somatic_metadata_free( pb->meta );
+        free(pb);
+    }
+}
+void somatic_sim_cmd_set(Somatic__SimCmd *pb, Somatic__SimCmd__Code cmd,
+                         struct Somatic_KrangPoseParams *pose) {
+  pb->cmd = cmd;
+  if (cmd == SOMATIC__SIM_CMD__CODE__RESET) {
+    // Heading
+    pb->has_heading = 1;
+    pb->heading = pose->heading;
+
+    // Base link pitch
+    pb->has_q_base = 1;
+    pb->q_base = pose->q_base;
+
+    // Origin of base frame wrt world frame
+    if (NULL == pb->xyz) pb->xyz = somatic_vector_alloc(3);
+    somatic_vector_set_data(pb->xyz, pose->xyz, 3);
+
+    // Wheel angles
+    pb->has_q_lwheel = 1;
+    pb->q_lwheel = pose->q_lwheel;
+    pb->has_q_rwheel = 1;
+    pb->q_rwheel = pose->q_rwheel;
+
+    // Waist angle
+    pb->has_q_waist = 1;
+    pb->q_waist = pose->q_waist;
+
+    // Torso angle
+    pb->has_q_torso = 1;
+    pb->q_torso = pose->q_torso;
+
+    // Left arm
+    if (NULL == pb->q_left_arm) pb->q_left_arm = somatic_vector_alloc(7);
+    somatic_vector_set_data(pb->q_left_arm, pose->q_left_arm, 7);
+
+    // Right arm
+    if (NULL == pb->q_right_arm) pb->q_right_arm = somatic_vector_alloc(7);
+    somatic_vector_set_data(pb->q_right_arm, pose->q_right_arm, 7);
+
+    // Position of camera mounted on the robot
+    if (NULL == pb->q_camera) pb->q_camera = somatic_vector_alloc(2);
+    somatic_vector_set_data(pb->q_camera, pose->q_camera, 2);
+  }
 }
