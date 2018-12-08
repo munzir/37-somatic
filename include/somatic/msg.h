@@ -190,6 +190,24 @@ AA_API void somatic__visualize_data__free(Somatic__VisualizeData* pb);
 AA_API const char *somatic_event_code2str(Somatic__Event__Codes code);
 AA_API const char *somatic_event_pri2str(Somatic__Event__Priorities pri);
 
+//=== SimCmd ===
+AA_API Somatic__SimCmd *somatic_sim_cmd_alloc();
+AA_API void somatic_sim_cmd_free(Somatic__SimCmd *pb);
+struct Somatic_KrangPoseParams {
+  double heading;
+  double q_base;
+  double xyz[3];
+  double q_lwheel;
+  double q_rwheel;
+  double q_waist;
+  double q_torso;
+  double q_left_arm[7];
+  double q_right_arm[7];
+  double q_camera[2];
+};
+AA_API void somatic_sim_cmd_set(Somatic__SimCmd *pb, Somatic__SimCmd__Code cmd,
+                                struct Somatic_KrangPoseParams* pose);
+
 #ifdef __cplusplus
 } // extern C
 #endif
