@@ -208,6 +208,9 @@ struct Somatic_KrangPoseParams {
 AA_API void somatic_sim_cmd_set(Somatic__SimCmd *pb, Somatic__SimCmd__Code cmd,
                                 struct Somatic_KrangPoseParams* pose);
 
+AA_API Somatic__SimMsg *somatic_sim_msg_alloc();
+AA_API void somatic_sim_msg_free( Somatic__SimMsg *pb );
+AA_API void somatic_sim_msg_set(Somatic__SimMsg *pb, int done);
 #ifdef __cplusplus
 } // extern C
 #endif

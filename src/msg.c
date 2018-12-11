@@ -653,3 +653,22 @@ void somatic_sim_cmd_set(Somatic__SimCmd *pb, Somatic__SimCmd__Code cmd,
     somatic_vector_set_data(pb->q_camera, pose->q_camera, 2);
   }
 }
+
+//=== Simulation Msg ===
+Somatic__SimMsg *somatic_sim_msg_alloc() {
+    Somatic__SimMsg *pb = AA_NEW0(Somatic__SimMsg);
+    somatic__sim_msg__init( pb );
+    pb->meta = somatic_metadata_alloc();
+    pb->meta->type = SOMATIC__MSG_TYPE__SIM_CMD;
+    pb->meta->has_type = 1;
+    return pb;
+}
+void somatic_sim_msg_free( Somatic__SimMsg *pb ) {
+    if( pb ) {
+        somatic_metadata_free( pb->meta );
+        free(pb);
+    }
+}
+void somatic_sim_msg_set(Somatic__SimMsg *pb, int done) {
+  pb->done = done;
+}

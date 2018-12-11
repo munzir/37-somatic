@@ -223,6 +223,7 @@ enum msg_type {
     VISUALIZE_DATA = 13;
 		CINDER = 14;
     SIM_CMD = 15;
+    SIM_MSG = 16;
 };
 
 // included in every top-level message
@@ -569,5 +570,10 @@ message sim_cmd {
     optional vector q_left_arm = 9;
     optional vector q_right_arm = 10;
     optional vector q_camera = 11;
+    optional metadata meta = 15;
+}
+
+message sim_msg {
+    required bool done = 1;
     optional metadata meta = 15;
 }
