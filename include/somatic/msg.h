@@ -204,6 +204,7 @@ struct Somatic_KrangPoseParams {
   double q_left_arm[7];
   double q_right_arm[7];
   double q_camera[2];
+  int init_with_balance_pose;
 };
 AA_API void somatic_sim_cmd_set(Somatic__SimCmd *pb, Somatic__SimCmd__Code cmd,
                                 struct Somatic_KrangPoseParams* pose);

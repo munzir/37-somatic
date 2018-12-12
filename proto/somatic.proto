@@ -570,6 +570,7 @@ message sim_cmd {
     optional vector q_left_arm = 9;
     optional vector q_right_arm = 10;
     optional vector q_camera = 11;
+    optional bool init_with_balance_pose = 12;
     optional metadata meta = 15;
 }
 
