@@ -651,6 +651,10 @@ void somatic_sim_cmd_set(Somatic__SimCmd *pb, Somatic__SimCmd__Code cmd,
     // Position of camera mounted on the robot
     if (NULL == pb->q_camera) pb->q_camera = somatic_vector_alloc(2);
     somatic_vector_set_data(pb->q_camera, pose->q_camera, 2);
+
+    // Init with balance pose
+    pb->has_init_with_balance_pose = 1;
+    pb->init_with_balance_pose = pose->init_with_balance_pose;
   }
 }
 
