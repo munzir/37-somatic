@@ -66,7 +66,7 @@ void somatic_motor_init(somatic_d_t *d, somatic_motor_t *m, size_t n,
 				// Open the command channel if one is provided (may not be for waist)
 				m->noCommands = (chan_cmd_name == NULL);
 				if(!m->noCommands) somatic_d_channel_open(d, &m->cmd_chan, chan_cmd_name, NULL);
-				
+
     } else {  // bad params
         somatic_d_die(d);
     }
@@ -115,8 +115,8 @@ AA_API void somatic_motor_reset( somatic_d_t *d, somatic_motor_t *m ) {
  * Function to be called for toggling auxillary digital outputs on AMC drives
  * \pre The port number on the device. For AMC Left: use 0-15. For Right: 16-31
  * \pre The value to be set. 1 for ACTIVE and 0 for INACTIVE.
- * Note that for AMC drives, these values go to virtual ports. And virtual ports 
- * ports have to be mapped to one of the available digital output ports on 
+ * Note that for AMC drives, these values go to virtual ports. And virtual ports
+ * ports have to be mapped to one of the available digital output ports on
  * hardware, using windows software.
  */
 
@@ -131,7 +131,7 @@ AA_API void somatic_motor_digital_out( somatic_d_t *d, somatic_motor_t *m,
 
 void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
                         Somatic__MotorParam cmd_type,
-                        double *x, size_t n,
+                        const double *x, size_t n,
 												int64_t *ix) {
 
 		// Check if this somatic motor group allows commands to be sent
@@ -165,7 +165,7 @@ void somatic_motor_cmd( somatic_d_t *d, somatic_motor_t *m,
             SOMATIC__MOTOR_PARAM__MOTOR_HALT == cmd_type ) {
             // value message
             somatic_motor_cmd_set(m->cmd_msg, cmd_type, x, n, NULL);
-        } 
+        }
 				// If the command is a digital output ctrl then send the ix values
 				else if(SOMATIC__MOTOR_PARAM__MOTOR_DIGITAL_OUT == cmd_type ) {
 						somatic_motor_cmd_set(m->cmd_msg, cmd_type, NULL, 0, ix);
@@ -243,7 +243,7 @@ void somatic_motor_update( somatic_d_t *d, somatic_motor_t *m ) {
                 somatic_d_check_msg( d, state->current->n_data == m->n,
                                      "motor_state-cur",
                                      "cure len, got %d, wanted %d",
-                                     state->velocity->n_data, m->n) 
+                                     state->velocity->n_data, m->n)
                 ) {
                 aa_fcpy( m->cur, state->current->data, m->n );
             }
