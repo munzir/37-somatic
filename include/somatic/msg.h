@@ -94,10 +94,10 @@ AA_API Somatic__Transform *somatic_transform_alloc();
 AA_API void somatic_transform_free(Somatic__Transform *pb);
 AA_API void somatic_transform_set_quat( Somatic__Transform *pb, const double r[4] );
 AA_API void somatic_transform_set_vec( Somatic__Transform *pb, const double r[3] );
-AA_API void somatic_transform_set_tf12( Somatic__Transform *pb, double r[12] );
+//AA_API void somatic_transform_set_tf12( Somatic__Transform *pb, double r[12] );
 AA_API void somatic_transform_get_quat( Somatic__Transform *pb, double r[4] );
 AA_API void somatic_transform_get_vec( Somatic__Transform *pb, double r[3] );
-AA_API void somatic_transform_get_tf12( Somatic__Transform *pb, double r[12] );
+//AA_API void somatic_transform_get_tf12( Somatic__Transform *pb, double r[12] );
 
 //=== Metadata ===
 /// heap allocates metadata object
