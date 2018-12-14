@@ -167,12 +167,14 @@ void somatic_transform_set_vec( Somatic__Transform *pb, const double r[3] ) {
     VECTOR_FIELD_SET( pb, translation, 3, r );
 }
 
-void somatic_transform_set_tf12( Somatic__Transform *pb, double r[12] ) {
-    VECTOR_FIELD_SET( pb, translation, 3, r+9 );
-    VECTOR_FIELD_INIT( pb, rotation, 4 );
-    aa_tf_rotmat2quat( r, pb->rotation->data );
+// This function is not useful with amino-lean
+// void somatic_transform_set_tf12( Somatic__Transform *pb, double r[12] ) {
+//    VECTOR_FIELD_SET( pb, translation, 3, r+9 );
+//    VECTOR_FIELD_INIT( pb, rotation, 4 );
+//    aa_tf_rotmat2quat( r, pb->rotation->data );
+//
+//}
 
-}
 void somatic_transform_get_quat( Somatic__Transform *pb, double r[4] ) {
     assert( pb->rotation && pb->rotation->data && 4 == pb->rotation->n_data );
     aa_fcpy( r, pb->rotation->data, 4 );
@@ -183,13 +185,14 @@ void somatic_transform_get_vec( Somatic__Transform *pb, double r[3] ) {
     aa_fcpy( r, pb->translation->data, 3 );
 
 }
-void somatic_transform_get_tf12( Somatic__Transform *pb, double r[12] ) {
-    assert( pb->rotation && pb->rotation->data && 4 == pb->rotation->n_data );
-    assert( pb->translation && pb->translation->data && 3 == pb->translation->n_data );
-    aa_fcpy( r+9, pb->translation->data, 3 );
-    aa_tf_quat2rotmat( pb->rotation->data, r );
-
-}
+// This function is not useful with amino-lean
+//void somatic_transform_get_tf12( Somatic__Transform *pb, double r[12] ) {
+//    assert( pb->rotation && pb->rotation->data && 4 == pb->rotation->n_data );
+//    assert( pb->translation && pb->translation->data && 3 == pb->translation->n_data );
+//    aa_fcpy( r+9, pb->translation->data, 3 );
+//    aa_tf_quat2rotmat( pb->rotation->data, r );
+//
+//}
 
 //=== Metadata ===
 Somatic__Metadata *somatic_metadata_alloc() {
