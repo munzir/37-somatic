@@ -70,3 +70,14 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Somatic is a communication library that w
 set(CPACK_PACKAGE_VENDOR "Georgia Tech Humanoids Lab")
 
 include(CPack)
+
+# uninstall target
+if(NOT TARGET uninstall)
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+        IMMEDIATE @ONLY)
+
+    add_custom_target(uninstall
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
