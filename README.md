@@ -24,6 +24,7 @@ number of useful utility routines.
     cd build
     cmake ..
     sudo make install
+    sudo ldconfig
 
 ## Uninstall
  To remove system files created by the installation of this repo.
